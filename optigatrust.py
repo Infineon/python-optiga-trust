@@ -1,5 +1,6 @@
 from ctypes import *
 import os
+import platform
 
 class OptigaTrust:
 	def __init__(self, api=None):
@@ -9,7 +10,15 @@ class OptigaTrust:
 		"""
 		self.api = api
 		if api is None:
-			curr_path = os.path.abspath(os.path.dirname(__file__) + "/liboptigatrust/library/")
+			arch = platform.architecture()
+
+			curr_path = os.path.abspath(os.path.dirname(__file__))
+
+			if arch[0] == '32bit' and arch[1].startswith('Win'):
+				curr_path = os.path.abspath(os.path.dirname(__file__) + "/liboptigatrust/library/ms32")
+			elif arch[0] == '64bit' and arch[1].startswith('Win'):
+				curr_path = os.path.abspath(os.path.dirname(__file__) + "/liboptigatrust/library/ms64")
+
 			os.chdir(curr_path)
 			if os.path.exists(os.path.join(curr_path, "liboptigatrust.so")):
 				self.api = cdll.LoadLibrary(os.path.join(curr_path, "liboptigatrust.so"))
