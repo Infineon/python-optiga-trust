@@ -1,10 +1,10 @@
-# Python package for the OPTIGA(TM) Trust devices
+# Python package for the OPTIGA™ Trust devices
 
 ## Intro
-A python ctypes based wrapper for the OPTIGA(TM) Trust Software Framework
+A python ctypes based wrapper for the OPTIGA™ Trust Software Framework
 
 ## Hardware
-In order to use this package you need to have the OPTIGA(TM) Trust Personalisation Board
+In order to use this package you need to have the OPTIGA™ Trust Personalisation Board
 
 ## Compatibility
 MS Windows 32bit/64bit compatible, Linux (32bit)
