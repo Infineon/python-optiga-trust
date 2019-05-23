@@ -1,4 +1,4 @@
-# Python package for the OPTIGA™ Trust devices
+# A non-official Python package for the OPTIGA™ Trust devices
 
 ## Intro
 A python ctypes based wrapper for the OPTIGA™ Trust Software Framework
