@@ -12,27 +12,49 @@ MS Windows 32bit/64bit compatible, Linux (32bit)
 ## Examples
 
 ```python
-from OptigaTrust.Random import *
-from OptigaTrust.PublicKey import ECC
+from optigatrust.rand import *
+from optigatrust.pk import *
+from optigatrust.x509 import *
+import base64
 
-print("Random size 8 bytes: {0}\n".format(list(get_random_bytes(8))))
-print("Random size 16 bytes: {0}\n".format(list(get_random_bytes(16))))
-print("Random size 255 bytes: {0}\n".format(list(get_random_bytes(255))))
-print("Generate NIST-P256 Keypair: {0}\n".format(list(ECC.generate())))
-print("Generate NIST-P384 Keypair: {0}\n".format(list(ECC.generate(curve="nistp384"))))
+print("Rand size 8 bytes: {0}\n".format(list(get_random_bytes(8))))
+print("Rand size 16 bytes: {0}\n".format(list(get_random_bytes(16))))
+print("Rand size 255 bytes: {0}\n".format(list(get_random_bytes(255))))
 
+key_1 = ecc.generate_keypair()
+print("Generate NIST-P256 Keypair: {0}\n".format(list(key_1.pkey)))
+
+sign_1 = ecdsa.sign(key_1, b'Hello World')
+print("Generate ECDSA Signature using the keypair: {0}\n".format(list(sign_1.signature)))
+
+builder = csr.Builder(
+	{
+		'country_name': 'DE',
+		'state_or_province_name': 'Bayern',
+		'organization_name': 'Infineon Technologies AG',
+		'common_name': 'OPTIGA(TM) Trust X IoT',
+	},
+	key_1
+)
+
+request = builder.build(key_1)
+der_bytes = request.dump()
+csr = base64.b64encode(der_bytes)
+print(csr)
 ```
 
 An output might be like this
 
 ```
-Random size 8 bytes: [243, 169, 10, 130, 204, 138, 220, 4]
+Rand size 8 bytes: [4, 177, 254, 71, 206, 105, 167, 59]
 
-Random size 16 bytes: [60, 29, 203, 142, 46, 62, 30, 31, 109, 175, 82, 70, 229, 43, 103, 199]
+Rand size 16 bytes: [97, 248, 197, 22, 163, 203, 234, 186, 196, 190, 21, 33, 189, 126, 167, 1]
 
-Random size 255 bytes: [137, 217, 5, 21, 103, 190, 118, 222, 5, 146, 238, 208, 146, 146, 95, 113, 204, 72, 186, 240, 201, 236, 203, 67, 187, 206, 49, 181, 33, 229, 5, 32, 72, 152, 166, 88, 189, 212, 99, 139, 54, 136, 240, 159, 88, 132, 26, 129, 162, 32, 118, 246, 240, 1, 155, 22, 231, 194, 36, 51, 204, 37, 159, 133, 83, 7, 163, 157, 145, 63, 59, 1, 167, 203, 35, 21, 109, 149, 94, 155, 158, 81, 67, 124, 163, 49, 174, 35, 14, 134, 79, 167, 232, 48, 129, 81, 5, 46, 203, 54, 175, 5, 38, 216, 84, 185, 111, 49, 104, 121, 127, 179, 65, 44, 66, 134, 212, 21, 184, 253, 231, 221, 6, 104, 69, 222, 125, 106, 220, 237, 243, 61, 106, 187, 228, 119, 20, 225, 38, 88, 25, 61, 103, 125, 86, 107, 198, 197, 23, 200, 169, 222, 197, 52, 170, 180, 66, 188, 106, 11, 79, 103, 244, 4, 54, 229, 205, 133, 100, 161, 171, 68, 4, 237, 14, 231, 247, 19, 1, 12, 179, 234, 41, 9, 159, 127, 191, 154, 242, 96, 60, 32, 149, 60, 36, 238, 237, 174, 26, 201, 240, 183, 178, 170, 97, 29, 203, 75, 246, 148, 124, 59, 122, 50, 38, 100, 47, 154, 192, 172, 236, 66, 66, 205, 162, 173, 87, 123, 183, 96, 221, 145, 172, 18, 67, 251, 145, 150, 242, 115, 219, 28, 166, 158, 181, 118, 199, 230, 114, 228, 21, 125, 10, 136, 144]
+Rand size 255 bytes: [6, 30, 186, 215, 212, 246, 56, 109, 209, 132, 135, 142, 88, 70, 159, 251, 187, 41, 237, 68, 236, 147, 238, 79, 233, 197, 151, 72, 202, 2, 114, 122, 242, 163, 238, 86, 132, 238, 45, 141, 90, 250, 247, 192, 168, 47, 29, 195, 145, 121, 169, 224, 228, 135, 181, 68, 248, 145, 183, 244, 178, 228, 223, 169, 48, 193, 222, 8, 53, 134, 21, 77, 189, 215, 241, 219, 91, 23, 244, 45, 246, 228, 167, 255, 75, 219, 151, 56, 81, 76, 3, 132, 166, 12, 203, 63, 12, 214, 20, 253, 8, 112, 70, 166, 193, 83, 35, 1, 51, 9, 174, 239, 9, 7, 178, 186, 37, 176, 209, 0, 17, 16, 15, 151, 134, 251, 111, 98, 47, 104, 121, 29, 177, 129, 210, 122, 39, 127, 198, 140, 191, 126, 237, 95, 101, 98, 92, 180, 4, 202, 243, 252, 248, 119, 129, 12, 3, 114, 225, 1, 29, 236, 65, 230, 34, 249, 55, 90, 189, 241, 184, 145, 16, 131, 49, 222, 91, 188, 104, 166, 90, 67, 147, 62, 133, 167, 193, 84, 209, 48, 49, 175, 194, 146, 32, 151, 70, 120, 143, 105, 16, 91, 179, 199, 253, 78, 21, 216, 6, 196, 165, 118, 9, 209, 200, 24, 194, 72, 99, 167, 242, 68, 164, 178, 84, 134, 58, 66, 136, 186, 236, 25, 114, 80, 155, 216, 158, 162, 185, 50, 113, 208, 152, 70, 171, 5, 104, 213, 98, 19, 177, 201, 22, 55, 82]
 
-Generate NIST-P256 Keypair: [3, 66, 0, 4, 100, 185, 216, 154, 228, 230, 58, 134, 161, 124, 91, 134, 251, 162, 163, 90, 195, 74, 220, 47, 254, 190, 194, 143, 80, 74, 67, 198, 145, 5, 253, 79, 187, 40, 241, 154, 240, 224, 72, 202, 214, 0, 243, 114, 34, 134, 74, 78, 215, 44, 254, 131, 14, 97, 207, 45, 63, 240, 86, 247, 127, 188, 245, 20]
+Generate NIST-P256 Keypair: [3, 66, 0, 4, 163, 102, 77, 131, 251, 153, 186, 143, 48, 164, 61, 55, 201, 33, 11, 95, 230, 37, 220, 98, 35, 81, 162, 84, 80, 105, 252, 120, 151, 164, 160, 25, 92, 0, 94, 236, 53, 205, 115, 191, 78, 224, 124, 178, 129, 11, 40, 150, 99, 206, 119, 118, 122, 139, 112, 235, 165, 46, 201, 210, 126, 11, 121, 240]
 
-Generate NIST-P384 Keypair: [3, 98, 0, 4, 4, 140, 162, 136, 243, 132, 65, 62, 211, 209, 12, 67, 1, 220, 119, 183, 221, 70, 98, 105, 20, 202, 115, 41, 240, 59, 240, 231, 157, 83, 28, 207, 121, 254, 191, 111, 66, 12, 22, 239, 111, 139, 22, 47, 180, 9, 235, 202, 36, 152, 146, 21, 73, 68, 50, 196, 222, 91, 14, 202, 102, 169, 5, 202, 184, 148, 174, 49, 136, 20, 211, 166, 13, 128, 255, 41, 90, 199, 26, 15, 250, 28, 131, 167, 183, 230, 157, 88, 171, 82, 81, 178, 196, 62, 174, 30]
+Generate ECDSA Signature using the keypair: [48, 0, 70, 2, 33, 0, 149, 217, 0, 159, 107, 82, 56, 7, 94, 213, 179, 21, 54, 192, 167, 42, 51, 53, 211, 158, 92, 202, 109, 80, 20, 16, 5, 84, 166, 128, 188, 61, 2, 33, 0, 194, 201, 253, 139, 95, 219, 151, 166, 245, 32, 75, 244, 112, 93, 13, 240, 87, 241, 170, 230, 22, 92, 63, 47, 208, 203, 150, 170, 229, 217, 109, 98]
+
+b'MIIBYDCCAQUCAQAwYjELMAkGA1UEBhMCREUxDzANBgNVBAgMBkJheWVybjEhMB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMR8wHQYDVQQDDBZPUFRJR0EoVE0pIFRydXN0IFggSW9UME8wCQYHKoZIzj0CAQNCAASjZk2D+5m6jzCkPTfJIQtf5iXcYiNRolRQafx4l6SgGVwAXuw1zXO/TuB8soELKJZjznd2eotw66UuydJ+C3nwoEswSQYJKoZIhvcNAQkOMTwwOjAJBgNVHRMEAjAAMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAOBgNVHQ8BAf8EBAMCBaAwCgYIKoZIzj0EAwIDSQAwAEUCIGNXvwohZk8X/bAJbJyXT/IayLbscQwsyNKvjb8stFWZAiEAmpzcpCCgZ/9FUlmLY0SE4hJXyGlRMefsD1xNpqJx94g='
 ```
