@@ -21,15 +21,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-
-"""Utlility modules
-Contains useful modules that don't fall into any of the other OptigaTrust.* 
-========================    =============================================
-Module                      Description
-========================    =============================================
-`OptigaTrust.Util.Chip`     Init/Deinit the chip + other HW related operations
-`OptigaTrust.Util.Defines`  Various typedefs used to talk with the chip
-========================    =============================================
-"""
-
-__all__ = ['Chip', 'Defines']
+__all__ = ['csr']

@@ -1,3 +1,0 @@
-from typing import Optional
-
-def get_random_bytes(n, trng : Optional[bool] = ...) -> bytes: ...

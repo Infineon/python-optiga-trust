@@ -1,4 +1,4 @@
-__all__ = ['Random', 'PublicKey', 'Util']
+__all__ = ['rand', 'pk', 'x509','util']
 
 version_info = (0, 1, '0a0')
 

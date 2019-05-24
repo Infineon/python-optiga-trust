@@ -25,7 +25,9 @@ from ctypes import *
 import os
 import platform
 import sys
-from OptigaTrust.Util.Defines import *
+from optigatrust.util import *
+
+__all__ = ['init', 'deinit', 'fwversion', 'uid']
 
 optiga_initialised = False
 optiga_lib_handler = None
@@ -66,7 +68,7 @@ def _get_lib_postfix():
 
 def init():
 	"""
-	load OptigaTrust into Python
+	load optigatrust into Python
 	raise an exception library can't be loaded
 	Initialise only one, afterwards return the library handler
 	"""

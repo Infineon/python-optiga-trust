@@ -1,18 +1,18 @@
 # ============================================================================
 # The MIT License
-# 
+#
 # Copyright (c) 2018 Infineon Technologies AG
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,39 +21,47 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-from OptigaTrust.Util.Defines import Curves, KeyUsage, KeyId
-from OptigaTrust.Util import Chip
+
+from optigatrust.util import Curves, chip
+from optigatrust.pk import EccKey, EcdsaSignature
 from ctypes import *
+import warnings
+import hashlib
 
 
-def generate(curve='nistp256', usage='auth,sign,agreement', keyid=KeyId.USER_PRIVKEY_1):
-	_bytes = None
-	api = Chip.init()
+def sign(ecckey, d, hash_algorithm='sha256'):
+	api = chip.init()
 
-	if curve == 'nistp256':
-		c = c_int(Curves.NIST_P_256.value)
-	elif curve == 'nistp384':
-		c = c_int(Curves.NIST_P_384.value)
+	if not isinstance(d, bytes):
+		_d = bytes(d)
+		warnings.warn("data will be converted to bytes type before signing")
 	else:
-		raise Exception('Curve not supported use either nistp256 or nistp384')
+		_d = d
 
-	if keyid not in KeyId:
+	if not isinstance(ecckey, EccKey):
 		raise Exception('Key ID should be selected of class KeyId')
 
-	api.optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
-	api.optiga_crypt_ecc_generate_keypair.restype = c_int
+	api.optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
+	api.optiga_crypt_ecdsa_sign.restype = c_int
 
-	c_keyusage = c_ubyte(KeyUsage.KEY_AGREEMENT.value | KeyUsage.AUTHENTICATION.value)
-	c_keyid = c_ushort(keyid.value)
-	p = (c_ubyte * 100)()
-	c_plen = c_ushort(len(p))
+	if ecckey.curve == Curves.NIST_P_256:
+		digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
+		s = (c_ubyte * (64 + 6))()
+	elif ecckey.curve == Curves.NIST_P_384:
+		digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
+		s = (c_ubyte * (96 + 6))()
 
-	ret = api.optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0,  byref(c_keyid), p, byref(c_plen))
+	c_slen = c_ubyte(len(s))
 
-	pubkey = (c_ubyte * c_plen.value)()
-	memmove(pubkey, p, sizeof(p))
+	ret = api.optiga_crypt_ecdsa_sign(digest, len(digest), ecckey.keyid.value, s, byref(c_slen))
 
 	if ret == 0:
-		_bytes = bytes(pubkey)
+		signature = (c_ubyte * (c_slen.value + 3))()
+		signature[0] = c_ubyte(0x30)
+		signature[1] = c_ubyte(0x00)
+		signature[2] = c_ubyte(c_slen.value)
+		memmove(addressof(signature) + 3, s, c_slen.value)
 
-	return _bytes
+		return EcdsaSignature(hash_algorithm, ecckey.curve, ecckey.keyid, bytes(signature))
+	else:
+		return None

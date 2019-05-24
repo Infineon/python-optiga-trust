@@ -22,19 +22,46 @@
 # SOFTWARE
 # ============================================================================
 
+"""Utlility modules
+Contains useful modules that don't fall into any of the other optigatrust.*
+========================    =============================================
+Module                      Description
+========================    =============================================
+`optigatrust.util.chip`     Init/Deinit the chip + other HW related operations
+`optigatrust.util.defines`  Various typedefs used to talk with the chip
+========================    =============================================
+"""
 from enum import Enum
 from collections import namedtuple
 
-__all__ = ['Rng', 'KeyUsage', 'ObjectId', 'KeyId', 'KeyUsage']
+import optigatrust.util.chip
+import optigatrust.util.io
+
+__all__ = ['Rng', 'Curves', 'str2curve', 'KeyUsage', 'ObjectId', 'KeyId', 'KeyUsage', 'UID', 'chip', 'io']
 
 class Rng(Enum):
 	# OPTIGA Trust RNG Enumeration
 	TRNG = 0
 	DRNG = 1
-	
+
+
 class Curves(Enum):
 	NIST_P_256 = 3
 	NIST_P_384 = 4
+
+
+def str2curve(curve_str, return_value=False):
+	if curve_str == 'nistp256r1':
+		c = Curves.NIST_P_256
+	elif curve_str == 'nist384r1':
+		c = Curves.NIST_P_384
+	else:
+		raise Exception('Curve not supported use either nistp256r1 or nistp384r1')
+
+	if return_value:
+		return c.value
+	else:
+		return c
 
 
 class KeyUsage(Enum):
