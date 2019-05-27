@@ -9,7 +9,28 @@ In order to use this package you need to have the OPTIGA™ Trust Personalisatio
 ## Compatibility
 MS Windows 32bit/64bit compatible, Linux (32bit)
 
-## Examples
+## Installation
+
+### Requirements
+You need to have at least Python 2.7+ insalled on you computer before proceeding.
+Don't forget to add you Python to the standard path ([for instance](https://geek-university.com/python/add-python-to-the-windows-path/)).
+
+The module can be installed via a standard Python Package manager (pip). Type in your terminal
+```console
+$ pip install optigatrust
+```
+
+The module can be updated with the following command
+```console
+$ pip install -U optigatrust
+```
+
+De-installation:
+```console
+$ pip uninstall optigatrust
+```
+
+## Usage examples
 
 ```python
 from optigatrust.rand import *
