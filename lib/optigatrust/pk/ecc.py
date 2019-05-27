@@ -24,7 +24,8 @@
 from ctypes import *
 
 from optigatrust.pk import EccKey
-from optigatrust.util import KeyUsage, str2curve, KeyId, chip
+from optigatrust.util import chip
+from optigatrust.util.types import KeyId, KeyUsage, str2curve
 
 
 def generate_keypair(curve='nistp256r1', keyid=KeyId.USER_PRIVKEY_1):

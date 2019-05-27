@@ -25,8 +25,10 @@ import os
 import platform
 import sys
 from ctypes import *
+import pkg_resources
 
-from optigatrust.util import *
+from optigatrust.util.types import UID
+
 
 __all__ = ['init', 'deinit', 'fwversion', 'uid']
 
@@ -84,7 +86,7 @@ def init():
 	if not optiga_initialised and optiga_lib_handler is None :
 		lib_postfix = _get_lib_postfix()
 
-		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../../../shlibs/library/" + lib_postfix)
+		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../csrc/library/" + lib_postfix)
 
 		print(curr_path)
 
@@ -120,9 +122,11 @@ def deinit():
 
 	optiga_initialised = False
 	optiga_lib_handler = None
-	
+
+
 def fwversion():
 	pass
-	
+
+
 def uid():
 	return UID()

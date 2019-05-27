@@ -27,7 +27,8 @@ import warnings
 from ctypes import *
 
 from optigatrust.pk import EccKey, EcdsaSignature
-from optigatrust.util import Curves, chip
+from optigatrust.util.types import Curves
+from optigatrust.util import chip
 
 
 def sign(ecckey, d, hash_algorithm='sha256'):

@@ -23,7 +23,8 @@
 # ============================================================================
 from ctypes import *
 
-from optigatrust.util import *
+from optigatrust.util import chip
+from optigatrust.util.types import Rng
 
 __all__ = ['get_random_bytes']
 

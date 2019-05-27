@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.install import install
 
 import platform
@@ -105,38 +105,24 @@ __version = ".".join([str(x) for x in version_tuple])
 # Parameters for setup
 __packages = [
 	'optigatrust',
-	'optigatrust.pk',
-	'optigatrust.rand',
-	'optigatrust.util',
-	'optigatrust.x509',
-	'tests'
+	'optigatrust.csrc.library.ms32',
+	'optigatrust.csrc.library.ms64',
+	'optigatrust.csrc.library.x86_64'
 ]
 
 __package_data = {
-	'optigatrust': ['*.*'],
-	'optigatrust.pk': ['*.*'],
-	'optigatrust.rand': ['*.*'],
-	'optigatrust.util': ['*.*'],
-	'optigatrust.x509': ['*.*'],
-	'tests': ['*.*']
+	'optigatrust.csrc.library.ms32': ['*.dll'],
+	'optigatrust.csrc.library.ms64': ['*.dll'],
+	'optigatrust.csrc.library.x86_64': ['*.so'],
+	'optigatrust.rules': [
+		'csrc/optiga-trust-x/pal/libusb/include/90-optigatrust.rules'
+	]
 }
 
-__package_dir = {"": "lib", "tests": "tests"}
 
-__data_files = [
-	('rules', ['src/optiga-trust-x/pal/libusb/include/90-optigatrust.rules']),
-	('shlibs/ms32', [
-		'src/library/ms32/OptigaTrust.dll',
-		'src/library/ms32/libusb-1.0.dll'
-	]),
-	('shlibs/ms64', [
-		'src/library/ms64/OptigaTrust.dll',
-		'src/library/ms64/libusb-1.0.dll'
-	]),
-	('shlibs/x86_64', [
-		'src/library/x86_64/liboptigatrust.so'
-	])
-]
+__package_dir = {
+	"optigatrust": "lib/optigatrust",
+}
 
 if __name__ == '__main__':
 	setup(
@@ -151,11 +137,10 @@ if __name__ == '__main__':
 		keywords=__keywords,
 		license=__license,
 		classifiers=__classifiers,
+		include_package_data=True,
 		packages=__packages,
 		package_dir=__package_dir,
 		package_data=__package_data,
-		data_files=__data_files,
-		#cmdclass=_commands,
 		setup_requires=['setuptools>=41.0.1', 'wheel'],
 		install_requires=['asn1crypto;python_version<"4"'],
 		python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',

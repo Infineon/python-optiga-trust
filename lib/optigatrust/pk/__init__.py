@@ -25,7 +25,7 @@ import inspect
 import re
 import textwrap
 
-from optigatrust.util import KeyId, Curves
+from optigatrust.util.types import *
 
 
 class Key:

@@ -28,83 +28,9 @@ Contains useful modules that don't fall into any of the other optigatrust.*
 Module                      Description
 ========================    =============================================
 `optigatrust.util.chip`     Init/Deinit the chip + other HW related operations
-`optigatrust.util.defines`  Various typedefs used to talk with the chip
+`optigatrust.util.types`    Various typedefs used to talk with the chip
+`optigatrust.util.io`       Input/Output operations
 ========================    =============================================
 """
-from collections import namedtuple
-from enum import Enum
 
-__all__ = ['Rng', 'Curves', 'str2curve', 'KeyUsage', 'ObjectId', 'KeyId', 'KeyUsage', 'UID', 'chip', 'io']
-
-class Rng(Enum):
-	# OPTIGA Trust RNG Enumeration
-	TRNG = 0
-	DRNG = 1
-
-
-class Curves(Enum):
-	NIST_P_256 = 3
-	NIST_P_384 = 4
-
-
-def str2curve(curve_str, return_value=False):
-	if curve_str == 'nistp256r1':
-		c = Curves.NIST_P_256
-	elif curve_str == 'nist384r1':
-		c = Curves.NIST_P_384
-	else:
-		raise Exception('Curve not supported use either nistp256r1 or nistp384r1')
-
-	if return_value:
-		return c.value
-	else:
-		return c
-
-
-class KeyUsage(Enum):
-	# This enables the private key for the signature generation as part of authentication commands
-	AUTHENTICATION = 0x01
-	# This enables the private key for the signature generation
-	SIGN = 0x10
-	# This enables the private key for key agreement (e.g. ecdh operations)
-	KEY_AGREEMENT = 0x20
-
-
-class ObjectId(Enum):
-	# Default Infineon Certificate Slot
-	IFX_CERT = 0xE0E0
-	# User defined certificate Slot 1
-	USER_CERT_1 = 0xE0E1
-	# User defined certificate Slot 2
-	USER_CERT_2 = 0xE0E2
-	# User defined certificate Slot 3
-	USER_CERT_3 = 0xE0E3
-	# An Object OID to store by default a public key out of newly generated keypair
-	DEF_PUBKEY = 0xF1D0
-
-
-class KeyId(Enum):
-	# Key from key store
-	IFX_PRIVKEY = 0xE0F0
-	# Key from key store
-	USER_PRIVKEY_1 = 0xE0F1
-	# Key from key store
-	USER_PRIVKEY_2 = 0xE0F2
-	# Key from key store
-	USER_PRIVKEY_3 = 0xE0F3
-
-	# Key from Session context id 1
-	SESSION_ID_1 = 0xE100
-	# Key from Session context id 2
-	SESSION_ID_2 = 0xE101
-	# Key from Session context id 3
-	SESSION_ID_3 = 0xE102
-	# Key from Session context id 4
-	SESSION_ID_4 = 0xE103
-
-	@classmethod
-	def has_value(cls, value):
-		return any(value == item.value for item in cls)
-
-
-UID = namedtuple("_Curve", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
+__all__ = ['chip', 'io', 'types']
