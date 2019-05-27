@@ -1,4 +1,4 @@
-# A non-official Python package for the OPTIGA™ Trust devices
+# A Python package to support the OPTIGA™ Trust devices
 
 ## Intro
 A python ctypes based wrapper for the OPTIGA™ Trust Software Framework
@@ -7,7 +7,8 @@ A python ctypes based wrapper for the OPTIGA™ Trust Software Framework
 In order to use this package you need to have the OPTIGA™ Trust Personalisation Board
 
 ## Compatibility
-MS Windows 32bit/64bit compatible, Linux (32bit)
+* MS Windows 32bit/64bit
+* Linux (32bit)
 
 ## Installation
 
@@ -15,6 +16,7 @@ MS Windows 32bit/64bit compatible, Linux (32bit)
 You need to have at least Python 2.7+ insalled on you computer before proceeding.
 Don't forget to add you Python to the standard path ([for instance](https://geek-university.com/python/add-python-to-the-windows-path/)).
 
+### Flow
 The module can be installed via a standard Python Package manager (pip). Type in your terminal
 ```console
 $ pip install optigatrust

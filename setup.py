@@ -1,6 +1,5 @@
 from setuptools import setup
 from setuptools.command.install import install
-from setuptools.extension import Extension
 
 import platform
 import sys
@@ -95,7 +94,7 @@ __classifiers = [
 	'Programming Language :: Python :: 3.7',
 	'Operating System :: OS Independent',
 ]
-_commands = {'install': OptigaTrustInstall}
+#_commands = {'install': OptigaTrustInstall}
 
 with open(os.path.join("lib", __name, "__init__.py")) as init_root:
 	for line in init_root:
@@ -112,6 +111,7 @@ __packages = [
 	'optigatrust.x509',
 	'tests'
 ]
+
 __package_data = {
 	'optigatrust': ['*.*'],
 	'optigatrust.pk': ['*.*'],
@@ -120,7 +120,9 @@ __package_data = {
 	'optigatrust.x509': ['*.*'],
 	'tests': ['*.*']
 }
-__package_dir = {"": "lib/", "tests": "tests"}
+
+__package_dir = {"": "lib", "tests": "tests"}
+
 __data_files = [
 	('rules', ['src/optiga-trust-x/pal/libusb/include/90-optigatrust.rules']),
 	('shlibs/ms32', [
@@ -153,9 +155,8 @@ if __name__ == '__main__':
 		package_dir=__package_dir,
 		package_data=__package_data,
 		data_files=__data_files,
-		cmdclass=_commands,
+		#cmdclass=_commands,
 		setup_requires=['setuptools>=41.0.1', 'wheel'],
 		install_requires=['asn1crypto;python_version<"4"'],
 		python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
-		zip_safe=False
 	)
