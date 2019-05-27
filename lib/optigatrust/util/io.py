@@ -21,11 +21,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-from optigatrust.util import chip
 from ctypes import *
+
+from optigatrust.util import chip
 
 
 def read(keyid, offset=0):
+	"""
+	This function either deinitialises the communication channel between the chip and the application
+
+	:param None:
+	:return:
+		a CDLL Instance
+	"""
 	_bytes = None
 	api = chip.init()
 

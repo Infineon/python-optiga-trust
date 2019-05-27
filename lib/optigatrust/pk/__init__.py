@@ -21,9 +21,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
+import inspect
 import re
 import textwrap
-import inspect
 
 from optigatrust.util import KeyId, Curves
 

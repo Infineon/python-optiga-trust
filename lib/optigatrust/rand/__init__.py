@@ -21,8 +21,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-from optigatrust.util import *
 from ctypes import *
+
+from optigatrust.util import *
 
 __all__ = ['get_random_bytes']
 

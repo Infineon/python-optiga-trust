@@ -21,10 +21,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-from ctypes import *
 import os
 import platform
 import sys
+from ctypes import *
+
 from optigatrust.util import *
 
 __all__ = ['init', 'deinit', 'fwversion', 'uid']
@@ -32,21 +33,23 @@ __all__ = ['init', 'deinit', 'fwversion', 'uid']
 optiga_initialised = False
 optiga_lib_handler = None
 
+
 def _get_arch_os():
 	platforms = {
-		'linux' : 'Linux',
+		'linux': 'Linux',
 		'linux1': 'Linux',
 		'linux2': 'Linux',
 		'darwin': 'OSX',
 		'cygwin': 'Windows',
-		'msys'  : 'Windows',
-		'win32' : 'Windows',
+		'msys': 'Windows',
+		'win32': 'Windows',
 	}
 
 	if sys.platform not in platforms:
 		return sys.platform
 	
 	return platform.architecture()[0], platforms[sys.platform]
+
 
 def _get_lib_postfix():
 	targets = {
@@ -66,11 +69,14 @@ def _get_lib_postfix():
 
 	return targets[arch_os[1]][arch_os[0]]
 
+
 def init():
 	"""
-	load optigatrust into Python
-	raise an exception library can't be loaded
-	Initialise only one, afterwards return the library handler
+	This function either initialises non-initialised communication channel between the chip and the application, or
+	returns an existing communication
+	:param None:
+	:return:
+		a CDLL Instance
 	"""
 	global optiga_initialised
 	global optiga_lib_handler
@@ -78,7 +84,7 @@ def init():
 	if not optiga_initialised and optiga_lib_handler is None :
 		lib_postfix = _get_lib_postfix()
 
-		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../../../src/library/" + lib_postfix)
+		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../../../shlibs/library/" + lib_postfix)
 
 		print(curr_path)
 
@@ -99,8 +105,16 @@ def init():
 		optiga_lib_handler = api
 
 	return optiga_lib_handler
-	
+
+
 def deinit():
+	"""
+	This function either deinitialises the communication channel between the chip and the application
+
+	:param None:
+	:return:
+		a CDLL Instance
+	"""
 	global optiga_initialised
 	global optiga_lib_handler
 

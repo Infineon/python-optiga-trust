@@ -2,3 +2,5 @@
 .d
 .o
 .pyc
+.eggs/
+*.egg-info/

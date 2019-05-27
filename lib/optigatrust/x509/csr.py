@@ -12,7 +12,6 @@
 
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,13 +24,12 @@
 # A link ot the repository https://github.com/wbond/csrbuilder
 # Modifications are done with respect to signature methods
 # ============================================================================
-from optigatrust.pk import *
-
 import inspect
 import re
 import textwrap
 
 from asn1crypto import x509, keys, csr, pem, core
+from optigatrust.pk import *
 
 int_types = (int,)
 str_cls = str

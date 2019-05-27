@@ -21,9 +21,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-from optigatrust.util import KeyUsage, str2curve, KeyId, chip
-from optigatrust.pk import EccKey
 from ctypes import *
+
+from optigatrust.pk import EccKey
+from optigatrust.util import KeyUsage, str2curve, KeyId, chip
 
 
 def generate_keypair(curve='nistp256r1', keyid=KeyId.USER_PRIVKEY_1):

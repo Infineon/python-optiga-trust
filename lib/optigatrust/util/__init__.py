@@ -31,11 +31,8 @@ Module                      Description
 `optigatrust.util.defines`  Various typedefs used to talk with the chip
 ========================    =============================================
 """
-from enum import Enum
 from collections import namedtuple
-
-import optigatrust.util.chip
-import optigatrust.util.io
+from enum import Enum
 
 __all__ = ['Rng', 'Curves', 'str2curve', 'KeyUsage', 'ObjectId', 'KeyId', 'KeyUsage', 'UID', 'chip', 'io']
 
