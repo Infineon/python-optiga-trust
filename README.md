@@ -18,6 +18,7 @@ Don't forget to add you Python to the standard path ([for instance](https://geek
 
 ### Flow
 The module can be installed via a standard Python Package manager (pip). Type in your terminal
+
 ```console
 $ pip install optigatrust
 ```
