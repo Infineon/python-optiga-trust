@@ -88,13 +88,15 @@ __classifiers = [
 	'License :: OSI Approved :: MIT License',
 	'Intended Audience :: Developers',
 	'Programming Language :: Python',
-	'Programming Language :: Python :: 2.7',
 	'Programming Language :: Python :: 3.5',
 	'Programming Language :: Python :: 3.6',
 	'Programming Language :: Python :: 3.7',
-	'Operating System :: OS Independent',
+	'Operating System :: Microsoft :: Windows',
+	'Operating System :: Microsoft :: Windows :: Windows 8',
+	'Operating System :: Microsoft :: Windows :: Windows 8.1',
+	'Operating System :: Microsoft :: Windows :: Windows 10',
+	'Operating System :: POSIX :: Linux'
 ]
-#_commands = {'install': OptigaTrustInstall}
 
 with open(os.path.join("lib", __name, "__init__.py")) as init_root:
 	for line in init_root:
@@ -141,7 +143,7 @@ if __name__ == '__main__':
 		packages=__packages,
 		package_dir=__package_dir,
 		package_data=__package_data,
-		setup_requires=['setuptools>=41.0.1', 'wheel'],
+		setup_requires=['setuptools>=40', 'wheel'],
 		install_requires=['asn1crypto;python_version<"4"'],
-		python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
+		python_requires='>=3.5',
 	)

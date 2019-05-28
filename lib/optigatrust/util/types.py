@@ -39,12 +39,12 @@ class Curves(Enum):
 
 
 def str2curve(curve_str, return_value=False):
-	if curve_str == 'nistp256r1':
+	if curve_str == 'secp256r1':
 		c = Curves.NIST_P_256
-	elif curve_str == 'nist384r1':
+	elif curve_str == 'secp384r1':
 		c = Curves.NIST_P_384
 	else:
-		raise Exception('Curve not supported use either nistp256r1 or nistp384r1')
+		raise ValueError('Curve not supported use either nistp256r1 or nistp384r1')
 
 	if return_value:
 		return c.value
@@ -93,9 +93,9 @@ class KeyId(Enum):
 	# Key from Session context id 4
 	SESSION_ID_4 = 0xE103
 
-	@classmethod
-	def has_value(cls, value):
-		return any(value == item.value for item in cls)
+
+def has_value(cls, value):
+	return any(value == item.value for item in cls)
 
 
 UID = namedtuple("_Curve", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")

@@ -22,20 +22,21 @@
 # SOFTWARE
 # ============================================================================
 from ctypes import *
+import warnings
 
 from optigatrust.pk import EccKey
 from optigatrust.util import chip
 from optigatrust.util.types import KeyId, KeyUsage, str2curve
 
 
-def generate_keypair(curve='nistp256r1', keyid=KeyId.USER_PRIVKEY_1):
+def generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_1):
 	_bytes = None
 	api = chip.init()
 
 	c = str2curve(curve, return_value=True)
 
 	if keyid not in KeyId:
-		raise Exception('Key ID should be selected of class KeyId')
+		raise TypeError('Key ID should be selected of class KeyId')
 
 	api.optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
 	api.optiga_crypt_ecc_generate_keypair.restype = c_int
@@ -51,6 +52,7 @@ def generate_keypair(curve='nistp256r1', keyid=KeyId.USER_PRIVKEY_1):
 	memmove(pubkey, p, c_plen.value)
 
 	if ret == 0:
-		return EccKey(pkey=bytes(pubkey), keyid=keyid, curve=str2curve(curve))
+		return EccKey(pkey=bytes(pubkey), keyid=keyid, curve=curve)
 	else:
+		warnings.warn("Failed to generate an ECC keypair, return a NoneType")
 		return None

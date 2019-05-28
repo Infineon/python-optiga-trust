@@ -27,43 +27,47 @@ import warnings
 from ctypes import *
 
 from optigatrust.pk import EccKey, EcdsaSignature
-from optigatrust.util.types import Curves
+from optigatrust.util.types import Curves, str2curve
 from optigatrust.util import chip
 
 
-def sign(ecckey, d, hash_algorithm='sha256'):
+def sign(ecckey, data):
 	api = chip.init()
 
-	if not isinstance(d, bytes):
-		_d = bytes(d)
-		warnings.warn("data will be converted to bytes type before signing")
+	if not isinstance(data, bytes) and not isinstance(data, bytearray):
+		if isinstance(data, str):
+			_d = bytes(data.encode())
+			warnings.warn("data will be converted to bytes type before signing")
+		else:
+			raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
 	else:
-		_d = d
+		_d = data
 
 	if not isinstance(ecckey, EccKey):
-		raise Exception('Key ID should be selected of class KeyId')
+		raise TypeError('Key ID should be selected of class KeyId')
 
 	api.optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
 	api.optiga_crypt_ecdsa_sign.restype = c_int
 
-	if ecckey.curve == Curves.NIST_P_256:
+	if ecckey.curve == 'secp256r1':
 		digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
 		s = (c_ubyte * (64 + 6))()
-	elif ecckey.curve == Curves.NIST_P_384:
+		hash_algorithm = 'sha256'
+	elif ecckey.curve == 'secp384r1':
 		digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
 		s = (c_ubyte * (96 + 6))()
-
+		hash_algorithm = 'sha384'
 	c_slen = c_ubyte(len(s))
 
 	ret = api.optiga_crypt_ecdsa_sign(digest, len(digest), ecckey.keyid.value, s, byref(c_slen))
 
 	if ret == 0:
-		signature = (c_ubyte * (c_slen.value + 3))()
-		signature[0] = c_ubyte(0x30)
-		signature[1] = c_ubyte(0x00)
-		signature[2] = c_ubyte(c_slen.value)
-		memmove(addressof(signature) + 3, s, c_slen.value)
+		signature = (c_ubyte * (c_slen.value + 2))()
+		signature[0] = 0x30
+		signature[1] = c_slen.value
+		memmove(addressof(signature) + 2, s, c_slen.value)
 
-		return EcdsaSignature(hash_algorithm, ecckey.curve, ecckey.keyid, bytes(signature))
+		return EcdsaSignature(hash_algorithm, ecckey.keyid, bytes(signature))
 	else:
+		warnings.warn("Failed to sign a data, return a NoneType")
 		return None

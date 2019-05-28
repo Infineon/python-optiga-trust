@@ -63,9 +63,9 @@ class EccKey(Key):
 	def __init__(self, pkey, keyid, curve):
 		super().__init__(pkey, keyid, 'ec')
 
-		if not isinstance(curve, Curves):
-			raise ValueError("curve should be instance of Curves")
-
+		allowed_curves = set({'secp256r1', 'secp384r1'})
+		if curve not in allowed_curves:
+			raise ValueError("Supported curves {0} you provided {1}".format(allowed_curves, curve))
 		self._curve = curve
 
 	@property
@@ -89,7 +89,7 @@ class Signature:
 
 		self._signature = signature
 
-		allowed_algorithms = set({'ecdsa'})
+		allowed_algorithms = set({'sha256_ecdsa', 'sha384_ecdsa'})
 		if algorithm in allowed_algorithms:
 			self._algorithm = algorithm
 		else:
@@ -108,19 +108,15 @@ class Signature:
 	def signature(self):
 		return self._signature
 
+	@property
+	def algorithm(self):
+		return self._algorithm
+
 
 class EcdsaSignature(Signature):
-	def __init__(self, hash_alg, curve, keyid, signature):
-		super().__init__(hash_alg, keyid, signature, 'ecdsa')
-
-		if not isinstance(curve, Curves):
-			raise ValueError("curve should be instance of Curves")
-
-		self._curve = curve
-
-	@property
-	def curve(self):
-		return self._curve
+	def __init__(self, hash_alg, keyid, signature):
+		signature_algorithm_id = '%s_%s' % (hash_alg, 'ecdsa')
+		super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
 
 
 def _pretty_message(string, *params):

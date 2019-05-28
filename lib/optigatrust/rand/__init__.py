@@ -32,7 +32,6 @@ __all__ = ['get_random_bytes']
 def get_random_bytes(n, trng=True):
 	api = chip.init()
 
-	_bytes = None
 	api.optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
 	api.optiga_crypt_random.restype = c_int
 	p = (c_ubyte * n)()
@@ -43,6 +42,6 @@ def get_random_bytes(n, trng=True):
 		ret = api.optiga_crypt_random(Rng.DRNG.value, p, len(p))
 		
 	if ret == 0:
-		_bytes = bytes(p)
-
-	return _bytes
+		return bytes(p)
+	else:
+		return bytes(0)

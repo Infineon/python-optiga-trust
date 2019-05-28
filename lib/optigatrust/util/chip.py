@@ -25,7 +25,6 @@ import os
 import platform
 import sys
 from ctypes import *
-import pkg_resources
 
 from optigatrust.util.types import UID
 
@@ -87,8 +86,6 @@ def init():
 		lib_postfix = _get_lib_postfix()
 
 		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../csrc/library/" + lib_postfix)
-
-		print(curr_path)
 
 		os.chdir(curr_path)
 		if os.path.exists(os.path.join(curr_path, "liboptigatrust.so")):
