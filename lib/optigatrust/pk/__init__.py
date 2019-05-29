@@ -28,6 +28,16 @@ import textwrap
 from optigatrust.util.types import *
 
 
+__all__ = [
+	'Key',
+	'EccKey',
+	'Signature',
+	'EcdsaSignature',
+	'ecc',
+	'ecdsa'
+]
+
+
 class Key:
 	def __init__(self, pkey, keyid, algorithm):
 		if not isinstance(pkey, bytes):
@@ -164,5 +174,3 @@ def _type_name(value):
 		return cls.__name__
 	return '%s.%s' % (cls.__module__, cls.__name__)
 
-
-__all__ = ['Key', 'EccKey', 'Signature', 'EcdsaSignature', 'ecc', 'ecdsa']

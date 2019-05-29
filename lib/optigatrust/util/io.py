@@ -24,44 +24,64 @@
 from ctypes import *
 
 from optigatrust.util import chip
+from optigatrust.util.types import *
 
 
-def read(keyid, offset=0):
+def read(object_id, offset=0):
 	"""
 	This function either deinitialises the communication channel between the chip and the application
 
-	:param None:
+	:param object_id:
+		An ID of the Object. Should be ObjectId
+
+	:param offset:
+		An optional parameter defining whether you want to read the data with offset
+
+	:raises
+		ValueError - when any of the parameters contain an invalid value
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
 	:return:
-		a CDLL Instance
+		bytearray with the data
 	"""
-	_bytes = None
 	api = chip.init()
 
 	if offset > 1700:
 		raise ValueError("offset should be less than the limit of 1700 bytes")
 
+	if not isinstance(object_id, ObjectId):
+		raise TypeError("You need to provide an ObjectId you provided {0}".format(object_id))
+
 	api.optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
 	api.optiga_util_read_data.restype = c_int
 
 	d = (c_ubyte * 1700)()
-	c_dlen = c_ushort(len(d))
+	c_dlen = c_ushort(1700)
 
-	ret = api.optiga_util_read_data(keyid, offset, d, byref(c_dlen))
+	ret = api.optiga_util_read_data(c_ushort(object_id.value), offset, d, byref(c_dlen))
 
-	data = (c_ubyte * c_dlen.value)()
-	memmove(data, d, sizeof(d))
+	if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+		data = (c_ubyte * c_dlen.value)()
+		memmove(data, d, sizeof(d))
+		_bytes = bytearray(data)
+	else:
+		_bytes = bytearray(0)
 
-	if ret == 0:
-		_bytes = bytes(data)
-
-	return data
+	return _bytes
 
 
-def write(data, keyid, offset=0):
+def write(data, object_id, offset=0):
 	api = chip.init()
 
-	if not isinstance(data, bytes):
+	if not isinstance(data, bytes) and not isinstance(data, bytearray):
 		raise TypeError("data should be bytes type")
+
+	if not isinstance(object_id, ObjectId):
+		raise TypeError(
+			'keyid should be KeyId type,'
+			'you gave {0}'.format(type(object_id))
+		)
 
 	if len(data) > 1700:
 		raise ValueError("length of data exceeds the limit of 1700")
@@ -72,6 +92,13 @@ def write(data, keyid, offset=0):
 	api.optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
 	api.optiga_util_write_data.restype = c_int
 
-	ret = api.optiga_util_write_data(keyid, 0x40, offset, data, len(data))
+	_data = (c_ubyte * len(data))(*data)
+
+	ret = api.optiga_util_write_data(c_ushort(object_id.value), 0x40, offset, _data, len(data))
+
+	if ret != 0:
+		raise ValueError(
+			'Some problems during communication. You have possible selected one of locked objects'
+		)
 
 	return ret

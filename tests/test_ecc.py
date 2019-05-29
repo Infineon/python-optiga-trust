@@ -1,6 +1,6 @@
 import pytest
 from optigatrust.pk import ecc
-from optigatrust.util.types import KeyId, Curves
+from optigatrust.util.types import KeyId
 
 
 def test_keypair_default():

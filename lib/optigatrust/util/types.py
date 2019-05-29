@@ -70,8 +70,32 @@ class ObjectId(Enum):
 	USER_CERT_2 = 0xE0E2
 	# User defined certificate Slot 3
 	USER_CERT_3 = 0xE0E3
-	# An Object OID to store by default a public key out of newly generated keypair
-	DEF_PUBKEY = 0xF1D0
+	# An Object OID to store a first Trust Anchor
+	TRUST_ANCHOR_1 = 0xE0E8
+	# An Object OID to store a second Trust Anchor
+	TRUST_ANCHOR_2 = 0xE0EF
+	# An Object OIDs to store arbitrary data type 1 (Refer to the solution reference manual).
+	# 100 bytes each
+	DATA_TYPE1_0 = 0xF1D0
+	DATA_TYPE1_1 = 0xF1D1
+	DATA_TYPE1_2 = 0xF1D2
+	DATA_TYPE1_3 = 0xF1D3
+	DATA_TYPE1_4 = 0xF1D4
+	DATA_TYPE1_5 = 0xF1D5
+	DATA_TYPE1_6 = 0xF1D6
+	DATA_TYPE1_7 = 0xF1D7
+	DATA_TYPE1_8 = 0xF1D8
+	DATA_TYPE1_9 = 0xF1D9
+	DATA_TYPE1_A = 0xF1DA
+	DATA_TYPE1_B = 0xF1DB
+	DATA_TYPE1_C = 0xF1DC
+	DATA_TYPE1_D = 0xF1DD
+	DATA_TYPE1_E = 0xF1DE
+	# An Object OIDs to store arbitrary data type 2 (Refer to the solution reference manual)
+	# 1500 bytes each
+	DATA_TYPE2_0 = 0xF1E0
+	DATA_TYPE2_1 = 0xF1E1
+
 
 
 class KeyId(Enum):
