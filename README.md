@@ -1,4 +1,5 @@
 # A Python package to support the OPTIGA™ Trust devices
+# Status - alpha
 
 ## Intro
 A python ctypes based wrapper for the OPTIGA™ Trust Software Framework
@@ -13,7 +14,7 @@ In order to use this package you need to have the OPTIGA™ Trust Personalisatio
 ## Installation
 
 ### Requirements
-You need to have at least Python 2.7+ insalled on you computer before proceeding.
+You need to have at least Python 3+ insalled on you computer before proceeding.
 Don't forget to add you Python to the standard path ([for instance](https://geek-university.com/python/add-python-to-the-windows-path/)).
 
 ### Flow
