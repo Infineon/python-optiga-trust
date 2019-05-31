@@ -490,7 +490,7 @@ class Builder(object):
 		if signing_key.algorithm == 'ec':
 			sign_func = ecdsa.sign
 
-		s = sign_func(signing_key, certification_request_info.dump(), self._hash_algo)
+		s = sign_func(signing_key, certification_request_info.dump())
 
 		return csr.CertificationRequest({
 			'certification_request_info': certification_request_info,
