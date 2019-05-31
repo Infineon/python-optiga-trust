@@ -3,7 +3,6 @@
 A ctypes based Python wrapper to work with the OPTIGA(TM) Trust security solutions.
 
  - [Features](#features)
- - [Current Release](#current-release)
  - [Dependencies](#dependencies)
  - [Required Hardware](#required-hardware)
  - [Installation](#installation)
@@ -24,10 +23,6 @@ A ctypes based Python wrapper to work with the OPTIGA(TM) Trust security solutio
 | Certificate handling        | [`optigatrust.x509.cert`](lib/optigatrust/x509/cert.py)     | 
 | Random Number Generation    | [`optigatrust.rand`](lib/optigatrust/rand/__init__.py)       | 
 | Write/Read General Purpose Data | [`optigatrust.util.io`](lib/optigatrust/util/io.py)       | 
-
-## Current Release
-
-0.3.4
 
 ## Dependencies
 
