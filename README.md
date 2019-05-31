@@ -3,13 +3,12 @@
 A ctypes based Python wrapper to work with the OPTIGA(TM) Trust security solutions.
 
  - [Features](#features)
- - [Related Crypto Libraries](#related-crypto-libraries)
  - [Current Release](#current-release)
  - [Dependencies](#dependencies)
+ - [Required Hardware](#required-hardware)
  - [Installation](#installation)
  - [License](#license)
  - [Documentation](#documentation)
- - [Continuous Integration](#continuous-integration)
  - [Testing](#testing)
  - [Development](#development)
 
