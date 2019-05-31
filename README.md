@@ -3,7 +3,6 @@
 A ctypes based Python wrapper to work with the OPTIGA(TM) Trust security solutions.
 
  - [Features](#features)
- - [Why Another Python ASN.1 Library?](#why-another-python-asn1-library)
  - [Related Crypto Libraries](#related-crypto-libraries)
  - [Current Release](#current-release)
  - [Dependencies](#dependencies)
