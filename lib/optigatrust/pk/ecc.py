@@ -30,6 +30,22 @@ from optigatrust.util.types import KeyId, KeyUsage, str2curve
 
 
 def generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_1):
+	"""
+	This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
+
+	:param curve:
+		Curve name, should be either secp256r1 or secp384r1
+
+	:param keyid:
+		A Private Key Slot object ID. The value should be within the KeyId Enumeration
+
+	:raises
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
+	:return:
+		EccKey object or None
+	"""
 	_bytes = None
 	api = chip.init()
 

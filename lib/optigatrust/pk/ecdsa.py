@@ -27,11 +27,26 @@ import warnings
 from ctypes import *
 
 from optigatrust.pk import EccKey, EcdsaSignature
-from optigatrust.util.types import Curves, str2curve
 from optigatrust.util import chip
 
 
 def sign(ecckey, data):
+	"""
+	This function signs given data based on the provided EccKey object
+
+	:param ecckey:
+		a valid EccKey object. Use ecc.generate_keypair() for this
+
+	:param data:
+		Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384
+
+	:raises
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
+	:return:
+		EcdsaSignature object or None
+	"""
 	api = chip.init()
 
 	if not isinstance(data, bytes) and not isinstance(data, bytearray):

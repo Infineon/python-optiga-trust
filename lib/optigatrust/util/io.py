@@ -29,7 +29,7 @@ from optigatrust.util.types import *
 
 def read(object_id, offset=0):
 	"""
-	This function either deinitialises the communication channel between the chip and the application
+	This function helps to read the data stored on the chip
 
 	:param object_id:
 		An ID of the Object. Should be ObjectId
@@ -72,6 +72,25 @@ def read(object_id, offset=0):
 
 
 def write(data, object_id, offset=0):
+	"""
+	This function helps to write the data stored on the chip
+
+	:param data:
+		Data to write, should be either bytes of bytearray
+
+	:param object_id:
+		An ID of the Object. Should be ObjectId
+
+	:param offset:
+		An optional parameter defining whether you want to read the data with offset
+
+	:raises
+		ValueError - when any of the parameters contain an invalid value
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
+	:return:
+	"""
 	api = chip.init()
 
 	if not isinstance(data, bytes) and not isinstance(data, bytearray):
@@ -100,5 +119,3 @@ def write(data, object_id, offset=0):
 		raise ValueError(
 			'Some problems during communication. You have possible selected one of locked objects'
 		)
-
-	return ret

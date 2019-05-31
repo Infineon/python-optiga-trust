@@ -75,7 +75,12 @@ def init():
 	"""
 	This function either initialises non-initialised communication channel between the chip and the application, or
 	returns an existing communication
+
 	:param None:
+
+	:raises:
+		OSError: If some problems occured during the initialisation of the library or the chip
+
 	:return:
 		a CDLL Instance
 	"""
@@ -94,11 +99,11 @@ def init():
 			api = cdll.LoadLibrary(os.path.join(curr_path, "OptigaTrust.dll"))
 		else:
 			api = None
-			raise Exception('Unable to find library in {}'.format(curr_path))
+			raise OSError('Unable to find library in {}'.format(curr_path))
 		api.optiga_init.restype = c_int
 		ret = api.optiga_init()
 		if ret != 0:
-			raise Exception('Failed to initialise the chip. Exit.')
+			raise OSError('Failed to initialise the chip. Exit.')
 		
 		optiga_initialised = True
 		optiga_lib_handler = api
@@ -111,6 +116,7 @@ def deinit():
 	This function either deinitialises the communication channel between the chip and the application
 
 	:param None:
+
 	:return:
 		a CDLL Instance
 	"""

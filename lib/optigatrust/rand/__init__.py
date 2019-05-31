@@ -30,6 +30,22 @@ __all__ = ['get_random_bytes']
 
 
 def get_random_bytes(n, trng=True):
+	"""
+	This function generates a random number
+
+	:param n:
+		how much randomness to generate. Valid values are from 8 to 256
+
+	:param trng:
+		If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
+
+	:raises
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
+	:return:
+		Bytes object with randomness
+	"""
 	api = chip.init()
 
 	api.optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
