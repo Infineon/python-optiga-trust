@@ -55,6 +55,7 @@ links to the source for the various pre-defined type classes.
 ### Examples
 
 ```python
+from optigatrust.util.types import *
 from optigatrust.rand import *
 from optigatrust.pk import *
 from optigatrust.x509 import *
@@ -80,7 +81,7 @@ builder = csr.Builder(
 		'organization_name': 'Infineon Technologies AG',
 		'common_name': 'OPTIGA(TM) Trust IoT',
 	},
-	key_1
+	csr_key
 )
 
 request = builder.build(csr_key)
