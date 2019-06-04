@@ -29,7 +29,7 @@ from optigatrust.util import io
 
 __all__ = [
 	'read_existing',
-	'write_new'
+	'write_new',
 ]
 
 

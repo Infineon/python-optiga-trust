@@ -90,6 +90,8 @@ def init():
 	if not optiga_initialised and optiga_lib_handler is None :
 		lib_postfix = _get_lib_postfix()
 
+		old_path = os.getcwd()
+
 		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../csrc/library/" + lib_postfix)
 
 		os.chdir(curr_path)
@@ -107,6 +109,8 @@ def init():
 		
 		optiga_initialised = True
 		optiga_lib_handler = api
+
+		os.chdir(old_path)
 
 	return optiga_lib_handler
 

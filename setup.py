@@ -106,7 +106,10 @@ __version = ".".join([str(x) for x in version_tuple])
 
 # Parameters for setup
 __packages = [
-	'optigatrust',
+	'optigatrust.pk',
+	'optigatrust.rand',
+	'optigatrust.util',
+	'optigatrust.x509',
 	'optigatrust.csrc.library.ms32',
 	'optigatrust.csrc.library.ms64',
 	'optigatrust.csrc.library.x86_64'
