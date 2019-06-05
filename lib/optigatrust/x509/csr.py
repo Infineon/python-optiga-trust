@@ -169,7 +169,10 @@ class Builder(object):
 				_type_name(_value)
 			))
 
-		pubkey_alg = keys.PublicKeyAlgorithm({'algorithm': _value.algorithm})
+		pubkey_alg = keys.PublicKeyAlgorithm({
+			'algorithm': _value.algorithm,
+			'parameters':  keys.ECDomainParameters('named', _value.curve)
+		})
 		pubkey_asn1 = core.BitString.load(_value.pkey)
 		pubkey_info = keys.PublicKeyInfo({
 			'algorithm': pubkey_alg,

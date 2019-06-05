@@ -63,7 +63,7 @@ def read(object_id, offset=0):
 
 	if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
 		data = (c_ubyte * c_dlen.value)()
-		memmove(data, d, sizeof(d))
+		memmove(data, d, c_dlen.value)
 		_bytes = bytearray(data)
 	else:
 		_bytes = bytearray(0)

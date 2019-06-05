@@ -65,6 +65,8 @@ def read_existing(certid=ObjectId.IFX_CERT, to_pem=False):
 
 	der_cert = io.read(certid)
 
+	print(list(der_cert))
+
 	if len(der_cert) == 0:
 		raise ValueError(
 			'Certificate Slot {0} is empty'.format(certid)
@@ -76,7 +78,7 @@ def read_existing(certid=ObjectId.IFX_CERT, to_pem=False):
 
 	if to_pem:
 		pem_cert = "-----BEGIN CERTIFICATE-----\n"
-		pem_cert += _break_apart(base64.b64encode(der_cert).decode(), '\n', 65)
+		pem_cert += _break_apart(base64.b64encode(der_cert).decode(), '\n', 64)
 		pem_cert += "\n-----END CERTIFICATE-----"
 		return pem_cert.encode()
 	else:
