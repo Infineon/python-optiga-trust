@@ -4,3 +4,8 @@
 .pyc
 .eggs/
 *.egg-info/
+__pycache__/
+.vs/
+dist/
+venv/
+build/
