@@ -49,9 +49,6 @@
 #define LOG_HAL(...) //printf(__VA_ARGS__)
 #endif
 
-/// I2C device
-extern char * i2c_if;
-
 // Slave address not initialization
 #define IFXI2C_SLAVE_ADDRESS_INIT 0xFFFF
 #define PAL_I2C_MASTER_MAX_BITRATE 100
@@ -120,23 +117,6 @@ void i2c_master_end_of_receive_callback(void)
 // I2C error callback function
 void i2c_master_error_detected_callback(void)
 {
-    //I2C_MASTER_t *p_i2c_master;
-    //
-    //p_i2c_master = gp_pal_i2c_current_ctx->p_i2c_hw_config;
-    //if (I2C_MASTER_IsTxBusy(p_i2c_master))
-    //{
-    //    //lint --e{534} suppress "Return value is not required to be checked"
-    //    I2C_MASTER_AbortTransmit(p_i2c_master);
-    //    while (I2C_MASTER_IsTxBusy(p_i2c_master)){}
-    //}  
-
-    //if (I2C_MASTER_IsRxBusy(p_i2c_master)) 
-    //{
-    //    //lint --e{534} suppress "Return value is not required to be checked"
-    //    I2C_MASTER_AbortReceive(p_i2c_master);
-    //    while (I2C_MASTER_IsRxBusy(p_i2c_master)){}
-    //}
-
     invoke_upper_layer_callback(gp_pal_i2c_current_ctx, PAL_I2C_EVENT_ERROR);
 }
 
@@ -161,7 +141,7 @@ pal_status_t pal_i2c_init(const pal_i2c_t* p_i2c_context)
 	do
 	{
 		pal_linux = (pal_linux_t*) p_i2c_context->p_i2c_hw_config;
-		pal_linux->i2c_handle = open(i2c_if, O_RDWR);
+		pal_linux->i2c_handle = open("/dev/optiga_trust_i2c", O_RDWR);
 		LOG_HAL("IFX OPTIGA TRUST X Logs \n");
 		
 		// Assign the slave address

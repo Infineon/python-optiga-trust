@@ -49,7 +49,7 @@ class Key:
 				_pretty_message(''' pkey must be an instance of optigatrust.util.KeyId, not %s ''', _type_name(pkey)))
 		self._keyid = keyid
 
-		allowed_algorithms = set({'ec'})
+		allowed_algorithms = set({'ec', 'rsa'})
 		if algorithm in allowed_algorithms:
 			self._algorithm = algorithm
 		else:
@@ -81,6 +81,20 @@ class EccKey(Key):
 	@property
 	def curve(self):
 		return self._curve
+
+
+class RsaKey(Key):
+	def __init__(self, pkey, keyid, key_size):
+		super().__init__(pkey, keyid, 'rsa')
+
+		allowed_key_sizes = set({'1024', '2048'})
+		if key_size not in allowed_key_sizes:
+			raise ValueError("Supported key sizes {0} you provided {1}".format(allowed_key_sizes, key_size))
+		self._key_size = key_size
+
+	@property
+	def key_size(self):
+		return self._key_size
 
 
 class Signature:

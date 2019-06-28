@@ -1,9 +1,10 @@
-cmake_minimum_required(VERSION 2.6.4)
+cmake_minimum_required(VERSION 3.0.2)
 project(optigatrust)
 
 # BUILD Options
-option(TRUST_PAL_LIBUSB "Add support for the HID enabled OPTIGA(TM) Trust" ON) # e.g. Perso2Go Board
 option(TRUST_PAL_RPI3 "Add support for the direct communication over I2C -- for RPi3")
+CMAKE_DEPENDENT_OPTION(TRUST_PAL_LIBUSB "Add support for the HID enabled OPTIGA(TM) Trust" ON
+                       "TRUST_PAL_RPI3" OFF)
 option(TRUST_BUILD_SHARED_LIBS "Build as a shared library" ON)
 set(BUILD_SHARED_LIBS ${OPTIGA_TRUST_BUILD_SHARED_LIBS})
 	
@@ -50,12 +51,12 @@ if(TRUST_PAL_LIBUSB)
         optiga-trust-x/pal/libusb/optiga_comms_ifx_i2c_usb.c
         optiga-trust-x/pal/libusb/pal_common.c
         optiga-trust-x/pal/libusb/pal.c
-	optiga-trust-x/pal/libusb/pal_gpio.c
-	optiga-trust-x/pal/libusb/pal_i2c.c
-	optiga-trust-x/pal/libusb/pal_ifx_usb_config.c
-	optiga-trust-x/pal/libusb/pal_os_event.c
-	optiga-trust-x/pal/libusb/pal_os_lock.c
-	optiga-trust-x/pal/libusb/pal_os_timer.c   
+        optiga-trust-x/pal/libusb/pal_gpio.c
+        optiga-trust-x/pal/libusb/pal_i2c.c
+        optiga-trust-x/pal/libusb/pal_ifx_usb_config.c
+        optiga-trust-x/pal/libusb/pal_os_event.c
+        optiga-trust-x/pal/libusb/pal_os_lock.c
+        optiga-trust-x/pal/libusb/pal_os_timer.c   
     )
     set(TRUST_PAL_INC ${TRUST_PAL_INC} optiga-trust-x/pal/libusb/include)
     add_definitions(-DUSE_LIBUSB_PAL -DPAL_OS_HAS_EVENT_INIT)

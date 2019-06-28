@@ -54,13 +54,13 @@ def _get_arch_os():
 
 def _get_lib_postfix():
 	targets = {
-		'Linux'  : {
-			'32bit' : 'x86',
-			'64bit' : 'x86_64'
+		'Linux': {
+			'32bit': 'x86',
+			'64bit': 'x86_64'
 		},
 		'Windows': {
-			'32bit' : 'ms32',
-			'64bit' : 'ms64',
+			'32bit': 'ms32',
+			'64bit': 'ms64',
 		}
 	}
 	arch_os = _get_arch_os()
@@ -71,7 +71,7 @@ def _get_lib_postfix():
 	return targets[arch_os[1]][arch_os[0]]
 
 
-def init():
+def init(init_trustm=False):
 	"""
 	This function either initialises non-initialised communication channel between the chip and the application, or
 	returns an existing communication
@@ -87,8 +87,11 @@ def init():
 	global optiga_initialised
 	global optiga_lib_handler
 	
-	if not optiga_initialised and optiga_lib_handler is None :
+	if not optiga_initialised and optiga_lib_handler is None:
 		lib_postfix = _get_lib_postfix()
+
+		if init_trustm:
+			lib_postfix += 'tm'
 
 		old_path = os.getcwd()
 

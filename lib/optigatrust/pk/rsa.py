@@ -29,12 +29,12 @@ from optigatrust.util import chip
 from optigatrust.util.types import KeyId, KeyUsage, str2curve
 
 
-def generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_1):
+def generate_keypair(size='1024', keyid=KeyId.USER_PRIVKEY_1):
 	"""
 	This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
 
-	:param curve:
-		Curve name, should be either secp256r1 or secp384r1
+	:param size:
+		Size of the key, can be 1024 or 2048
 
 	:param keyid:
 		A Private Key Slot object ID. The value should be within the KeyId Enumeration
@@ -47,9 +47,11 @@ def generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_1):
 		EccKey object or None
 	"""
 	_bytes = None
-	api = chip.init()
+	trustm_api = chip.init(init_trustm=True)
+	key_size = int(size)
 
-	c = str2curve(curve, return_value=True)
+	if key_size is not 1024 or 2048:
+		raise ValueError('This key isze is not supported, you typed {0} supported are [1024, 2048]'.format(key_size))
 
 	if keyid not in KeyId:
 		raise TypeError('Key ID should be selected of class KeyId')
