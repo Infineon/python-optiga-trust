@@ -38,10 +38,10 @@ A ctypes based Python wrapper to work with the OPTIGA™ Trust security solution
     * Embedded Linux with open I2C lines; e.g. RPi3
   2. OPTIGA™ Trust X/M sample
 
-    <details>
-    <summary> <em> Connection details for the RPi3 and OPTIGA™ Trust X Security Shield 2Go  </em> </summary>
-    <img src="https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_x_rpi3_setup.jpg"  width=60% height=%60>
-    </details>
+<details>
+<summary> <em> Connection details for the RPi3 and OPTIGA™ Trust X Security Shield 2Go  </em> </summary>
+<img src="https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_x_rpi3_setup.jpg"  width=60% height=%60>
+</details>
 
 ## Installation
 
