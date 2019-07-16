@@ -45,11 +45,19 @@ def _get_arch_os():
 		'msys': 'win',
 		'win32': 'win',
 	}
+	
+	targets = {
+		'32bit': 'i686',
+		'64bit': 'amd64'
+	}
 
 	if sys.platform not in platforms:
 		return sys.platform
 		
 	_,_,_,_, arch,_ = platform.uname()
+	
+	if platforms[sys.platform] == 'win':
+		arch = targets[platform.architecture()[0]]
 	
 	return arch, platforms[sys.platform]
 
@@ -57,7 +65,12 @@ def _get_arch_os():
 def _get_lib_name(interface='libusb'):
 	arch, os = _get_arch_os()
 
-	return 'liboptigatrust-{interface}-{os}-{arch}.so'.format(interface=interface, os=os, arch=arch)
+	if os == 'win':
+		extension = 'dll'
+	if os == 'linux':
+		extension = 'so'
+	
+	return 'liboptigatrust-{interface}-{os}-{arch}.{ext}'.format(interface=interface, os=os, arch=arch, ext=extension)
 
 
 def _load_lib(interface):
@@ -66,7 +79,7 @@ def _load_lib(interface):
 	old_path = os.getcwd()
 	
 	curr_path = os.path.abspath(os.path.dirname(__file__) + "/../csrc/lib/")
-
+	
 	os.chdir(curr_path)
 	if os.path.exists(os.path.join(curr_path, libname)):
 		api = cdll.LoadLibrary(os.path.join(curr_path, libname))
