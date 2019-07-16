@@ -84,12 +84,10 @@ __author_email = 'DSSTechnicalSupport@infineon.com'
 __license = 'MIT'
 __keywords = 'ECDHE ECDSA RSA ECC X509 NISTP256 NIST384 OPTIGA TRUST TRUSTX TRUSTM'
 __classifiers = [
-	'Development Status :: 3 - Alpha',
+	'Development Status :: 4 - Beta',
 	'License :: OSI Approved :: MIT License',
 	'Intended Audience :: Developers',
 	'Programming Language :: Python',
-	'Programming Language :: Python :: 3.5',
-	'Programming Language :: Python :: 3.6',
 	'Programming Language :: Python :: 3.7',
 	'Operating System :: Microsoft :: Windows',
 	'Operating System :: Microsoft :: Windows :: Windows 8',
@@ -110,15 +108,11 @@ __packages = [
 	'optigatrust.rand',
 	'optigatrust.util',
 	'optigatrust.x509',
-	'optigatrust.csrc.library.ms32',
-	'optigatrust.csrc.library.ms64',
-	'optigatrust.csrc.library.x86_64'
+	'optigatrust.csrc.lib'
 ]
 
 __package_data = {
-	'optigatrust.csrc.library.ms32': ['*.dll'],
-	'optigatrust.csrc.library.ms64': ['*.dll'],
-	'optigatrust.csrc.library.x86_64': ['*.so'],
+	'optigatrust.csrc.lib': ['*.dll', '*.so'],
 	'optigatrust.rules': [
 		'csrc/optiga-trust-x/pal/libusb/include/90-optigatrust.rules'
 	]

@@ -70,13 +70,14 @@ int32_t optiga_init(void)
 	{
 		pal_gpio_init();
 		pal_os_event_init();
+#ifdef USE_LIBUSB_PAL
 		if (pal_init() != PAL_STATUS_SUCCESS)
 			break;
+#endif
 
 		status = optiga_util_open_application(&optiga_comms);
 		if (OPTIGA_LIB_SUCCESS != status)
 		{
-			printf("Failure: optiga_util_open_application(): 0x%04X\n\r", status);
 			break;
 		}
 
@@ -96,7 +97,6 @@ int32_t optiga_deinit(void)
 		status = optiga_comms_close(&optiga_comms);
 		if (OPTIGA_LIB_SUCCESS != status)
 		{
-			printf("Failure: optiga_comms_close(): 0x%04X\n\r", status);
 			break;
 		}
 

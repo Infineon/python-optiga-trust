@@ -143,6 +143,7 @@ GPIOWrite(int pin, int value)
 //lint --e{714,715} suppress "This function is used for to support multiple platforms "
 pal_status_t pal_gpio_init(const pal_gpio_t * p_gpio_context)
 {
+#ifndef OPTIGA_USE_SOFT_RESET
 	if (optiga_reset_0.p_gpio_hw != NULL)
 	{
 		int res_pin = *((gpio_pin_t*)(optiga_reset_0.p_gpio_hw));
@@ -174,6 +175,7 @@ pal_status_t pal_gpio_init(const pal_gpio_t * p_gpio_context)
 		if (-1 == GPIODirection(vdd_pin, OUT))
 			return(2);
 	}
+#endif
 
     return PAL_STATUS_SUCCESS;
 }
@@ -181,6 +183,7 @@ pal_status_t pal_gpio_init(const pal_gpio_t * p_gpio_context)
 //lint --e{714,715} suppress "This function is used for to support multiple platforms "
 pal_status_t pal_gpio_deinit(const pal_gpio_t * p_gpio_context)
 {
+#ifndef OPTIGA_USE_SOFT_RESET
 	if (optiga_reset_0.p_gpio_hw != NULL)
 	{
 		int res_pin = *((gpio_pin_t*)(optiga_reset_0.p_gpio_hw));
@@ -201,12 +204,13 @@ pal_status_t pal_gpio_deinit(const pal_gpio_t * p_gpio_context)
 		if (-1 == GPIOUnexport(vdd_pin))
 			return(1);
 	}
-    	
+#endif
 	return PAL_STATUS_SUCCESS;
 }
 
 void pal_gpio_set_high(const pal_gpio_t * p_gpio_context)
 {
+#ifndef OPTIGA_USE_SOFT_RESET
 	if ((p_gpio_context != NULL) && (p_gpio_context->p_gpio_hw != NULL))
 	{
 		int pin = *((gpio_pin_t*)(p_gpio_context->p_gpio_hw));
@@ -215,10 +219,12 @@ void pal_gpio_set_high(const pal_gpio_t * p_gpio_context)
 		*/
 		GPIOWrite(pin, HIGH );
 	}
+#endif
 }
 
 void pal_gpio_set_low(const pal_gpio_t* p_gpio_context)
 {
+#ifndef OPTIGA_USE_SOFT_RESET
 	if ((p_gpio_context != NULL) && (p_gpio_context->p_gpio_hw != NULL))
 	{
 		int pin = *((gpio_pin_t*)(p_gpio_context->p_gpio_hw));
@@ -227,6 +233,7 @@ void pal_gpio_set_low(const pal_gpio_t* p_gpio_context)
 		 */
 		GPIOWrite(pin, LOW );
 	}
+#endif
 }
 
 /**

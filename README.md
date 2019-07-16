@@ -92,9 +92,10 @@ print("A new CSR {0}\n".format(csr))
 
 ## Testing
 
-Tests are written using `pytest` and require this package to be installed:
+Tests are written using `pytest` and `oscrypto` and require these packages to be installed:
 
 ```bash
+$ pip3 install pytest oscrypto
 $ git clone --recurse-submodules https://github.com/Infineon/python-optiga-trust
 ...
 $ cd python-optiga-trust

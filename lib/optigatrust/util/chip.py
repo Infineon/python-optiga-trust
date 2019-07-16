@@ -37,38 +37,51 @@ optiga_lib_handler = None
 
 def _get_arch_os():
 	platforms = {
-		'linux': 'Linux',
-		'linux1': 'Linux',
-		'linux2': 'Linux',
-		'darwin': 'OSX',
-		'cygwin': 'Windows',
-		'msys': 'Windows',
-		'win32': 'Windows',
+		'linux': 'linux',
+		'linux1': 'linux',
+		'linux2': 'linux',
+		'darwin': 'osx',
+		'cygwin': 'win',
+		'msys': 'win',
+		'win32': 'win',
 	}
 
 	if sys.platform not in platforms:
 		return sys.platform
+		
+	_,_,_,_, arch,_ = platform.uname()
 	
-	return platform.architecture()[0], platforms[sys.platform]
+	return arch, platforms[sys.platform]
 
 
-def _get_lib_postfix():
-	targets = {
-		'Linux': {
-			'32bit': 'x86',
-			'64bit': 'x86_64'
-		},
-		'Windows': {
-			'32bit': 'ms32',
-			'64bit': 'ms64',
-		}
-	}
-	arch_os = _get_arch_os()
+def _get_lib_name(interface='libusb'):
+	arch, os = _get_arch_os()
+
+	return 'liboptigatrust-{interface}-{os}-{arch}.so'.format(interface=interface, os=os, arch=arch)
+
+
+def _load_lib(interface):
+	libname = _get_lib_name(interface)
 	
-	if arch_os[1] not in targets:
-		raise Exception('Platform not supported')
+	old_path = os.getcwd()
+	
+	curr_path = os.path.abspath(os.path.dirname(__file__) + "/../csrc/lib/")
 
-	return targets[arch_os[1]][arch_os[0]]
+	os.chdir(curr_path)
+	if os.path.exists(os.path.join(curr_path, libname)):
+		api = cdll.LoadLibrary(os.path.join(curr_path, libname))
+	else:
+		api = None
+		os.chdir(old_path)
+		raise OSError('Unable to find library in {}'.format(curr_path))
+	api.optiga_init.restype = c_int
+	ret = api.optiga_init()
+	if ret != 0:
+		os.chdir(old_path)
+		raise OSError('Failed to initialise the chip. Exit.')
+		
+	os.chdir(old_path)
+	return api
 
 
 def init(init_trustm=False):
@@ -88,32 +101,22 @@ def init(init_trustm=False):
 	global optiga_lib_handler
 	
 	if not optiga_initialised and optiga_lib_handler is None:
-		lib_postfix = _get_lib_postfix()
-
-		if init_trustm:
-			lib_postfix += 'tm'
-
-		old_path = os.getcwd()
-
-		curr_path = os.path.abspath(os.path.dirname(__file__) + "/../csrc/library/" + lib_postfix)
-
-		os.chdir(curr_path)
-		if os.path.exists(os.path.join(curr_path, "liboptigatrust.so")):
-			api = cdll.LoadLibrary(os.path.join(curr_path, "liboptigatrust.so"))
-		elif os.path.exists(os.path.join(curr_path, "OptigaTrust.dll")):
-			api = cdll.LoadLibrary(os.path.join(curr_path, "OptigaTrust.dll"))
-		else:
-			api = None
-			raise OSError('Unable to find library in {}'.format(curr_path))
-		api.optiga_init.restype = c_int
-		ret = api.optiga_init()
-		if ret != 0:
-			raise OSError('Failed to initialise the chip. Exit.')
+	
+		try:
+			"""
+			Here we try to probe which interface is actually in use, might be either libusb or i2c
+			We suppress stderr output of the libusb interface in case it's npot connected to not confuse
+			a user
+			"""
+			api = _load_lib('libusb')
+			print('Loaded: {0}'.format(_get_lib_name('libusb')))
+		except OSError:
+			api = _load_lib('i2c')
+			print('Loaded: {0}'.format(_get_lib_name('i2c')))
+		
 		
 		optiga_initialised = True
 		optiga_lib_handler = api
-
-		os.chdir(old_path)
 
 	return optiga_lib_handler
 
