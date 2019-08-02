@@ -39,7 +39,7 @@ def get_random_bytes(n, trng=True):
 	:param trng:
 		If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
 
-	:raises
+	:raises:
 		TypeError - when any of the parameters are of the wrong type
 		OSError - when an error is returned by the chip initialisation library
 

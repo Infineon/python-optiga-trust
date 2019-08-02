@@ -37,7 +37,7 @@ def read(object_id, offset=0):
 	:param offset:
 		An optional parameter defining whether you want to read the data with offset
 
-	:raises
+	:raises:
 		ValueError - when any of the parameters contain an invalid value
 		TypeError - when any of the parameters are of the wrong type
 		OSError - when an error is returned by the chip initialisation library

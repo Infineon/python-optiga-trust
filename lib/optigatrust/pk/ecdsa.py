@@ -40,7 +40,7 @@ def sign(ecckey, data):
 	:param data:
 		Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384
 
-	:raises
+	:raises:
 		TypeError - when any of the parameters are of the wrong type
 		OSError - when an error is returned by the chip initialisation library
 

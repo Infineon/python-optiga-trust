@@ -39,7 +39,7 @@ def generate_keypair(size='1024', keyid=KeyId.USER_PRIVKEY_1):
 	:param keyid:
 		A Private Key Slot object ID. The value should be within the KeyId Enumeration
 
-	:raises
+	:raises:
 		TypeError - when any of the parameters are of the wrong type
 		OSError - when an error is returned by the chip initialisation library
 
