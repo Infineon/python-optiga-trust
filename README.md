@@ -18,7 +18,9 @@ A ctypes based Python wrapper to work with the OPTIGA™ Trust security solution
 | Function                    | Module                                      |
 | --------------------------- | ------------------------------------------- | 
 | Elliptic Curves Cryptograpy | [`optigatrust.pk.ecc`](lib/optigatrust/pk/ecc.py)       | 
-| ECDSA                       | [`optigatrust.pk.ecdsa`](lib/optigatrust/pk/ecdsa.py)       | 
+| ECDSA                       | [`optigatrust.pk.ecdsa`](lib/optigatrust/pk/ecdsa.py)       |
+| RSA                         | [`optigatrust.pk.rsa`](lib/optigatrust/pk/rsa.py)       | 
+| RSA PKCS#1 Ver1.5           | [`optigatrust.pk.rsassa`](lib/optigatrust/pk/rsassa.py)       | 
 | Certificate Signing Request | [`optigatrust.x509.csr`](lib/optigatrust/x509/csr.py)     |
 | Certificate handling        | [`optigatrust.x509.cert`](lib/optigatrust/x509/cert.py)     | 
 | Random Number Generation    | [`optigatrust.rand`](lib/optigatrust/rand/__init__.py)       | 
@@ -77,6 +79,12 @@ print("Generate NIST-P256 Keypair: {0}\n".format(list(ecc_key.pkey)))
 
 ecdsa_signature = ecdsa.sign(ecc_key, b'Hello World')
 print("Generate ECDSA Signature using the keypair: {0}\n".format(list(ecdsa_signature.signature)))
+
+rsa_key = rsa.generate_keypair()
+print("Generate RSA1k Keypair: {0}\n".format(list(rsa_key.pkey)))
+
+rsassa_signature = rsassa.sign(rsa_key, b'Hello World')
+print("Generate RSASSA Signature using the keypair: {0}\n".format(list(rsassa_signature.signature)))
 
 csr_key = ecc.generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_3)
 print("Generate NIST-P256 Keypair for a new certificate: {0}\n".format(list(csr_key.pkey)))
