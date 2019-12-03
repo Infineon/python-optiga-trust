@@ -62,8 +62,12 @@
 	\
 	if (OPTIGA_LIB_SUCCESS != optiga_lib_status)\
 	{ \
-		ret = optiga_lib_status;\
-		break;\
+			ret = optiga_lib_status;\
+			printf("Error: 0x%02X \r\n", optiga_lib_status);\
+			optiga_util_destroy(p_local_util);\
+			optiga_crypt_destroy(p_local_crypt);\
+			pal_os_event_destroy(NULL);\
+			break; \
 	}
 
 #define CHECK_RESULT(expr) \
