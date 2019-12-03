@@ -23,14 +23,14 @@ def test_keypair_nistp256():
 	assert len(k.pkey) > 0
 	assert len(k.pkey) == 68
 	assert k.algorithm is 'ec'
-	assert k.keyid == KeyId.USER_PRIVKEY_1
+	assert k.keyid == KeyId.ECC_KEY_E0F1
 	assert k.curve == 'secp256r1'
 
 
 @pytest.mark.parametrize("ki", [
-	KeyId.USER_PRIVKEY_1,
-	KeyId.USER_PRIVKEY_2,
-	KeyId.USER_PRIVKEY_3,
+	KeyId.ECC_KEY_E0F1,
+	KeyId.ECC_KEY_E0F2,
+	KeyId.ECC_KEY_E0F3,
 	KeyId.SESSION_ID_1,
 	KeyId.SESSION_ID_2,
 	KeyId.SESSION_ID_3,
@@ -54,14 +54,14 @@ def test_keypair_nistp384():
 	assert len(k.pkey) > 0
 	assert len(k.pkey) == 100
 	assert k.algorithm is 'ec'
-	assert k.keyid == KeyId.USER_PRIVKEY_1
+	assert k.keyid == KeyId.ECC_KEY_E0F1
 	assert k.curve == 'secp384r1'
 
 
 @pytest.mark.parametrize("ki", [
-	KeyId.USER_PRIVKEY_1,
-	KeyId.USER_PRIVKEY_2,
-	KeyId.USER_PRIVKEY_3,
+	KeyId.ECC_KEY_E0F1,
+	KeyId.ECC_KEY_E0F2,
+	KeyId.ECC_KEY_E0F3,
 	KeyId.SESSION_ID_1,
 	KeyId.SESSION_ID_2,
 	KeyId.SESSION_ID_3,

@@ -159,25 +159,27 @@ class Builder(object):
 
 	@_writer
 	def subject_public_key(self, _value):
-		if not isinstance(_value, ecc.EccKey):
+		if isinstance(_value, EccKey):
+			pubkey_alg = keys.PublicKeyAlgorithm({
+				'algorithm': _value.algorithm,
+				'parameters': keys.ECDomainParameters('named', _value.curve)
+			})
+			pubkey_asn1 = core.BitString.load(_value.pkey)
+			pubkey_info = keys.PublicKeyInfo({
+				'algorithm': pubkey_alg,
+				'public_key': pubkey_asn1.cast(keys.ECPointBitString)
+			})
+		elif isinstance(_value, RsaKey):
+			pubkey_info = keys.PublicKeyInfo.load(_value.pkey)
+		else:
 			raise TypeError(_pretty_message(
 				'''
 				subject_public_key must be an instance of
-				optigatrust.pk.EccKey,
+				optigatrust.pk.EccKey or optigatrust.pk.RsaKey,
 				not %s
 				''',
 				_type_name(_value)
 			))
-
-		pubkey_alg = keys.PublicKeyAlgorithm({
-			'algorithm': _value.algorithm,
-			'parameters':  keys.ECDomainParameters('named', _value.curve)
-		})
-		pubkey_asn1 = core.BitString.load(_value.pkey)
-		pubkey_info = keys.PublicKeyInfo({
-			'algorithm': pubkey_alg,
-			'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-		})
 
 		self._subject_public_key = pubkey_info
 
@@ -444,17 +446,19 @@ class Builder(object):
 			An asn1crypto.csr.CertificationRequest object of the request
 		"""
 
-		if not isinstance(signing_key, EccKey):
+		if not isinstance(signing_key, EccKey) and not isinstance(signing_key, RsaKey):
 			raise TypeError(_pretty_message(
 				'''
 				signing_private_key must be an instance of
-				optigatrust.pk.EccKey, not %s
+				optigatrust.pk.EccKey or optigatrust.pk.RsaKey, not %s
 				''',
 				_type_name(signing_key)
 			))
 
 		if isinstance(signing_key, EccKey):
 			signature_algo = 'ecdsa'
+		if isinstance(signing_key, RsaKey):
+			signature_algo = 'rsa'
 		else:
 			signature_algo = 'undefined'
 
@@ -492,6 +496,8 @@ class Builder(object):
 
 		if signing_key.algorithm == 'ec':
 			sign_func = ecdsa.sign
+		elif signing_key.algorithm == 'rsa':
+			sign_func = rsassa.sign
 
 		s = sign_func(signing_key, certification_request_info.dump())
 

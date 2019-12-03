@@ -24,16 +24,16 @@
 from ctypes import *
 import warnings
 
-from optigatrust.pk import EccKey
+from optigatrust.pk import RsaKey
 from optigatrust.util import chip
-from optigatrust.util.types import KeyId, KeyUsage, str2curve
+from optigatrust.util.types import KeyId, KeyUsage
 
 
-def generate_keypair(size='1024', keyid=KeyId.USER_PRIVKEY_1):
+def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC):
 	"""
-	This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
+	This function generates an RSA keypair, the private part is stored on the chip based on the provided slot
 
-	:param size:
+	:param key_size:
 		Size of the key, can be 1024 or 2048
 
 	:param keyid:
@@ -44,33 +44,43 @@ def generate_keypair(size='1024', keyid=KeyId.USER_PRIVKEY_1):
 		OSError - when an error is returned by the chip initialisation library
 
 	:return:
-		EccKey object or None
+		RsaKey object or None
 	"""
 	_bytes = None
-	trustm_api = chip.init(init_trustm=True)
-	key_size = int(size)
+	api = chip.init()
 
-	if key_size is not 1024 or 2048:
-		raise ValueError('This key isze is not supported, you typed {0} supported are [1024, 2048]'.format(key_size))
+	if not chip.is_trustm():
+		raise TypeError('You are trying to use Trust M API with the Trust X hardware')
+
+	allowed_key_sizes = {'1024', '2048'}
+	if key_size not in allowed_key_sizes:
+		raise ValueError('This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]'.
+						format(key_size, type(key_size)))
 
 	if keyid not in KeyId:
 		raise TypeError('Key ID should be selected of class KeyId')
 
-	api.optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
-	api.optiga_crypt_ecc_generate_keypair.restype = c_int
+	api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
+	api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int
 
-	c_keyusage = c_ubyte(KeyUsage.KEY_AGREEMENT.value | KeyUsage.AUTHENTICATION.value)
+	if key_size is '1024':
+		c_keytype = 0x41
+		rsa_header = b'\x30\x81\x9F\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00'
+	else:
+		c_keytype = 0x42
+		rsa_header = b'\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00'
+	c_keyusage = c_ubyte(KeyUsage.KEY_AGREEMENT.value | KeyUsage.AUTHENTICATION.value | KeyUsage.ENCRYPTION.value)
 	c_keyid = c_ushort(keyid.value)
-	p = (c_ubyte * 100)()
+	p = (c_ubyte * 320)()
 	c_plen = c_ushort(len(p))
 
-	ret = api.optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0,  byref(c_keyid), p, byref(c_plen))
+	ret = api.exp_optiga_crypt_ecc_generate_keypair(c_keytype, c_keyusage, 0,  byref(c_keyid), p, byref(c_plen))
 
 	pubkey = (c_ubyte * c_plen.value)()
 	memmove(pubkey, p, c_plen.value)
 
 	if ret == 0:
-		return EccKey(pkey=bytes(pubkey), keyid=keyid, curve=curve)
+		return RsaKey(pkey=rsa_header + bytes(pubkey), keyid=keyid, key_size=int(key_size))
 	else:
-		warnings.warn("Failed to generate an ECC keypair, return a NoneType")
-		return None
+		raise ValueError('Failed to generate an RSA keypair, return a NoneType')
+

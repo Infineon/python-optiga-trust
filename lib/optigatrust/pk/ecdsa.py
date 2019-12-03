@@ -61,8 +61,8 @@ def sign(ecckey, data):
 	if not isinstance(ecckey, EccKey):
 		raise TypeError('Key ID should be selected of class KeyId')
 
-	api.optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
-	api.optiga_crypt_ecdsa_sign.restype = c_int
+	api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
+	api.exp_optiga_crypt_ecdsa_sign.restype = c_int
 
 	if ecckey.curve == 'secp256r1':
 		digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
@@ -74,7 +74,7 @@ def sign(ecckey, data):
 		hash_algorithm = 'sha384'
 	c_slen = c_ubyte(len(s))
 
-	ret = api.optiga_crypt_ecdsa_sign(digest, len(digest), ecckey.keyid.value, s, byref(c_slen))
+	ret = api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), ecckey.keyid.value, s, byref(c_slen))
 
 	if ret == 0:
 		signature = (c_ubyte * (c_slen.value + 2))()

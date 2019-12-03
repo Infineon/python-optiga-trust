@@ -31,10 +31,14 @@ from optigatrust.util.types import *
 __all__ = [
 	'Key',
 	'EccKey',
+	'RsaKey',
 	'Signature',
 	'EcdsaSignature',
+	'RsassaSignature',
 	'ecc',
-	'ecdsa'
+	'rsa',
+	'ecdsa',
+	'rsassa'
 ]
 
 
@@ -87,7 +91,7 @@ class RsaKey(Key):
 	def __init__(self, pkey, keyid, key_size):
 		super().__init__(pkey, keyid, 'rsa')
 
-		allowed_key_sizes = set({'1024', '2048'})
+		allowed_key_sizes = set({1024, 2048})
 		if key_size not in allowed_key_sizes:
 			raise ValueError("Supported key sizes {0} you provided {1}".format(allowed_key_sizes, key_size))
 		self._key_size = key_size
@@ -113,7 +117,8 @@ class Signature:
 
 		self._signature = signature
 
-		allowed_algorithms = set({'sha256_ecdsa', 'sha384_ecdsa'})
+		allowed_algorithms = set({'sha256_ecdsa', 'sha384_ecdsa',
+								'sha256_rsa', 'sha384_rsa'})
 		if algorithm in allowed_algorithms:
 			self._algorithm = algorithm
 		else:
@@ -140,6 +145,12 @@ class Signature:
 class EcdsaSignature(Signature):
 	def __init__(self, hash_alg, keyid, signature):
 		signature_algorithm_id = '%s_%s' % (hash_alg, 'ecdsa')
+		super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
+
+
+class RsassaSignature(Signature):
+	def __init__(self, hash_alg, keyid, signature):
+		signature_algorithm_id = '%s_%s' % (hash_alg, 'rsa')
 		super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
 
 

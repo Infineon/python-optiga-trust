@@ -29,7 +29,7 @@ from optigatrust.util import chip
 from optigatrust.util.types import KeyId, KeyUsage, str2curve
 
 
-def generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_1):
+def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1):
 	"""
 	This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
 
@@ -51,18 +51,18 @@ def generate_keypair(curve='secp256r1', keyid=KeyId.USER_PRIVKEY_1):
 
 	c = str2curve(curve, return_value=True)
 
-	if keyid not in KeyId:
+	if not isinstance(keyid, KeyId):
 		raise TypeError('Key ID should be selected of class KeyId')
 
-	api.optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
-	api.optiga_crypt_ecc_generate_keypair.restype = c_int
+	api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
+	api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
 
 	c_keyusage = c_ubyte(KeyUsage.KEY_AGREEMENT.value | KeyUsage.AUTHENTICATION.value)
 	c_keyid = c_ushort(keyid.value)
 	p = (c_ubyte * 100)()
 	c_plen = c_ushort(len(p))
 
-	ret = api.optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0,  byref(c_keyid), p, byref(c_plen))
+	ret = api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0,  byref(c_keyid), p, byref(c_plen))
 
 	pubkey = (c_ubyte * c_plen.value)()
 	memmove(pubkey, p, c_plen.value)

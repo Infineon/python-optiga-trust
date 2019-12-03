@@ -22,18 +22,18 @@
 # SOFTWARE
 # ============================================================================
 from collections import namedtuple
-from enum import Enum
+from enum import IntFlag
 
 __all__ = ['Rng', 'Curves', 'str2curve', 'KeyUsage', 'ObjectId', 'KeyId', 'KeyUsage', 'UID']
 
 
-class Rng(Enum):
+class Rng(IntFlag):
 	# OPTIGA Trust RNG Enumeration
 	TRNG = 0
 	DRNG = 1
 
 
-class Curves(Enum):
+class Curves(IntFlag):
 	NIST_P_256 = 3
 	NIST_P_384 = 4
 
@@ -52,16 +52,18 @@ def str2curve(curve_str, return_value=False):
 		return c
 
 
-class KeyUsage(Enum):
+class KeyUsage(IntFlag):
 	# This enables the private key for the signature generation as part of authentication commands
 	AUTHENTICATION = 0x01
+	# This enables the private key for encrypt and decrypt
+	ENCRYPTION = 0x02
 	# This enables the private key for the signature generation
 	SIGN = 0x10
 	# This enables the private key for key agreement (e.g. ecdh operations)
 	KEY_AGREEMENT = 0x20
 
 
-class ObjectId(Enum):
+class ObjectId(IntFlag):
 	# Default Infineon Certificate Slot
 	IFX_CERT = 0xE0E0
 	# User defined certificate Slot 1
@@ -96,17 +98,22 @@ class ObjectId(Enum):
 	DATA_TYPE2_0 = 0xF1E0
 	DATA_TYPE2_1 = 0xF1E1
 
+	COPROCESSOR_UID = 0xE0C2
 
 
-class KeyId(Enum):
+class KeyId(IntFlag):
 	# Key from key store
-	IFX_PRIVKEY = 0xE0F0
+	ECC_KEY_E0E0 = 0xE0F0
 	# Key from key store
-	USER_PRIVKEY_1 = 0xE0F1
+	ECC_KEY_E0F1 = 0xE0F1
 	# Key from key store
-	USER_PRIVKEY_2 = 0xE0F2
+	ECC_KEY_E0F2 = 0xE0F2
 	# Key from key store
-	USER_PRIVKEY_3 = 0xE0F3
+	ECC_KEY_E0F3 = 0xE0F3
+	# Key from key store
+	RSA_KEY_E0FC = 0xE0FC
+	# Key from key store
+	RSA_KEY_E0FD = 0xE0FD
 
 	# Key from Session context id 1
 	SESSION_ID_1 = 0xE100
@@ -122,4 +129,4 @@ def has_value(cls, value):
 	return any(value == item.value for item in cls)
 
 
-UID = namedtuple("_Curve", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
+UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")

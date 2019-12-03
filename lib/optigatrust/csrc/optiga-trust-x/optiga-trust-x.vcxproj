@@ -84,13 +84,13 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>optiga-trust-x\pal\libusb\include;optiga-trust-x\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pal\libusb\include;optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>optiga-trust-x\pal\libusb\include\ms32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>pal\libusb\include\ms32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -103,7 +103,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>optiga-trust-x\pal\libusb\include;optiga-trust-x\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pal\libusb\include;optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>optiga-trust-x\pal\libusb\include\ms32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>pal\libusb\include\ms32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -121,11 +121,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>optiga-trust-x\pal\libusb\include;optiga-trust-x\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pal\libusb\include;optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;WIN32;_DEBUG;_WINDOWS;_USRDLL;OPTIGATRUST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>optiga-trust-x\pal\libusb\include\ms64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>pal\libusb\include\ms64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -135,11 +135,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>optiga-trust-x\pal\libusb\include;optiga-trust-x\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>pal\libusb\include;optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>optiga-trust-x\pal\libusb\include\ms64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>pal\libusb\include\ms64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
@@ -147,82 +147,82 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="optiga-trust-x\optiga\cmd\CommandLib.c" />
-    <ClCompile Include="optiga-trust-x\optiga\common\Logger.c" />
-    <ClCompile Include="optiga-trust-x\optiga\common\Util.c" />
-    <ClCompile Include="optiga-trust-x\optiga\comms\ifx_i2c\ifx_i2c.c" />
-    <ClCompile Include="optiga-trust-x\optiga\comms\ifx_i2c\ifx_i2c_config.c" />
-    <ClCompile Include="optiga-trust-x\optiga\comms\ifx_i2c\ifx_i2c_data_link_layer.c" />
-    <ClCompile Include="optiga-trust-x\optiga\comms\ifx_i2c\ifx_i2c_physical_layer.c" />
-    <ClCompile Include="optiga-trust-x\optiga\comms\ifx_i2c\ifx_i2c_transport_layer.c" />
-    <ClCompile Include="optiga-trust-x\optiga\crypt\optiga_crypt.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\AlertProtocol.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\DtlsFlightHandler.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\DtlsHandshakeProtocol.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\DtlsRecordLayer.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\DtlsTransportLayer.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\DtlsWindowing.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\HardwareCrypto.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\MessageLayer.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\OCP.c" />
-    <ClCompile Include="optiga-trust-x\optiga\dtls\OCPConfig.c" />
-    <ClCompile Include="optiga-trust-x\optiga\util\optiga_util.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\optiga_comms_ifx_i2c_usb.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_common.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_gpio.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_i2c.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_ifx_usb_config.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_os_event.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_os_lock.c" />
-    <ClCompile Include="optiga-trust-x\pal\libusb\pal_os_timer.c" />
+    <ClCompile Include="optiga\cmd\CommandLib.c" />
+    <ClCompile Include="optiga\common\Logger.c" />
+    <ClCompile Include="optiga\common\Util.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_config.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_data_link_layer.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_physical_layer.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_transport_layer.c" />
+    <ClCompile Include="optiga\crypt\optiga_crypt.c" />
+    <ClCompile Include="optiga\dtls\AlertProtocol.c" />
+    <ClCompile Include="optiga\dtls\DtlsFlightHandler.c" />
+    <ClCompile Include="optiga\dtls\DtlsHandshakeProtocol.c" />
+    <ClCompile Include="optiga\dtls\DtlsRecordLayer.c" />
+    <ClCompile Include="optiga\dtls\DtlsTransportLayer.c" />
+    <ClCompile Include="optiga\dtls\DtlsWindowing.c" />
+    <ClCompile Include="optiga\dtls\HardwareCrypto.c" />
+    <ClCompile Include="optiga\dtls\MessageLayer.c" />
+    <ClCompile Include="optiga\dtls\OCP.c" />
+    <ClCompile Include="optiga\dtls\OCPConfig.c" />
+    <ClCompile Include="optiga\util\optiga_util.c" />
+    <ClCompile Include="pal\libusb\optiga_comms_ifx_i2c_usb.c" />
+    <ClCompile Include="pal\libusb\pal.c" />
+    <ClCompile Include="pal\libusb\pal_common.c" />
+    <ClCompile Include="pal\libusb\pal_gpio.c" />
+    <ClCompile Include="pal\libusb\pal_i2c.c" />
+    <ClCompile Include="pal\libusb\pal_ifx_usb_config.c" />
+    <ClCompile Include="pal\libusb\pal_os_event.c" />
+    <ClCompile Include="pal\libusb\pal_os_lock.c" />
+    <ClCompile Include="pal\libusb\pal_os_timer.c" />
     <ClCompile Include="optiga_trust_init.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\cmd\CommandLib.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\common\AuthLibSettings.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\common\Datatypes.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\common\ErrorCodes.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\common\Logger.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\common\MemoryMgmt.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\common\Util.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\comms\optiga_comms.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\AlertProtocol.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\BaseErrorCodes.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\DtlsFlighthandler.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\DtlsHandshakeProtocol.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\DtlsRecordLayer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\DtlsTransportLayer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\DtlsWindowing.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\HardwareCrypto.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\MessageLayer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\OcpCommon.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\OcpCommonIncludes.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\OcpCryptoLayer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\OcpRecordLayer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\OcpTransportLayer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\dtls\UDPErrorCodes.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\ifx_i2c\ifx_i2c.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\ifx_i2c\ifx_i2c_config.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\ifx_i2c\ifx_i2c_data_link_layer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\ifx_i2c\ifx_i2c_physical_layer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\ifx_i2c\ifx_i2c_transport_layer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\optiga_crypt.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\optiga_dtls.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\optiga_util.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_gpio.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_i2c.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_ifx_i2c_config.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_os_event.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_os_lock.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_os_random.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_os_timer.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\pal\pal_socket.h" />
-    <ClInclude Include="optiga-trust-x\optiga\include\optiga\Version.h" />
-    <ClInclude Include="optiga-trust-x\pal\libusb\include\libusb.h" />
-    <ClInclude Include="optiga-trust-x\pal\libusb\include\pal_common.h" />
-    <ClInclude Include="optiga-trust-x\pal\libusb\include\pal_usb.h" />
+    <ClInclude Include="optiga\include\optiga\cmd\CommandLib.h" />
+    <ClInclude Include="optiga\include\optiga\common\AuthLibSettings.h" />
+    <ClInclude Include="optiga\include\optiga\common\Datatypes.h" />
+    <ClInclude Include="optiga\include\optiga\common\ErrorCodes.h" />
+    <ClInclude Include="optiga\include\optiga\common\Logger.h" />
+    <ClInclude Include="optiga\include\optiga\common\MemoryMgmt.h" />
+    <ClInclude Include="optiga\include\optiga\common\Util.h" />
+    <ClInclude Include="optiga\include\optiga\comms\optiga_comms.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\AlertProtocol.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\BaseErrorCodes.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\DtlsFlighthandler.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\DtlsHandshakeProtocol.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\DtlsRecordLayer.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\DtlsTransportLayer.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\DtlsWindowing.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\HardwareCrypto.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\MessageLayer.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\OcpCommon.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\OcpCommonIncludes.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\OcpCryptoLayer.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\OcpRecordLayer.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\OcpTransportLayer.h" />
+    <ClInclude Include="optiga\include\optiga\dtls\UDPErrorCodes.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_config.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_data_link_layer.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_physical_layer.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_transport_layer.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_crypt.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_dtls.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_util.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_gpio.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_i2c.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_ifx_i2c_config.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_event.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_lock.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_random.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_timer.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_socket.h" />
+    <ClInclude Include="optiga\include\optiga\Version.h" />
+    <ClInclude Include="pal\libusb\include\libusb.h" />
+    <ClInclude Include="pal\libusb\include\pal_common.h" />
+    <ClInclude Include="pal\libusb\include\pal_usb.h" />
     <ClInclude Include="optiga_trust_init.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

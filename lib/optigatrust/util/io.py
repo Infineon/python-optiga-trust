@@ -53,13 +53,13 @@ def read(object_id, offset=0):
 	if not isinstance(object_id, ObjectId):
 		raise TypeError("You need to provide an ObjectId you provided {0}".format(object_id))
 
-	api.optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-	api.optiga_util_read_data.restype = c_int
+	api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
+	api.exp_optiga_util_read_data.restype = c_int
 
 	d = (c_ubyte * 1700)()
 	c_dlen = c_ushort(1700)
 
-	ret = api.optiga_util_read_data(c_ushort(object_id.value), offset, d, byref(c_dlen))
+	ret = api.exp_optiga_util_read_data(c_ushort(object_id.value), offset, d, byref(c_dlen))
 
 	if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
 		data = (c_ubyte * c_dlen.value)()
@@ -108,12 +108,12 @@ def write(data, object_id, offset=0):
 	if offset > 1700:
 		raise ValueError("offset should be less than the limit of 1700 bytes")
 
-	api.optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
-	api.optiga_util_write_data.restype = c_int
+	api.exp_optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
+	api.exp_optiga_util_write_data.restype = c_int
 
 	_data = (c_ubyte * len(data))(*data)
 
-	ret = api.optiga_util_write_data(c_ushort(object_id.value), 0x40, offset, _data, len(data))
+	ret = api.exp_optiga_util_write_data(c_ushort(object_id.value), 0x40, offset, _data, len(data))
 
 	if ret != 0:
 		raise ValueError(
