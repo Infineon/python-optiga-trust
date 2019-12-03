@@ -61,7 +61,7 @@
 
 // USB device settings
 #define USB_INTERFACE               0
-#define USB_TIMEOUT                 100
+#define USB_TIMEOUT                 2000
 
 // USB HID report size (fixed for static buffer placement)
 #define HID_REPORT_SIZE             64

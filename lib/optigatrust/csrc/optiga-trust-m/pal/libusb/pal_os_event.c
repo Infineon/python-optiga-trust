@@ -39,11 +39,15 @@
 #include <stdio.h>
 #include <errno.h>
 #include <time.h>
+#ifdef __WIN32__
 #include <windows.h>
+#else
+#include <signal.h>
+#endif
 #include "optiga/pal/pal_os_timer.h"
 #include "optiga/pal/pal_os_event.h"
 
-#define TRUSTM_PAL_EVENT_DEBUG = 1
+//#define TRUSTM_PAL_EVENT_DEBUG
 
 #ifdef TRUSTM_PAL_EVENT_DEBUG
 
@@ -64,8 +68,14 @@
 /// @cond hidden
 
 static pal_os_event_t pal_os_event_0 = {0};
+#ifdef __WIN32__
 HANDLE gTimerQueue = NULL;
 HANDLE gTimer = NULL;
+#else
+#define CLOCKID CLOCK_REALTIME
+#define SIG SIGRTMIN
+static     timer_t timerid;
+#endif
 
 #ifdef __WIN32__
 VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
@@ -73,7 +83,6 @@ VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
 	pal_os_event_trigger_registered_callback();
 	//printf("<- \r\n");
 }
-
 #else
 static void handler(int sig, siginfo_t *si, void *uc)
 {
@@ -98,6 +107,7 @@ void pal_os_event_stop(pal_os_event_t * p_pal_os_event)
     p_pal_os_event->is_event_triggered = FALSE;
 }
 
+#ifdef __WIN32__
 pal_os_event_t * pal_os_event_create(register_callback callback, void * callback_args)
 {	
 	if ((NULL != callback) && (NULL != callback_args))
@@ -115,6 +125,7 @@ pal_os_event_t * pal_os_event_create(register_callback callback, void * callback
     return (&pal_os_event_0);
 }
 
+
 void pal_os_event_trigger_registered_callback(void)
 {
     register_callback callback;
@@ -129,6 +140,7 @@ void pal_os_event_trigger_registered_callback(void)
     }
 
 }
+
 /// @endcond
 
 void pal_os_event_register_callback_oneshot(pal_os_event_t * p_pal_os_event,
@@ -168,6 +180,128 @@ void pal_os_event_destroy(pal_os_event_t * pal_os_event)
 
 	gTimerQueue = NULL;
 }
+#else
+
+pal_os_event_t * pal_os_event_create(register_callback callback, void * callback_args)
+{
+    struct sigevent sev;
+    struct sigaction sa;
+    
+    TRUSTM_PAL_EVENT_DBGFN(">");
+    
+    if(( NULL != callback )&&( NULL != callback_args ))
+    {
+        /* Establishing handler for signal */
+        sa.sa_flags = SA_SIGINFO;
+        sa.sa_sigaction = handler;
+        sigemptyset(&sa.sa_mask);
+        if (sigaction(SIG, &sa, NULL) == -1)
+        {
+            printf("sigaction\n");
+            exit(1);
+        }
+
+        /* Create the timer */
+
+        sev.sigev_notify = SIGEV_SIGNAL;
+        sev.sigev_signo = SIG;
+        sev.sigev_value.sival_ptr = &timerid;
+        if (timer_create(CLOCKID, &sev, &timerid) == -1)
+        {
+            printf("error in timer_create\n");
+            exit(1);
+        }
+
+        pal_os_event_start(&pal_os_event_0,callback,callback_args);
+    }
+    
+    TRUSTM_PAL_EVENT_DBGFN("<");
+    
+    return (&pal_os_event_0);
+}
+	
+void pal_os_event_trigger_registered_callback(void)
+{
+    register_callback callback;
+    struct itimerspec its;
+
+    TRUSTM_PAL_EVENT_DBGFN(">");  
+    
+    its.it_value.tv_sec = 0;
+    its.it_value.tv_nsec = 0;
+    its.it_interval.tv_sec = 0;
+    its.it_interval.tv_nsec = 0;
+    
+    if (timer_settime(timerid, 0, &its, NULL) == -1)
+    {
+        fprintf(stderr, "Error in timer_settime\n");
+        exit(1);
+    }
+
+    if (pal_os_event_0.callback_registered)
+    {
+        callback = pal_os_event_0.callback_registered;
+        pal_os_event_0.callback_registered = NULL;
+        callback((void * )pal_os_event_0.callback_ctx);
+    }
+
+    TRUSTM_PAL_EVENT_DBGFN("<"); 
+}
+
+void pal_os_event_register_callback_oneshot(pal_os_event_t * p_pal_os_event,
+                                             register_callback callback,
+                                             void * callback_args,
+                                             uint32_t time_us)
+{
+    struct itimerspec its;
+    long long freq_nanosecs;
+    int ret = 0;
+    //sigset_t mask;
+
+    TRUSTM_PAL_EVENT_DBGFN(">");
+    
+    //uint8_t scheduler_timer;
+    p_pal_os_event->callback_registered = callback;
+    p_pal_os_event->callback_ctx = callback_args;
+    
+    /* Start the timer */
+    freq_nanosecs = time_us * 1000;
+    its.it_value.tv_sec = (freq_nanosecs / 1000000000);
+    its.it_value.tv_nsec = (freq_nanosecs % 1000000000);
+    its.it_interval.tv_sec = 0;
+    its.it_interval.tv_nsec = 0;
+    
+    if (( ret = timer_settime(timerid, 0, &its, NULL)) == -1)    
+    {
+        int errsv = errno;
+        fprintf(stderr,"timer_settime FAILED!!!\n");
+        if(errsv == EINVAL)
+        {
+            fprintf(stderr,"INVALID VALUE!\n");
+        }
+        else
+        {
+            fprintf(stderr,"UNKOWN ERROR: %d\n",errsv);
+        }
+        exit(1);
+    }
+    
+    TRUSTM_PAL_EVENT_DBGFN("<"); 
+}
+
+//lint --e{818,715} suppress "As there is no implementation, pal_os_event is not used"
+void pal_os_event_destroy(pal_os_event_t * pal_os_event)
+{
+    TRUSTM_PAL_EVENT_DBGFN(">");
+    if (pal_os_event != NULL)
+        pal_os_event_stop(pal_os_event);
+    if (timerid != 0)
+    {
+        timer_delete(timerid);
+    }
+    TRUSTM_PAL_EVENT_DBGFN("<"); 
+}
+#endif
 
 /**
 * @}
