@@ -457,7 +457,7 @@ class Builder(object):
 
 		if isinstance(signing_key, EccKey):
 			signature_algo = 'ecdsa'
-		if isinstance(signing_key, RsaKey):
+		elif isinstance(signing_key, RsaKey):
 			signature_algo = 'rsa'
 		else:
 			signature_algo = 'undefined'
