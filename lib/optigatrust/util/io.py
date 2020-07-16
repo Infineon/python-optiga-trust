@@ -1,7 +1,7 @@
 # ============================================================================
 # The MIT License
 #
-# Copyright (c) 2018 Infineon Technologies AG
+# Copyright (c) 2020 Infineon Technologies AG
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,44 @@ def read(object_id, offset=0):
 	c_dlen = c_ushort(1700)
 
 	ret = api.exp_optiga_util_read_data(c_ushort(object_id.value), offset, d, byref(c_dlen))
+
+	if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+		data = (c_ubyte * c_dlen.value)()
+		memmove(data, d, c_dlen.value)
+		_bytes = bytearray(data)
+	else:
+		_bytes = bytearray(0)
+
+	return _bytes
+	
+def read_meta(data_id):
+	"""
+	This function helps to read the metadata associated with the data object stored on the chip
+
+	:param data_id:
+		An ID of the Object. Should be either ObjectId, KeyID
+
+
+	:raises:
+		ValueError - when any of the parameters contain an invalid value
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
+	:return:
+		bytearray with the data
+	"""
+	api = chip.init()
+
+	if not isinstance(data_id, ObjectId) and not isinstance(data_id, KeyId):
+		raise TypeError("You need to provide an ObjectId or KeyId you provided {0}".format(data_id))
+
+	api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
+	api.exp_optiga_util_read_metadata.restype = c_int
+
+	d = (c_ubyte * 100)()
+	c_dlen = c_ushort(100)
+
+	ret = api.exp_optiga_util_read_metadata(c_ushort(data_id.value), d, byref(c_dlen))
 
 	if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
 		data = (c_ubyte * c_dlen.value)()
