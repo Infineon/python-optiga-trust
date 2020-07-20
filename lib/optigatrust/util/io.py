@@ -108,7 +108,47 @@ def read_meta(data_id):
 
 	return _bytes
 
+def write_meta(data, object_id):
+	"""
+	This function helps to write the metadata associated with the data object stored on the chip
 
+	:param data:
+		Data to write, should be bytearray
+
+	:param object_id:
+		An ID of the Object. Should be ObjectId
+
+	:raises
+		ValueError - when any of the parameters contain an invalid value
+		TypeError - when any of the parameters are of the wrong type
+		OSError - when an error is returned by the chip initialisation library
+
+	:return:
+	"""
+
+	api = chip.init()
+	
+	if not isinstance(data, bytes) and not isinstance(data, bytearray):
+		raise TypeError("data should be bytes type")
+
+	if not isinstance(object_id, ObjectId):
+		raise TypeError(
+			'keyid should be KeyId type,'
+			'you gave {0}'.format(type(object_id))
+		)
+			
+	_data = (c_ubyte * len(data))(*data)
+
+	api.exp_optiga_util_write_metadata.argtypes = c_ushort, POINTER(c_ubyte), c_ubyte
+	api.exp_optiga_util_write_metadata.restype = c_int
+
+	ret = api.exp_optiga_util_write_metadata(c_ushort(object_id.value), _data, len(_data))
+
+	if ret != 0:
+	raise ValueError(
+		'Some problems during communication. You have possible selected one of locked objects'
+	)
+	
 def write(data, object_id, offset=0):
 	"""
 	This function helps to write the data stored on the chip
