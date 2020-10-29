@@ -44,6 +44,7 @@
 #include "optiga/optiga_crypt.h"
 #include "optiga/pal/pal_os_event.h"
 #include "optiga/pal/pal_os_timer.h"
+#include "optiga/pal/pal_ifx_i2c_config.h"
 #include "optiga/pal/pal.h"
 #include "optiga/ifx_i2c/ifx_i2c_config.h"
 
@@ -109,6 +110,8 @@ int32_t exp_optiga_init(void)
 
 	do
 	{
+        pal_gpio_init(&optiga_reset_0);
+        pal_gpio_init(&optiga_vdd_0);
 		/**
          * 1. Create OPTIGA Crypt Instance
          */

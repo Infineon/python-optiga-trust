@@ -145,9 +145,9 @@ def write_meta(data, object_id):
 	ret = api.exp_optiga_util_write_metadata(c_ushort(object_id.value), _data, len(_data))
 
 	if ret != 0:
-	raise ValueError(
-		'Some problems during communication. You have possible selected one of locked objects'
-	)
+		raise ValueError(
+			'Some problems during communication. You have possible selected one of locked objects'
+		)
 	
 def write(data, object_id, offset=0):
 	"""
