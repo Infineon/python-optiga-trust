@@ -34,11 +34,13 @@ A ctypes based Python wrapper to work with the OPTIGA™ Trust security solution
  
 ## Required Hardware
 
-  1. Either of the following:
+  * Either of the following
     * OPTIGA™ Trust Personalisation Board
     * any FTDI USB-HID/I2C Converter board
     * Embedded Linux with open I2C lines; e.g. RPi3
-  2. OPTIGA™ Trust X/M sample
+  * OPTIGA™ Trust X/M sample
+
+Note: If you use any of the embedded Linux as a Host, please don't forget to enable i2c support in your kernel (RPi3: via `raspi-config` command), as well as add your user to the gpio group (RPi3: via `sudo adduser pi gpio`)
 
 <details>
 <summary> <em> Connection details for the RPi3 and OPTIGA™ Trust X Security Shield 2Go  </em> </summary>
