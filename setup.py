@@ -96,11 +96,11 @@ __classifiers = [
 	'Operating System :: POSIX :: Linux'
 ]
 
-with open(os.path.join("lib", __name, "__init__.py")) as init_root:
+with open(os.path.join("lib", __name, "version.py")) as init_root:
 	for line in init_root:
-		if line.startswith("version_info"):
-			version_tuple = eval(line.split("=")[1])
-__version = ".".join([str(x) for x in version_tuple])
+		if line.startswith("__version_info__"):
+			__version_tuple__ = eval(line.split("=")[1])
+__version = ".".join([str(x) for x in __version_tuple__])
 
 # Parameters for setup
 __packages = [

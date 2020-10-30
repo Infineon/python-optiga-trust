@@ -1,5 +1,10 @@
-__all__ = ['rand', 'pk', 'x509', 'util']
+from .version import __version__, __version_info__
 
-version_info = (0, 6, 9)
-
-__version__ = ".".join([str(x) for x in version_info])
+__all__ = [
+    '__version__',
+    '__version_info__',
+    'rand',
+    'pk',
+    'x509',
+    'util'
+]
