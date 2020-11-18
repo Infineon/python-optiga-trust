@@ -29,7 +29,7 @@ from optigatrust.util import chip
 from optigatrust.util.types import KeyId, KeyUsage
 
 
-def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC):
+def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC, key_usage=None):
 	"""
 	This function generates an RSA keypair, the private part is stored on the chip based on the provided slot
 
@@ -39,6 +39,10 @@ def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC):
 	:param keyid:
 		A Private Key Slot object ID. The value should be within the KeyId Enumeration
 
+	:param key_usage:
+		A key usage indicator. The value should be the KeyUsage Enumeration. By default
+		[KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+
 	:raises:
 		TypeError - when any of the parameters are of the wrong type
 		OSError - when an error is returned by the chip initialisation library
@@ -46,6 +50,9 @@ def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC):
 	:return:
 		RsaKey object or None
 	"""
+	if key_usage is None:
+		key_usage = [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION, KeyUsage.ENCRYPTION]
+
 	_bytes = None
 	api = chip.init()
 
@@ -69,7 +76,8 @@ def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC):
 	else:
 		c_keytype = 0x42
 		rsa_header = b'\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00'
-	c_keyusage = c_ubyte(KeyUsage.KEY_AGREEMENT.value | KeyUsage.AUTHENTICATION.value | KeyUsage.ENCRYPTION.value)
+
+	c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
 	c_keyid = c_ushort(keyid.value)
 	p = (c_ubyte * 320)()
 	c_plen = c_ushort(len(p))
@@ -80,7 +88,7 @@ def generate_keypair(key_size='1024', keyid=KeyId.RSA_KEY_E0FC):
 	memmove(pubkey, p, c_plen.value)
 
 	if ret == 0:
-		return RsaKey(pkey=rsa_header + bytes(pubkey), keyid=keyid, key_size=int(key_size))
+		return RsaKey(pkey=rsa_header + bytes(pubkey), keyid=keyid, key_size=int(key_size), key_usage=key_usage)
 	else:
 		raise ValueError('Failed to generate an RSA keypair, return a NoneType')
 

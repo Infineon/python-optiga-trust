@@ -29,7 +29,7 @@ from optigatrust.util import chip
 from optigatrust.util.types import KeyId, KeyUsage, str2curve
 
 
-def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1):
+def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1, key_usage=None):
 	"""
 	This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
 
@@ -39,6 +39,10 @@ def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1):
 	:param keyid:
 		A Private Key Slot object ID. The value should be within the KeyId Enumeration
 
+	:param key_usage:
+		A key usage indicator. The value should be the KeyUsage Enumeration. By default
+		[KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+
 	:raises
 		TypeError - when any of the parameters are of the wrong type
 		OSError - when an error is returned by the chip initialisation library
@@ -46,6 +50,9 @@ def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1):
 	:return:
 		EccKey object or None
 	"""
+	if key_usage is None:
+		key_usage = [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+
 	_bytes = None
 	api = chip.init()
 
@@ -57,7 +64,7 @@ def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1):
 	api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(c_ushort)
 	api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
 
-	c_keyusage = c_ubyte(KeyUsage.KEY_AGREEMENT.value | KeyUsage.AUTHENTICATION.value)
+	c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
 	c_keyid = c_ushort(keyid.value)
 	p = (c_ubyte * 100)()
 	c_plen = c_ushort(len(p))
@@ -68,7 +75,7 @@ def generate_keypair(curve='secp256r1', keyid=KeyId.ECC_KEY_E0F1):
 	memmove(pubkey, p, c_plen.value)
 
 	if ret == 0:
-		return EccKey(pkey=bytes(pubkey), keyid=keyid, curve=curve)
+		return EccKey(pkey=bytes(pubkey), keyid=keyid, curve=curve, key_usage=key_usage)
 	else:
 		warnings.warn("Failed to generate an ECC keypair, return a NoneType")
 		return None

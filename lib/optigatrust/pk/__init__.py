@@ -43,7 +43,7 @@ __all__ = [
 
 
 class Key:
-	def __init__(self, pkey, keyid, algorithm):
+	def __init__(self, pkey, keyid, algorithm, key_usage):
 		if not isinstance(pkey, bytes):
 			raise TypeError(_pretty_message(''' pkey must be an instance of bytes, not %s ''', _type_name(pkey)))
 		self._pkey = pkey
@@ -52,13 +52,21 @@ class Key:
 			raise TypeError(
 				_pretty_message(''' pkey must be an instance of optigatrust.util.KeyId, not %s ''', _type_name(pkey)))
 		self._keyid = keyid
+		self._key_usage = key_usage
 
 		allowed_algorithms = set({'ec', 'rsa'})
 		if algorithm in allowed_algorithms:
 			self._algorithm = algorithm
 		else:
 			raise ValueError(_pretty_message(
-				''' algorithm must be within allowed values {0}, not {1} '''.format(allowed_algorithms, algorithm)))
+				''' algorithm must be within allowed values {0}, not {1} '''.format(allowed_algorithms, algorithm)
+			))
+
+		for ku in key_usage:
+			if ku not in KeyUsage:
+				raise ValueError(_pretty_message(
+					''' key usage must be one of allowed values {0}, not {1} '''.format(KeyUsage, ku)
+				))
 
 	@property
 	def pkey(self):
@@ -69,13 +77,17 @@ class Key:
 		return self._keyid
 
 	@property
+	def key_usage(self):
+		return self._key_usage
+
+	@property
 	def algorithm(self):
 		return self._algorithm
 
 
 class EccKey(Key):
-	def __init__(self, pkey, keyid, curve):
-		super().__init__(pkey, keyid, 'ec')
+	def __init__(self, pkey, keyid, curve, key_usage):
+		super().__init__(pkey, keyid, 'ec', key_usage)
 
 		allowed_curves = set({'secp256r1', 'secp384r1'})
 		if curve not in allowed_curves:
@@ -88,8 +100,8 @@ class EccKey(Key):
 
 
 class RsaKey(Key):
-	def __init__(self, pkey, keyid, key_size):
-		super().__init__(pkey, keyid, 'rsa')
+	def __init__(self, pkey, keyid, key_size, key_usage):
+		super().__init__(pkey, keyid, 'rsa', key_usage)
 
 		allowed_key_sizes = set({1024, 2048})
 		if key_size not in allowed_key_sizes:
