@@ -76,6 +76,9 @@ print("Rand size 8 bytes: {0}\n".format(list(get_random_bytes(8))))
 print("Rand size 16 bytes: {0}\n".format(list(get_random_bytes(16))))
 print("Rand size 255 bytes: {0}\n".format(list(get_random_bytes(255))))
 
+ecc_key = ecc.generate_keypair(key_usage=[KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION])
+print("Generate NIST-P256 Keypair: {0}\n".format(list(ecc_key.pkey)))
+
 ecc_key = ecc.generate_keypair()
 print("Generate NIST-P256 Keypair: {0}\n".format(list(ecc_key.pkey)))
 
