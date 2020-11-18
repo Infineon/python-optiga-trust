@@ -35,6 +35,22 @@ optiga_initialised = False
 optiga_lib_handler = None
 
 
+def _info():
+	_uid = uid()
+	print("================== OPTIGA Trust Chip Info ==================")
+	print('{0:<30}{1:^10}:{2}'.format("CIM Identifier", "[bCimIdentifer]", hex(_uid.cim_id)))
+	print('{0:<30}{1:^10}:{2}'.format("Platform Identifer", "[bPlatformIdentifier]", hex(_uid.platform_id)))
+	print('{0:<30}{1:^10}:{2}'.format("Model Identifer", "[bModelIdentifier]", hex(_uid.model_id)))
+	print('{0:<30}{1:^10}:{2}'.format("ID of ROM mask", "[wROMCode]", hex(_uid.rommask_id)))
+	print('{0:<30}{1:^10}:{2}'.format("Chip Type", "[rgbChipType]", hex(_uid.chip_type)))
+	print('{0:<30}{1:^10}:{2}'.format("Batch Number", "[rgbBatchNumber]", hex(_uid.batch_num)))
+	print('{0:<30}{1:^10}:{2}'.format("X - coordinate", "[wChipPositionX]", hex(_uid.x_coord)))
+	print('{0:<30}{1:^10}:{2}'.format("Y - coordinate", "[wChipPositionY]", hex(_uid.y_coord)))
+	print('{0:<30}{1:^10}:{2}'.format("Firmware Identifier", "[dwFirmwareIdentifier]", hex(_uid.fw_id)))
+	print('{0:<30}{1:^10}:{2}'.format("Build Number", "[rgbESWBuild]", hex(_uid.fw_build)))
+	print("============================================================")
+
+
 def _get_arch_os():
 	platforms = {
 		'linux': 'linux',
@@ -130,6 +146,8 @@ def init():
 		optiga_initialised = True
 		optiga_lib_handler = api
 
+		_info()
+
 	return optiga_lib_handler
 
 
@@ -172,8 +190,8 @@ def uid():
 
 def is_trustm():
 	_uid = uid()
-	#print(_uid)
-	if _uid.fw_build in {0x809}:
+
+	if _uid.fw_build in {0x809, 0x2440}:
 		return True
 	else:
 		return False
