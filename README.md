@@ -24,7 +24,7 @@ A ctypes based Python wrapper to work with the OPTIGA™ Trust security solution
 | Certificate Signing Request | [`optigatrust.x509.csr`](lib/optigatrust/x509/csr.py)     |
 | Certificate handling        | [`optigatrust.x509.cert`](lib/optigatrust/x509/cert.py)     | 
 | Random Number Generation    | [`optigatrust.rand`](lib/optigatrust/rand/__init__.py)       | 
-| Write/Read General Purpose Data | [`optigatrust.util.io`](lib/optigatrust/util/io.py)       | 
+| Write/Read General Purpose Data | [`optigatrust.util.io`](lib/optigatrust/device/io.py)       | 
 
 ## Dependencies
 

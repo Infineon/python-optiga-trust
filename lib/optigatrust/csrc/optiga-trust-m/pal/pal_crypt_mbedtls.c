@@ -2,7 +2,7 @@
 * \copyright
 * MIT License
 *
-* Copyright (c) 2019 Infineon Technologies AG
+* Copyright (c) 2020 Infineon Technologies AG
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -298,6 +298,7 @@ pal_status_t pal_crypt_version(uint8_t * p_crypt_lib_version_info, uint16_t * le
     } while (0);
     return return_value;
 }
+
 
 /**
 * @}

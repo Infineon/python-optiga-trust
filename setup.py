@@ -104,10 +104,8 @@ __version = ".".join([str(x) for x in __version_tuple__])
 
 # Parameters for setup
 __packages = [
-	'optigatrust.pk',
-	'optigatrust.rand',
-	'optigatrust.util',
-	'optigatrust.x509',
+	'optigatrust',
+	'optigatrust.const',
 	'optigatrust.csrc.lib'
 ]
 
@@ -141,6 +139,6 @@ if __name__ == '__main__':
 		package_dir=__package_dir,
 		package_data=__package_data,
 		setup_requires=['setuptools>=40', 'wheel'],
-		install_requires=['asn1crypto;python_version<"4"'],
+		install_requires=['asn1crypto;python_version<"4"', 'optigatrust'],
 		python_requires='>=3.5',
 	)

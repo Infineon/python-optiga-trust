@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{CEB6A765-7E44-4734-BCB8-8777FC636E77}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)library\ms32\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>$(SolutionDir)lib\</OutDir>
+    <TargetName>liboptigatrust-libusb-win-i686</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)library\ms64\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)lib\</OutDir>
+    <TargetName>liboptigatrust-libusb-win-amd64</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;WIN32;_DEBUG;_WINDOWS;_USRDLL;OPTIGATRUST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include;$(SolutionDir)optiga-trust-m\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>optiga-trust-m\pal\libusb\include\ms32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /B /V $(SolutionDir)optiga-trust-m\pal\libusb\include\ms32\libusb-1.0.dll $(SolutionDir)library\ms32</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;WIN32;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include;$(SolutionDir)optiga-trust-m\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include\ms32\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libusb-1.0.lib;legacy_stdio_definitions.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>optiga-trust-m\pal\libusb\include;optiga-trust-m\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;WIN32;_DEBUG;_WINDOWS;_USRDLL;OPTIGATRUST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>optiga-trust-m\pal\libusb\include\ms64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy /B /V $(SolutionDir)optiga-trust-m\pal\libusb\include\ms64\libusb-1.0.dll $(SolutionDir)library\ms64</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include;$(SolutionDir)optiga-trust-m\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include\ms64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libusb-1.0.lib;legacy_stdio_definitions.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="iob_new.cpp" />
+    <ClCompile Include="optiga\cmd\optiga_cmd.c" />
+    <ClCompile Include="optiga\common\optiga_lib_common.c" />
+    <ClCompile Include="optiga\common\optiga_lib_logger.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_config.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_data_link_layer.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_physical_layer.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_presentation_layer.c" />
+    <ClCompile Include="optiga\comms\ifx_i2c\ifx_i2c_transport_layer.c" />
+    <ClCompile Include="optiga\comms\optiga_comms_ifx_i2c.c" />
+    <ClCompile Include="optiga\crypt\optiga_crypt.c" />
+    <ClCompile Include="optiga\util\optiga_util.c" />
+    <ClCompile Include="pal\libusb\pal.c" />
+    <ClCompile Include="pal\libusb\pal_common.c" />
+    <ClCompile Include="pal\libusb\pal_gpio.c" />
+    <ClCompile Include="pal\libusb\pal_i2c.c" />
+    <ClCompile Include="pal\libusb\pal_ifx_usb_config.c" />
+    <ClCompile Include="pal\libusb\pal_os_event.c" />
+    <ClCompile Include="pal\libusb\pal_logger.c" />
+    <ClCompile Include="pal\libusb\pal_os_datastore.c" />
+    <ClCompile Include="pal\libusb\pal_os_lock.c" />
+    <ClCompile Include="pal\libusb\pal_os_timer.c" />
+    <ClCompile Include="optiga_trust_init.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="optiga\include\optiga\cmd\optiga_cmd.h" />
+    <ClInclude Include="optiga\include\optiga\common\optiga_lib_common.h" />
+    <ClInclude Include="optiga\include\optiga\common\optiga_lib_common_internal.h" />
+    <ClInclude Include="optiga\include\optiga\common\optiga_lib_logger.h" />
+    <ClInclude Include="optiga\include\optiga\common\optiga_lib_return_codes.h" />
+    <ClInclude Include="optiga\include\optiga\common\optiga_lib_types.h" />
+    <ClInclude Include="optiga\include\optiga\comms\optiga_comms.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_config.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_data_link_layer.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_physical_layer.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_presentation_layer.h" />
+    <ClInclude Include="optiga\include\optiga\ifx_i2c\ifx_i2c_transport_layer.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_crypt.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_util.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_crypt.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_gpio.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_i2c.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_ifx_i2c_config.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_logger.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_datastore.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_memory.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_event.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_lock.h" />
+    <ClInclude Include="optiga\include\optiga\pal\pal_os_timer.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_lib_version.h" />
+    <ClInclude Include="optiga\include\optiga\optiga_lib_config.h" />
+    <ClInclude Include="pal\libusb\include\libusb.h" />
+    <ClInclude Include="pal\libusb\include\pal_common.h" />
+    <ClInclude Include="pal\libusb\include\pal_usb.h" />
+    <ClInclude Include="optiga_trust_init.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

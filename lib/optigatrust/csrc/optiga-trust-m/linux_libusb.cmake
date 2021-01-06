@@ -14,7 +14,7 @@ if(UNIX)
 		${TRUSTM_PATH}/pal/libusb/pal.c
 		${TRUSTM_PATH}/pal/libusb/pal_gpio.c
 		${TRUSTM_PATH}/pal/libusb/pal_i2c.c
-		${TRUSTM_PATH}/pal/libusb/pal_ifx_usb_config.c
+		${TRUSTM_PATH}/pal/libusb/pal_usb_config.c
 		${TRUSTM_PATH}/pal/libusb/pal_logger.c
 		${TRUSTM_PATH}/pal/libusb/pal_os_datastore.c
 		${TRUSTM_PATH}/pal/libusb/pal_os_event.c

@@ -1,0 +1,31 @@
+﻿  iob_new.cpp
+  optiga_cmd.c
+  optiga_lib_common.c
+  optiga_lib_logger.c
+  ifx_i2c.c
+  ifx_i2c_config.c
+  ifx_i2c_data_link_layer.c
+  ifx_i2c_physical_layer.c
+  ifx_i2c_presentation_layer.c
+  ifx_i2c_transport_layer.c
+  optiga_comms_ifx_i2c.c
+  optiga_crypt.c
+  optiga_util.c
+  pal.c
+  pal_common.c
+  pal_gpio.c
+  pal_i2c.c
+  pal_usb_config.c
+  pal_os_event.c
+  pal_logger.c
+  pal_os_datastore.c
+  Generating Code...
+  Compiling...
+  pal_os_lock.c
+  pal_os_memory.c
+  pal_os_timer.c
+  optiga_trust_init.c
+  Generating Code...
+     Creating library C:\Users\Yushev\git\python-optiga-trust\lib\optigatrust\csrc\lib\liboptigatrust-libusb-win-amd64.lib and object C:\Users\Yushev\git\python-optiga-trust\lib\optigatrust\csrc\lib\liboptigatrust-libusb-win-amd64.exp
+  optiga-trust-m.vcxproj -> C:\Users\Yushev\git\python-optiga-trust\lib\optigatrust\csrc\lib\liboptigatrust-libusb-win-amd64.dll
+  optiga-trust-m.vcxproj -> C:\Users\Yushev\git\python-optiga-trust\lib\optigatrust\csrc\lib\liboptigatrust-libusb-win-amd64.pdb (Full PDB)

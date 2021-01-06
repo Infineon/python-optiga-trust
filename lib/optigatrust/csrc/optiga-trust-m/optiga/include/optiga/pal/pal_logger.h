@@ -2,7 +2,7 @@
 * \copyright
 * MIT License
 *
-* Copyright (c) 2019 Infineon Technologies AG
+* Copyright (c) 2020 Infineon Technologies AG
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #include "optiga/pal/pal.h"
 
 /** \brief PAL logger context structure */
