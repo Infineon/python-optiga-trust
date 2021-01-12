@@ -53,6 +53,8 @@ Note: If you use any of the embedded Linux as a Host, please don't forget to ena
 $ pip install optigatrust
 ```
 
+For a complete getting started for windows please be forwarded to our [wiki](https://github.com/Infineon/python-optiga-trust/wiki/Quickstart-Windows-(usb)).
+
 ## License
 
 *optigatrust* is licensed under the terms of the MIT license. See the
