@@ -614,9 +614,16 @@ class Certificate(chip.Object):
         read = '{0:<30}:{1}\n'.format("Access Condition: Read", self.meta['read'])
         change = '{0:<30}:{1}\n'.format("Access Conditions: Change", self.meta['change'])
         pem = '{0:<30}:\n{1}\n'.format("PEM", str(self.pem).replace('\\n', '\n').replace('\\t', '\t'))
-        der = '{0:<30}:\n{1}\n'.format("DER", self.der)
+        cert = x509.Certificate.load(self.der)
+        tbs_certificate = cert['tbs_certificate']
+        issuer_cn = '{0:<30}:{1}\n'.format("Issuer: Common Name",
+                                             tbs_certificate['issuer'].native['common_name'])
+        subject_cn = '{0:<30}:{1}\n'.format("Subject: Common Name",
+                                              tbs_certificate['subject'].native['common_name'])
+        pkey = '{0:<30}:{1}\n'.format("Public Key", self.pkey)
+        signature = '{0:<30}:{1}\n'.format("Signature", self.signature)
         footer = "============================================================"
-        return header + lcso + size + read + change + pem + der + footer
+        return header + lcso + size + read + change + pem + issuer_cn + subject_cn + pkey + signature + footer
 
     @property
     def pkey(self):
@@ -654,6 +661,18 @@ class Certificate(chip.Object):
             pem_cert += "\n-----END CERTIFICATE-----"
             return pem_cert.encode()
 
+    @property
+    def pkey(self):
+        cert = x509.Certificate.load(self.der)
+        tbs_certificate = cert['tbs_certificate']
+        subject_public_key_info = tbs_certificate['subject_public_key_info']
+        subject_public_key = subject_public_key_info['public_key'].native.hex()
+        return subject_public_key
+
+    @property
+    def signature(self):
+        cert = x509.Certificate.load(self.der)
+        return cert['signature_value'].native.hex()
 
     def _update(self, cert: str or bytes or bytearray):
         """
