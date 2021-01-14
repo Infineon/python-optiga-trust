@@ -32,10 +32,8 @@ from optigatrust.const import x, m1, m3, charge
 __all__ = [
     'EccKey',
     'RsaKey',
-    'rsa_generate_keypair',
     'EcdsaSignature',
-    'RsassaSignature',
-    'rsa_pkcs1v1_sign'
+    'RsaPkcs1v15Signature',
 ]
 
 
@@ -76,6 +74,12 @@ class EcdsaSignature(_Signature):
         super().__init__(hash_alg, key_id, signature, signature_algorithm_id)
 
 
+class RsaPkcs1v15Signature(_Signature):
+    def __init__(self, hash_alg, keyid, signature):
+        signature_algorithm_id = '%s_%s' % (hash_alg, 'rsa')
+        super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
+
+
 class EccKey(chip.Object):
     def __init__(self, key_id: int, curve='secp256r1'):
         super(EccKey, self).__init__(key_id)
@@ -86,6 +90,10 @@ class EccKey(chip.Object):
         self._hash_alg = None
         self._pkey = None
         self._signature = None
+
+    @property
+    def pkey(self):
+        return self._pkey
 
     @property
     def curve(self):
@@ -114,9 +122,6 @@ class EccKey(chip.Object):
         :param curve:
             Curve name, should be either secp256r1 or secp384r1
 
-        :param keyid:
-            A Private Key Slot object ID.
-
         :param key_usage:
             A key usage indicator. The value should be the KeyUsage Enumeration. By default
             [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
@@ -134,7 +139,8 @@ class EccKey(chip.Object):
         c = _str2curve(self.optiga, curve, return_value=True)
         if c not in self.optiga.curves_values:
             raise TypeError(
-                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.curves_values), c))
+                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.curves_values),
+                                                                                        c))
 
         self.optiga.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
             c_ubyte), POINTER(
@@ -153,7 +159,7 @@ class EccKey(chip.Object):
 
         if ret == 0:
             self._pkey = bytes(pubkey)
-            self._key_usage=key_usage
+            self._key_usage = key_usage
         else:
             warnings.warn("Failed to generate an ECC keypair, return a NoneType")
             return None
@@ -184,7 +190,8 @@ class EccKey(chip.Object):
         if not isinstance(self._pkey, EccKey):
             raise TypeError('Key ID should be selected of class KeyId')
 
-        self.optiga.api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
+        self.optiga.api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(
+            c_ubyte), POINTER(c_ubyte)
         self.optiga.api.exp_optiga_crypt_ecdsa_sign.restype = c_int
 
         if self.curve == 'secp256r1':
@@ -217,151 +224,145 @@ class EccKey(chip.Object):
 
 
 class RsaKey(chip.Object):
-    def __init__(self, pkey: bytes, keyid: int, key_size: int, key_usage):
-        super().__init__(pkey, keyid, 'rsa', key_usage)
-
-        allowed_key_sizes = {1024, 2048}
-        if key_size not in allowed_key_sizes:
-            raise ValueError("Supported key sizes {0} you provided {1}".format(allowed_key_sizes, key_size))
-        self._key_size = key_size
+    def __init__(self, key_id: int):
+        super(RsaKey, self).__init__(key_id)
+        self._key_usage = None
+        self._key_size = None
+        self._pkey = None
 
     @property
     def key_size(self):
         return self._key_size
 
+    @property
+    def pkey(self):
+        return self._pkey
 
-def rsa_generate_keypair(key_size='1024', keyid=0xe0fc, key_usage=None):
-    """
-    This function generates an RSA keypair, the private part is stored on the chip based on the provided slot
+    @property
+    def key_usage(self):
+        return self._key_usage
 
-    :param key_size:
-        Size of the key, can be 1024 or 2048
+    def rsa_generate_keypair(self, key_size='1024', key_id=0xe0fc, key_usage=None):
+        """
+        This function generates an RSA keypair, the private part is stored on the chip based on the provided slot
 
-    :param keyid:
-        A Private Key Slot object ID. The value should be within the KeyId Enumeration
+        :param key_size:
+            Size of the key, can be 1024 or 2048
 
-    :param key_usage:
-        A key usage indicator. The value should be the KeyUsage Enumeration. By default
-        [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+        :param key_id:
+            A Private Key Slot object ID. The value should be within the KeyId Enumeration
 
-    :raises:
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
+        :param key_usage:
+            A key usage indicator. The value should be the KeyUsage Enumeration. By default
+            [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
 
-    :return:
-        RsaKey object or None
-    """
-    _bytes = None
-    optiga = chip.init_optiga()
-    api = optiga.api
+        :raises:
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
 
-    if key_usage is None:
-        key_usage = [optiga.key_usage.KEY_AGR, optiga.key_usage.AUTH, optiga.key_usage.ENCRYPT]
+        :return:
+            RsaKey object or None
+        """
+        _bytes = None
+        optiga = chip.init_optiga()
+        api = optiga.api
 
-    allowed_key_sizes = {'1024', '2048'}
-    if key_size not in allowed_key_sizes:
-        raise ValueError('This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]'.
-                         format(key_size, type(key_size)))
+        if key_usage is None:
+            key_usage = [optiga.key_usage.KEY_AGR, optiga.key_usage.AUTH, optiga.key_usage.ENCRYPT]
 
-    if keyid not in optiga.key_id_values:
-        raise TypeError(
-            "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.key_id_values), keyid))
+        allowed_key_sizes = {'1024', '2048'}
+        if key_size not in allowed_key_sizes:
+            raise ValueError('This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]'.
+                             format(key_size, type(key_size)))
 
-    api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(
-        c_ushort)
-    api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int
+        if key_id not in optiga.key_id_values:
+            raise TypeError(
+                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.key_id_values),
+                                                                                        key_id))
 
-    if key_size is '1024':
-        c_keytype = 0x41
-        rsa_header = b'\x30\x81\x9F\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00'
-    else:
-        c_keytype = 0x42
-        rsa_header = b'\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00'
+        api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
+            c_ubyte), POINTER(
+            c_ushort)
+        api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int
 
-    c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
-    c_keyid = c_ushort(keyid)
-    p = (c_ubyte * 320)()
-    c_plen = c_ushort(len(p))
-
-    ret = api.exp_optiga_crypt_ecc_generate_keypair(c_keytype, c_keyusage, 0, byref(c_keyid), p, byref(c_plen))
-
-    pubkey = (c_ubyte * c_plen.value)()
-    memmove(pubkey, p, c_plen.value)
-
-    if ret == 0:
-        return RsaKey(pkey=rsa_header + bytes(pubkey), keyid=keyid, key_size=int(key_size), key_usage=key_usage)
-    else:
-        raise ValueError('Failed to generate an RSA keypair, return a NoneType')
-
-
-class RsassaSignature(_Signature):
-    def __init__(self, hash_alg, keyid, signature):
-        signature_algorithm_id = '%s_%s' % (hash_alg, 'rsa')
-        super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
-
-
-def rsa_pkcs1v1_sign(rsa_key: RsaKey, data: bytes or bytearray or str, hash_algorithm='sha256'):
-    """
-    This function signs given data based on the provided RsaKey object
-
-    :param rsa_key:
-        a valid RsaKey object. Use rsa.generate_keypair() for this
-
-    :param data:
-        Data to sign
-
-    :param hash_algorithm:
-        Hash algorithm which should be used to sign data. SHA256 by default
-
-    :raises:
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-
-    :return:
-        RsassaSignature object or None
-    """
-    api = chip.init()
-
-    if not chip.is_trustm():
-        raise TypeError('You are trying to use Trust M API with the Trust X hardware')
-
-    if not isinstance(data, bytes) and not isinstance(data, bytearray):
-        if isinstance(data, str):
-            _d = bytes(data.encode())
-            warnings.warn("data will be converted to bytes type before signing")
+        if key_size is '1024':
+            c_keytype = 0x41
+            rsa_header = b'\x30\x81\x9F\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00'
         else:
-            raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
-    else:
-        _d = data
+            c_keytype = 0x42
+            rsa_header = b'\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00'
 
-    if not isinstance(rsa_key, RsaKey):
-        raise TypeError('Key ID should be selected of class KeyId')
+        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
+        c_keyid = c_ushort(key_id)
+        p = (c_ubyte * 320)()
+        c_plen = c_ushort(len(p))
 
-    api.optiga_crypt_rsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
-    api.optiga_crypt_rsa_sign.restype = c_int
+        ret = api.exp_optiga_crypt_ecc_generate_keypair(c_keytype, c_keyusage, 0, byref(c_keyid), p, byref(c_plen))
 
-    if hash_algorithm == 'sha256':
-        digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
-        s = (c_ubyte * 320)()
-        # Signature schemes RSA SSA PKCS1-v1.5 with SHA256 digest
-        sign_scheme = 0x01
-    elif hash_algorithm == 'sha384':
-        digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
-        s = (c_ubyte * 320)()
-        # Signature schemes RSA SSA PKCS1-v1.5 with SHA384 digest
-        sign_scheme = 0x02
-    else:
-        raise ValueError('This key isze is not supported, you typed {0} supported are [\'sha256\', \'sha384\']'
-                         .format(hash_algorithm))
-    c_slen = c_uint(len(s))
+        pubkey = (c_ubyte * c_plen.value)()
+        memmove(pubkey, p, c_plen.value)
 
-    ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), rsa_key.keyid, s, byref(c_slen), 0)
+        if ret == 0:
+            self._pkey = rsa_header + bytes(pubkey)
+            self._key_usage=key_usage
+        else:
+            warnings.warn("Failed to generate an rsa keypair, return a NoneType")
+            return None
 
-    if ret == 0:
-        signature = (c_ubyte * c_slen.value)()
-        memmove(addressof(signature), s, c_slen.value)
-        print(bytes(signature))
-        return RsassaSignature(hash_algorithm, rsa_key.keyid, bytes(signature))
-    else:
-        warnings.warn("Failed to sign a data, return a NoneType")
-        return None
+    def rsa_pkcs1v15_sign(self, data: bytes or bytearray or str, hash_algorithm='sha256'):
+        """
+        This function signs given data based on the provided RsaKey object
+
+        :param data:
+            Data to sign
+
+        :param hash_algorithm:
+            Hash algorithm which should be used to sign data. SHA256 by default
+
+        :raises:
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
+
+        :return:
+            RsassaSignature object or None
+        """
+        optiga = chip.init_optiga()
+        api = optiga.api
+
+        if not isinstance(data, bytes) and not isinstance(data, bytearray):
+            if isinstance(data, str):
+                _d = bytes(data.encode())
+                warnings.warn("data will be converted to bytes type before signing")
+            else:
+                raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
+        else:
+            _d = data
+
+        api.optiga_crypt_rsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
+        api.optiga_crypt_rsa_sign.restype = c_int
+
+        if hash_algorithm == 'sha256':
+            digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
+            s = (c_ubyte * 320)()
+            # Signature schemes RSA SSA PKCS1-v1.5 with SHA256 digest
+            sign_scheme = 0x01
+        elif hash_algorithm == 'sha384':
+            digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
+            s = (c_ubyte * 320)()
+            # Signature schemes RSA SSA PKCS1-v1.5 with SHA384 digest
+            sign_scheme = 0x02
+        else:
+            raise ValueError('This key isze is not supported, you typed {0} supported are [\'sha256\', \'sha384\']'
+                             .format(hash_algorithm))
+        c_slen = c_uint(len(s))
+
+        ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), self.id, s, byref(c_slen), 0)
+
+        if ret == 0:
+            signature = (c_ubyte * c_slen.value)()
+            memmove(addressof(signature), s, c_slen.value)
+            print(bytes(signature))
+            return RsaPkcs1v15Signature(hash_algorithm, self.id, bytes(signature))
+        else:
+            warnings.warn("Failed to sign a data, return a NoneType")
+            return None
