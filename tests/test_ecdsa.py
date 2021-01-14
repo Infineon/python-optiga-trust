@@ -3,8 +3,7 @@ from oscrypto.asymmetric import ecdsa_verify, load_public_key
 from oscrypto.errors import SignatureError
 from asn1crypto import keys, core
 
-from optigatrust.pk import ecc, ecdsa
-from optigatrust.util.types import KeyId, Curves
+from optigatrust.asymmetric import *
 
 import logging
 
@@ -17,40 +16,38 @@ pytest.tbs_str_fail = b'FAILED Test String to Sign'
 
 
 def setup_keys():
-	pytest.p256 = ecc.generate_keypair(curve='secp256r1', keyid=KeyId.SESSION_ID_1)
-	pytest.p256_fail = ecc.generate_keypair(curve='secp256r1', keyid=KeyId.SESSION_ID_2)
-	pytest.p384 = ecc.generate_keypair(curve='secp384r1', keyid=KeyId.SESSION_ID_3)
-	pytest.p384_fail = ecc.generate_keypair(curve='secp384r1', keyid=KeyId.SESSION_ID_4)
+	pytest.p256 = ecc_generate_keypair(curve='secp256r1', keyid=0xE100)
+	pytest.p256_fail = ecc_generate_keypair(curve='secp256r1', keyid=0xE101)
+	pytest.p384 = ecc_generate_keypair(curve='secp384r1', keyid=0xE102)
+	pytest.p384_fail = ecc_generate_keypair(curve='secp384r1', keyid=0xE103)
 
 
 def test_ecdsa_checkcopy():
 	LOGGER.info('Sign data with newly generated NIST P-256 key and check return value')
 	setup_keys()
-	s = ecdsa.sign(pytest.p256, pytest.tbs_str)
+	s = ecdsa_sign(pytest.p256, pytest.tbs_str)
 	assert s.keyid is pytest.p256.keyid
 
 
 def test_ecdsa_p256():
 	LOGGER.info('Sign data with newly generated NIST P-256 key')
 	setup_keys()
-	s = ecdsa.sign(pytest.p256, pytest.tbs_str)
+	s = ecdsa_sign(pytest.p256, pytest.tbs_str)
 	assert isinstance(s.signature, bytes)
 	assert len(s.signature) > 0
 	assert len(s.signature) <= 72
 	assert s.hash_alg == 'sha256'
-	assert s.keyid in KeyId
 	assert s.algorithm == 'sha256_ecdsa'
 
 
 def test_ecdsa_p384():
 	LOGGER.info('Sign data with newly generated NIST P-384 key')
 	setup_keys()
-	s = ecdsa.sign(pytest.p384, pytest.tbs_str)
+	s = ecdsa_sign(pytest.p384, pytest.tbs_str)
 	assert isinstance(s.signature, bytes)
 	assert len(s.signature) > 0
 	assert len(s.signature) <= 104
 	assert s.hash_alg == 'sha384'
-	assert s.keyid in KeyId
 	assert s.algorithm == 'sha384_ecdsa'
 
 
@@ -58,7 +55,7 @@ def test_ecdsa_p256_signverify():
 	LOGGER.info('Sign data with newly generated NIST P-256 key and verify result')
 	setup_keys()
 	ha = 'sha256'
-	s = ecdsa.sign(pytest.p256, pytest.tbs_str)
+	s = ecdsa_sign(pytest.p256, pytest.tbs_str)
 	print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
 
 	# Preparing an algoroithm
@@ -104,7 +101,7 @@ def test_ecdsa_p384_signverify():
 	LOGGER.info('Sign data with newly generated NIST P-384 key and verify result')
 	setup_keys()
 	ha = 'sha384'
-	s = ecdsa.sign(pytest.p384, pytest.tbs_str)
+	s = ecdsa_sign(pytest.p384, pytest.tbs_str)
 	print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
 
 	# Preparing an algoroithm
@@ -144,16 +141,15 @@ def test_ecdsa_p384_signverify():
 		ecdsa_verify(public, s.signature, pytest.tbs_str, ha)
 
 
-
 def test_ecdsa_nonkey():
 	LOGGER.info('Sign data with empty key')
 	with pytest.raises(TypeError):
-		ecdsa.sign(bytearray(35), pytest.tbs_str)
+		ecdsa_sign(bytearray(35), pytest.tbs_str)
 
 
 def test_ecdsa_nonkey_2():
 	LOGGER.info('Sign faulty data with a correct key')
 	setup_keys()
 	with pytest.raises(TypeError):
-		ecdsa.sign(pytest.p256, int(19273917398739829))
+		ecdsa_sign(pytest.p256, int(19273917398739829))
 

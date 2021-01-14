@@ -24,28 +24,28 @@
 from ctypes import *
 import warnings
 import hashlib
+import struct
 
-from optigatrust import ctrl
+from optigatrust import chip
 from optigatrust.const import x, m1, m3, charge
 
 __all__ = [
     'EccKey',
     'RsaKey',
-    'ecc_generate_keypair',
+    'rsa_generate_keypair',
     'EcdsaSignature',
     'RsassaSignature',
-    'ecdsa_sign',
     'rsa_pkcs1v1_sign'
 ]
 
 
 def _str2curve(optiga, curve_str, return_value=False):
-    if curve_str == 'secp256r1' or curve_str == 'nestp256r1':
-        c = optiga.curves.NIST_P_256
-    elif curve_str == 'secp384r1' or curve_str == 'nestp384r1':
-        c = optiga.curves.NIST_P_384
-    elif curve_str == 'secp521r1' or curve_str == 'nestp512r1':
-        c = optiga.curves.NIST_P_521
+    if curve_str == 'secp256r1' or curve_str == 'nistp256r1':
+        c = optiga.curves.SEC_P256R1
+    elif curve_str == 'secp384r1' or curve_str == 'nistp384r1':
+        c = optiga.curves.SEC_P384R1
+    elif curve_str == 'secp521r1' or curve_str == 'nistp521r1':
+        c = optiga.curves.SEC_P521R1
     elif curve_str == 'brainpool256r1':
         c = optiga.curves.BRAINPOOL_P256R1
     elif curve_str == 'brainpoolp384r1':
@@ -53,8 +53,8 @@ def _str2curve(optiga, curve_str, return_value=False):
     elif curve_str == 'brainpoolp512r1':
         c = optiga.curves.BRAINPOOL_P512R1
     else:
-        raise ValueError('Curve not supported use one of these: secp256r1/nestp256r1, secp384r1/nestp384r1, '
-                         'secp521r1/nestp512r1, brainpool256r1, brainpoolp384r1, brainpoolp512r1')
+        raise ValueError('Curve not supported use one of these: secp256r1/nistp256r1, secp384r1/nistp384r1, '
+                         'secp521r1/nistp521r1, brainpool256r1, brainpoolp384r1, brainpoolp512r1')
 
     if return_value:
         return c.value
@@ -62,191 +62,161 @@ def _str2curve(optiga, curve_str, return_value=False):
         return c
 
 
-class _Key:
-    def __init__(self, pkey: bytes, keyid: int, algorithm: str, key_usage):
-        self._pkey = pkey
-        self._keyid = keyid
-        self._key_usage = key_usage
-        self._algorithm = algorithm
-
-    @property
-    def pkey(self):
-        return self._pkey
-
-    @property
-    def keyid(self):
-        return self._keyid
-
-    @property
-    def key_usage(self):
-        return self._key_usage
-
-    @property
-    def algorithm(self):
-        return self._algorithm
-
-
 class _Signature:
-    def __init__(self, hash_alg: str, keyid: int, signature: bytes, algorithm: str):
+    def __init__(self, hash_alg: str, key_id: int, signature: bytes, algorithm: str):
         self._hash_alg = hash_alg
-        self._keyid = keyid
+        self._key_id = key_id
         self._signature = signature
         self._algorithm = algorithm
+
+
+class EcdsaSignature(_Signature):
+    def __init__(self, hash_alg, key_id, signature):
+        signature_algorithm_id = '%s_%s' % (hash_alg, 'ecdsa')
+        super().__init__(hash_alg, key_id, signature, signature_algorithm_id)
+
+
+class EccKey(chip.Object):
+    def __init__(self, key_id: int, curve='secp256r1'):
+        super(EccKey, self).__init__(key_id)
+        self._curve = curve
+        self._pkey = None
+        self._key_id = key_id
+        self._key_usage = None
+        self._hash_alg = None
+        self._pkey = None
+        self._signature = None
+
+    @property
+    def curve(self):
+        return self._curve
 
     @property
     def hash_alg(self):
         return self._hash_alg
 
     @property
-    def keyid(self):
-        return self._keyid
+    def key_id(self):
+        return self._key_id
 
     @property
     def signature(self):
         return self._signature
 
     @property
-    def algorithm(self):
-        return self._algorithm
+    def key_usage(self):
+        return self._key_usage
 
+    def generate(self, curve='secp256r1', key_usage=None):
+        """
+        This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
 
-class EccKey(_Key):
-    def __init__(self, pkey, keyid, curve, key_usage):
-        super().__init__(pkey, keyid, 'ec', key_usage)
+        :param curve:
+            Curve name, should be either secp256r1 or secp384r1
 
-        allowed_curves = {'secp256r1', 'secp384r1'}
-        if curve not in allowed_curves:
-            raise ValueError("Supported curves {0} you provided {1}".format(allowed_curves, curve))
-        self._curve = curve
+        :param keyid:
+            A Private Key Slot object ID.
 
-    @property
-    def curve(self):
-        return self._curve
+        :param key_usage:
+            A key usage indicator. The value should be the KeyUsage Enumeration. By default
+            [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
 
+        :raises
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
 
-def ecc_generate_keypair(curve='secp256r1', keyid=0xe0f1, key_usage=None):
-    """
-    This function generates an ECC keypair, the private part is stored on the chip based on the provided slot
+        :return:
+            EccKey object or None
+        """
+        if key_usage is None:
+            key_usage = [self.optiga.key_usage.KEY_AGR, self.optiga.key_usage.AUTH]
 
-    :param curve:
-        Curve name, should be either secp256r1 or secp384r1
+        c = _str2curve(self.optiga, curve, return_value=True)
+        if c not in self.optiga.curves_values:
+            raise TypeError(
+                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.curves_values), c))
 
-    :param keyid:
-        A Private Key Slot object ID.
+        self.optiga.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
+            c_ubyte), POINTER(
+            c_ushort)
+        self.optiga.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
 
-    :param key_usage:
-        A key usage indicator. The value should be the KeyUsage Enumeration. By default
-        [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
+        c_keyid = c_ushort(self.key_id)
+        p = (c_ubyte * 100)()
+        c_plen = c_ushort(len(p))
 
-    :raises
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
+        ret = self.optiga.api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0, byref(c_keyid), p, byref(c_plen))
 
-    :return:
-        EccKey object or None
-    """
-    _bytes = None
-    optiga = ctrl.init_optiga()
-    api = optiga.api
+        pubkey = (c_ubyte * c_plen.value)()
+        memmove(pubkey, p, c_plen.value)
 
-    if key_usage is None:
-        key_usage = [optiga.key_usage.KEY_AGREEMENT, optiga.key_usage.AUTHENTICATION]
-
-    c = _str2curve(optiga, curve, return_value=True)
-    if c not in optiga.curves_values:
-        raise TypeError(
-            "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.curves_values), c))
-
-    api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(c_ubyte), POINTER(
-        c_ushort)
-    api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
-
-    c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
-    c_keyid = c_ushort(keyid)
-    p = (c_ubyte * 100)()
-    c_plen = c_ushort(len(p))
-
-    ret = api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0, byref(c_keyid), p, byref(c_plen))
-
-    pubkey = (c_ubyte * c_plen.value)()
-    memmove(pubkey, p, c_plen.value)
-
-    if ret == 0:
-        return EccKey(pkey=bytes(pubkey), keyid=keyid, curve=curve, key_usage=key_usage)
-    else:
-        warnings.warn("Failed to generate an ECC keypair, return a NoneType")
-        return None
-
-
-class EcdsaSignature(_Signature):
-    def __init__(self, hash_alg, keyid, signature):
-        signature_algorithm_id = '%s_%s' % (hash_alg, 'ecdsa')
-        super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
-
-
-def ecdsa_sign(ecc_key: EccKey, data: bytes or bytearray or str):
-    """
-    This function signs given data based on the provided EccKey object
-
-    :param ecc_key:
-        a valid EccKey object. Use ecc.generate_keypair() for this
-
-    :param data:
-        Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384
-
-    :raises:
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-
-    :return:
-        EcdsaSignature object or None
-    """
-    api = ctrl.init()
-
-    if not isinstance(data, bytes) and not isinstance(data, bytearray):
-        if isinstance(data, str):
-            _d = bytes(data.encode())
-            warnings.warn("data will be converted to bytes type before signing")
+        if ret == 0:
+            self._pkey = bytes(pubkey)
+            self._key_usage=key_usage
         else:
-            raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
-    else:
-        _d = data
+            warnings.warn("Failed to generate an ECC keypair, return a NoneType")
+            return None
 
-    if not isinstance(ecc_key, EccKey):
-        raise TypeError('Key ID should be selected of class KeyId')
+    def ecdsa_sign(self, data):
+        """
+        This function signs given data based on the provided EccKey object
 
-    api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
-    api.exp_optiga_crypt_ecdsa_sign.restype = c_int
+        :param data:
+            Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384
 
-    if ecc_key.curve == 'secp256r1':
-        digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
-        s = (c_ubyte * (64 + 6))()
-        hash_algorithm = 'sha256'
-    elif ecc_key.curve == 'secp384r1':
-        digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
-        s = (c_ubyte * (96 + 6))()
-        hash_algorithm = 'sha384'
-    else:
-        digest = (c_ubyte * 0)(*hashlib.sha256(_d).digest())
-        s = (c_ubyte * 0)()
-        hash_algorithm = 'None'
-    c_slen = c_ubyte(len(s))
+        :raises:
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
 
-    ret = api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), ecc_key.keyid, s, byref(c_slen))
+        :return:
+            EcdsaSignature object or None
+        """
+        if not isinstance(data, bytes) and not isinstance(data, bytearray):
+            if isinstance(data, str):
+                _d = bytes(data.encode())
+                warnings.warn("data will be converted to bytes type before signing")
+            else:
+                raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
+        else:
+            _d = data
 
-    if ret == 0:
-        signature = (c_ubyte * (c_slen.value + 2))()
-        signature[0] = 0x30
-        signature[1] = c_slen.value
-        memmove(addressof(signature) + 2, s, c_slen.value)
+        if not isinstance(self._pkey, EccKey):
+            raise TypeError('Key ID should be selected of class KeyId')
 
-        return EcdsaSignature(hash_algorithm, ecc_key.keyid, bytes(signature))
-    else:
-        warnings.warn("Failed to sign a data, return a NoneType")
-        return None
+        self.optiga.api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
+        self.optiga.api.exp_optiga_crypt_ecdsa_sign.restype = c_int
+
+        if self.curve == 'secp256r1':
+            digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
+            s = (c_ubyte * (64 + 6))()
+            hash_algorithm = 'sha256'
+        elif self.curve == 'secp384r1':
+            digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
+            s = (c_ubyte * (96 + 6))()
+            hash_algorithm = 'sha384'
+        else:
+            digest = (c_ubyte * 0)(*hashlib.sha256(_d).digest())
+            s = (c_ubyte * 0)()
+            hash_algorithm = 'None'
+        c_slen = c_ubyte(len(s))
+        self._hash_alg = hash_algorithm
+
+        ret = self.optiga.api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), self.key_id, s, byref(c_slen))
+
+        if ret == 0:
+            signature = (c_ubyte * (c_slen.value + 2))()
+            signature[0] = 0x30
+            signature[1] = c_slen.value
+            memmove(addressof(signature) + 2, s, c_slen.value)
+
+            return EcdsaSignature(hash_algorithm, self.key_id, bytes(signature))
+        else:
+            warnings.warn("Failed to sign a data, return a NoneType")
+            return None
 
 
-class RsaKey(_Key):
+class RsaKey(chip.Object):
     def __init__(self, pkey: bytes, keyid: int, key_size: int, key_usage):
         super().__init__(pkey, keyid, 'rsa', key_usage)
 
@@ -282,11 +252,11 @@ def rsa_generate_keypair(key_size='1024', keyid=0xe0fc, key_usage=None):
         RsaKey object or None
     """
     _bytes = None
-    optiga = ctrl.init_optiga()
+    optiga = chip.init_optiga()
     api = optiga.api
 
     if key_usage is None:
-        key_usage = [optiga.key_usage.KEY_AGREEMENT, optiga.key_usage.AUTHENTICATION, optiga.key_usage.ENCRYPTION]
+        key_usage = [optiga.key_usage.KEY_AGR, optiga.key_usage.AUTH, optiga.key_usage.ENCRYPT]
 
     allowed_key_sizes = {'1024', '2048'}
     if key_size not in allowed_key_sizes:
@@ -350,9 +320,9 @@ def rsa_pkcs1v1_sign(rsa_key: RsaKey, data: bytes or bytearray or str, hash_algo
     :return:
         RsassaSignature object or None
     """
-    api = ctrl.init()
+    api = chip.init()
 
-    if not ctrl.is_trustm():
+    if not chip.is_trustm():
         raise TypeError('You are trying to use Trust M API with the Trust X hardware')
 
     if not isinstance(data, bytes) and not isinstance(data, bytearray):

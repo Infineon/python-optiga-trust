@@ -25,23 +25,23 @@ import os
 import platform
 import sys
 from ctypes import *
-import base64
-import warnings
 from collections import namedtuple
+import struct
 
 from optigatrust.const import x, m1, m3, m2id2, charge
 
 __all__ = [
     'Settings',
     'Descriptor',
+    'Object',
     'init',
     'get_info',
     'read',
     'read_meta',
     'write',
     'write_meta',
-    'read_cert',
-    'write_cert'
+    'describe_meta',
+    'prepare_meta'
 ]
 
 
@@ -127,7 +127,7 @@ class Settings:
                         int.from_bytes(_uid[21:25], byteorder='big'),
                         int.from_bytes(_uid[25:27], byteorder='big'))
         self._security_status = int.from_bytes(read(0xe0c1, 0), "big")
-        self._global_lifecycle_state = lifecycle_states[int.from_bytes(read(0xe0c0, 0), "big")]
+        self._global_lifecycle_state = lifecycle_states[int.from_bytes(read(0xe0c0, 0), 'big')]
         self._security_event_counter = int.from_bytes(read(0xe0c5, 0), "big")
 
     @property
@@ -176,63 +176,19 @@ class Settings:
 
 class Descriptor:
     def __init__(self, api, object_id, key_id, rng, key_usage, curves):
-        self._api = api
-        self._object_id = object_id
-        self._object_id_values = set(item.value for item in self._object_id)
-        self._key_usage = key_usage
-        self._key_usage_values = set(item.value for item in self._key_usage)
-        self._key_id = key_id
-        self._key_id_values = set(item.value for item in self._key_id)
-        self._rng = rng
-        self._rng_values = set(item.value for item in self._rng)
-        self._curves = curves
-        self._curves_values = set(item.value for item in self._curves)
-        self._enabled = True
+        self.api = api
+        self.object_id = object_id
+        self.object_id_values = set(item.value for item in self.object_id)
+        self.key_usage = key_usage
+        self.key_usage_values = set(item.value for item in self.key_usage)
+        self.key_id = key_id
+        self.key_id_values = set(item.value for item in self.key_id)
+        self.rng = rng
+        self.rng_values = set(item.value for item in self.rng)
+        self.curves = curves
+        self.curves_values = set(item.value for item in self.curves)
+        self.enabled = True
         self._settings = None
-
-    @property
-    def api(self):
-        return self._api
-
-    @property
-    def object_id(self):
-        return self._object_id
-
-    @property
-    def object_id_values(self):
-        return self._object_id_values
-
-    @property
-    def key_usage(self):
-        return self._key_usage
-
-    @property
-    def key_usage_values(self):
-        return self._key_usage_values
-
-    @property
-    def key_id(self):
-        return self._key_id
-
-    @property
-    def key_id_values(self):
-        return self._key_id_values
-
-    @property
-    def rng(self):
-        return self._rng
-
-    @property
-    def rng_values(self):
-        return self._rng_values
-
-    @property
-    def curves(self):
-        return self._curves
-
-    @property
-    def curves_values(self):
-        return self._curves_values
 
     @property
     def settings(self):
@@ -291,14 +247,6 @@ def get_info():
     optiga = init()
     settings = optiga.settings
     print("================== OPTIGA Trust Chip Info ==================")
-    print('{0:<30}{1:^10}:{2}'.format("CIM Identifier", "[bCimIdentifer]", hex(settings.uid.cim_id)))
-    print('{0:<30}{1:^10}:{2}'.format("Platform Identifer", "[bPlatformIdentifier]", hex(settings.uid.platform_id)))
-    print('{0:<30}{1:^10}:{2}'.format("Model Identifer", "[bModelIdentifier]", hex(settings.uid.model_id)))
-    print('{0:<30}{1:^10}:{2}'.format("ID of ROM mask", "[wROMCode]", hex(settings.uid.rommask_id)))
-    print('{0:<30}{1:^10}:{2}'.format("Chip Type", "[rgbChipType]", hex(settings.uid.chip_type)))
-    print('{0:<30}{1:^10}:{2}'.format("Batch Number", "[rgbBatchNumber]", hex(settings.uid.batch_num)))
-    print('{0:<30}{1:^10}:{2}'.format("X - coordinate", "[wChipPositionX]", hex(settings.uid.x_coord)))
-    print('{0:<30}{1:^10}:{2}'.format("Y - coordinate", "[wChipPositionY]", hex(settings.uid.y_coord)))
     print('{0:<30}{1:^10}:{2}'.format("Firmware Identifier", "[dwFirmwareIdentifier]", hex(settings.uid.fw_id)))
     print('{0:<30}{1:^10}:{2}'.format("Build Number", "[rgbESWBuild]", hex(settings.uid.fw_build)))
     print('{0:<30}{1:^10}:{2}'.format("Current Limitation", "[OID: 0xE0C4]", hex(settings.current_limit)))
@@ -381,6 +329,350 @@ def read(object_id=0xe0e0, offset=0, force=False):
     return _bytes
 
 
+lifecycle_states = {
+    1: 'creation',
+    3: 'initalisation',
+    7: 'operational',
+    15: 'termination'
+}
+
+meta_tags = {
+    'execute': b'\xd3',
+    'change': b'\xd0',
+    'read': b'\xd1',
+    'metadata': b'\x20',
+    'lcso': b'\xc0',
+    'max_size': b'\xc4',
+    'used_size': b'\xc5',
+    'algorithm': b'\xe0',
+    'key_usage': b'\xe1',
+    'type': b'\xe8',
+    'reset_type': b'\xf0',
+}
+
+meta_tags_swaped = {y: x for x, y in meta_tags.items()}
+
+algorithms = {
+    'nistp256r1': b'\x03',
+    'nistp384r1': b'\x04',
+    'nistp512r1': b'\x05',
+    'brainpool256r1': b'\x13',
+    'brainpool384r1': b'\x15',
+    'brainpool521r1': b'\x16',
+    'rsa1024': b'\x41',
+    'rsa2048': b'\x42',
+    'aes128': b'\x81',
+    'aes192': b'\x82',
+    'aes256': b'\x83',
+    'sha256': b'\xe2'
+}
+
+algorithms_swaped = {y: x for x, y in algorithms.items()}
+
+access_conditions_ids = {
+    'always': b'\x00',
+    # 2 bytes, e.g. Enable access if boot phase flag in Security Status application is set → 0x10, 0x20
+    # Note: SetDataObject with Param = erase&write clears all bits and with Param = write clears all corresponding
+    # bits not set to 1 in data to be written
+    'sec_sta_g': b'\x10',
+    # 3 bytes, for instance data object read is allowed only under shielded connection using a pre shared secret
+    # 1) Read, Conf, Binding Secret (e.g. 0xD1, 0x03, 0x20, 0xE1, 0x40) In case of reading a data object (e.g. using
+    # GetDataObject), the shielded connection must be established already using the specified Binding secret (e.g.
+    # 0xE140) and the response is requested with protection (encrypted).
+    # 2) Change, Conf, Binding Secret (e.g. 0xD0,
+    # 0x03, 0x20, 0xE1, 0x40) In case of writing a data object (e.g. using SetDataObject), the shielded connection
+    # must be established already using the specified pre-shared secret (0xE140) and the command is sent with
+    # protection (encrypted).
+    # 3) Execute, Conf, Binding Secret (e.g. 0xD3, 0x03, 0x20, 0xE1, 0x40) In case of using a
+    # data object with an internal operation (e.g. using DeriveKey from a pre-shared secret), the shielded connection
+    # must be established already using the specified binding secret (0xE140) and the command is sent protection (
+    # encrypted).
+    # 4) Change, Conf, Protected Update Secret → (e.g. 0xD0, 0x03, 0x20, 0xF1, 0xD0) In case of writing a
+    # data object (using SetObjectProtected), the manifest must specify the same Protected Update Secret (e.g. 0xF1,
+    # 0xD0) which is specified in the object metadata. This enforces to use the defined Protected Update Secret to
+    # decrypt the object data in fragments.
+    # Notes: Conf (Protected Update Secret) must be used in association(
+    # Operator AND) with Integrity (Trust Anchor), to enforce the right Protected Update Secret to be used to decrypt
+    # the object data as part of SetObjectProtected. If Conf (Protected Update Secret) not specified in the metadata
+    # access conditions, SetObjectProtected uses Protected Update Secret specified in the manifest, to decrypt the
+    # object data as part of fragments. The usage of this identifier is to enforce the right secret used (Integrity
+    # Trust Anchor, Operator AND, Confidentiality Protected Update Secret OID). The Protected Update Secret must not
+    # same as the target data object to be updated.
+    'conf': b'\x20',
+    # 3 byte; Value, Key Reference
+    # (e.g. Int first Session Key → 0x21, 0xF1, 0xF0)
+    # 1) Read, Int, Binding Secret (e.g. 0xD1, 0x03, 0x21, 0xE1, 0x40)
+    # In case of reading a data object (e.g. using GetDataObject), the shielded connection must be established already
+    # using the specified pre-shared secret (0xE140) and the response is requested with protection (MAC).
+    # 2) Change, Int, Binding Secret (e.g. 0xD0, 0x03, 0x21, 0xE1, 0x40)
+    # In case of writing a data object (e.g. using SetDataObject), the shielded connection must be established already
+    # using the specified pre-shared secret (0xE140) and the command is sent with protection (MAC).
+    # 3) Execute, Int, Binding Secret (e.g. 0xD3, 0x03, 0x21, 0xE1, 0x40)
+    # In case of using a data object with an internal operation (e.g. using DeriveKey from a pre-shared secret), the
+    # shielded connection must be established already using the specified pre-shared secret (0xE140) and the command
+    # is sent with protection (MAC).
+    # 4) Change, Int, Trust Anchor (e.g. 0xD0, 0x03, 0x21, 0xE0, 0xEF)
+    # In case of writing a data object (e.g. using SetObjectProtected), the signature associated with the meta data
+    # in the manifest must be verified with the addressed trust anchor (e.g. 0xE0EF) in the access conditions. In case
+    # of SetObjectProtected command, the change access conditions of target OID must have Integrity access condition
+    # identifier with the respective Trust Anchor.
+    'int': b'\x21',
+    # 3 byte; Value, Reference (Authorization Reference OID)
+    # (e.g. Auto → 0x23, 0xF1, 0xD0)
+    'auto': b'\x23',
+    # 3 byte; Value, Counter Reference
+    # (e.g. Linked Counter 1 → 0x40, 0xE1, 0x20)
+    # For example, The arbitrary data object holds a pre-shared secret and this secret is allowed to be used for
+    # key derivation
+    # (DeriveKey) operations to a limited number of times. To enable this, choose a counter object
+    # (updated with maximum allowed limit) and assign the counter data object in the EXE access condition of arbitrary
+    # data object as shown below.
+    # (e.g. EXE, Luc, Counter Object → 0xD3, 0x03, 0x40, 0xE1, 0x20)
+    # The counter data objects gets updated (counter value gets incremented by 1 up to maximum limit)
+    # automatically when the DeriveKey command is performed.
+    'luc': b'\x40',
+    # 3 byte; Value, Qualifier, Reference
+    # (e.g. LcsG < op → 0x70, 0xFC, 0x07)
+    'lcsg': b'\x70',
+    # 2 byte; Value
+    # (e.g. Enable access if boot phase flag in Security Status application is set → 0x90, 0x20)
+    # Note: SetDataObject with Param = erase&write clears all bits and with Param = write clears all corresponding
+    # bits not set to 1 in data to be written
+    'sec_sta_a': b'\x90',
+    # 3 byte; Value, Qualifier, Reference
+    # (e.g. LcsA > in → 0xE0, 0xFB, 0x03)
+    'lcsa': b'\xe0',
+    # 3 byte; Value, Qualifier, Reference
+    # (e.g. LcsO < op → 0xE1, 0xFC, 0x07)
+    'lcso': b'\xe1',
+    '==': b'\xfa',
+    '>': b'\xfb',
+    '<': b'\xfc',
+    '&&': b'\xfd',
+    '||': b'\xfe',
+    'never': b'\xff'
+}
+
+access_conditions_ids_swaped = {y: x for x, y in access_conditions_ids.items()}
+
+
+data_object_types = {
+    # SRM: BSTR. The Byte String data object type is represented by a sequence of bytes, which could be addressed by
+    # offset and length.
+    'byte_string': b'\x00',
+    # SRM: UPCTR. The Up-counter data type implements a counter with a current value which could be increased only
+    # and a threshold terminating the counter.
+    'up_counter': b'\x01',
+    # SRM: TA. The Trust Anchor data type contains a single X.509 certificate which could be used in various commands
+    # requiring a root of trust.
+    'trust_anchor': b'\x11',
+    # SRM: DEVCERT. The Device Identity data type contains a single X.509 certificate or a chain of certificates
+    # (TLS, USB-Type C, ...) which was issued to vouch for the cryptographic identity of the end-device.
+    'device_cert': b'\x12',
+    # SRM: PRESSEC. The Pre-shared Secret contains a binary data string which makes up a pre-shared secret for various
+    # purposes (FW-decryption, ...).
+    'pre_sh_secret': b'\x21',
+    # SRM: PTFBIND. The Platform Binding contains a binary data string which makes up a pre-shared secret for platform
+    # binding (e.g. used for OPTIGA™ Shielded Connection).
+    'platform_binding': b'\x22',
+    # SRM: UPDATESEC. The Protected Update Secret contains a binary data string which makes up a pre-shared secret for
+    # confidentiality protected update of data or key objects. The maximum length is limited to 64 bytes, even if the
+    # hosting data object has a higher maximum length.
+    'update_secret': b'\x23',
+    # SRM: AUTOREF. The Authorization Reference contains a binary data string which makes up a reference value for
+    # verifying an external entity (admin, user, etc.) authorization.
+    'azthorization_ref': b'\x31'
+}
+
+
+data_object_types_swaped = {y: x for x, y in data_object_types.items()}
+
+
+def describe_meta(meta: bytes):
+    """
+    This function should process the given metadata and return it in a human readable form.
+
+    :param meta:
+        metadata represented in bytes
+
+    :raises:
+        ValueError - when any of the parameters contain an invalid value
+        TypeError - when any of the parameters are of the wrong type
+        OSError - when an error is returned by the chip initialisation library
+
+    :return:
+        A dictionary of the following format
+        {
+            'read': 'always'
+            'execute': ['lcso', '<', 'operational']
+        }
+    """
+    global access_conditions_ids_swaped
+    global meta_tags_swaped
+    if not isinstance(meta, bytes) and not isinstance(meta, bytearray):
+        raise TypeError(
+            'Metadata (meta) should be in bytes form, you provided {0}'.format(type(meta))
+        )
+    meta_unpacked = list(struct.unpack(str(len(meta)) + 'c', meta))
+    meta_itr = iter(meta_unpacked)
+    # First byte is always \x20
+    # For instance
+    # [ b'\x20',
+    #   b'\x17',
+    #   b'\xc0', b'\x01', b'\x01',
+    #   b'\xc4', b'\x02', b'\x06', b'\xc0',
+    #   b'\xc5', b'\x02', b'\x01', b'\xe5',
+    #   b'\xd0', b'\x01', b'\xff',
+    #   b'\xd1', b'\x01', b'\x00',
+    #   b'\xd3', b'\x01', b'\x00',
+    #   b'\xe8', b'\x01', b'\x12' ]
+    # We skip the very first tag, then record the length o the meta data, then go tag by tag (line by line here).
+    # Some tags, like lcso or algorithm have a different value which should be interepeted differently
+    next(meta_itr)
+    meta_size = int.from_bytes(next(meta_itr), "big")
+    if meta_size == 0:
+        return None
+    if meta_size < 0:
+        raise ValueError(
+            'Metadata size can\'t be less than zero. Ou have {0}'.format(meta_size)
+        )
+    # 64 for is the maximum
+    if meta_size > 62:
+        raise ValueError(
+            'Metadata Size can\'t be more than 64 bytes. You have {0}'.format(meta_size)
+        )
+    meta_described = dict()
+    try:
+        while True:
+            tag = meta_tags_swaped[next(meta_itr)]
+            tag_size = int.from_bytes(next(meta_itr), 'big')
+            if tag_size == 0:
+                return None
+            if tag_size < 0:
+                raise ValueError(
+                    'Metadata size can\'t be less than zero. Ou have {0}'.format(meta_size)
+                )
+            if tag == 'used_size' or tag == 'max_size':
+                meta_described[tag] = (int.from_bytes(next(meta_itr), 'big') << 8) + \
+                                      int.from_bytes(next(meta_itr), 'big')
+                continue
+            if tag == 'type':
+                meta_described[tag] = data_object_types_swaped[next(meta_itr)]
+                continue
+            if tag == 'algorithm':
+                meta_described[tag] = algorithms_swaped[next(meta_itr)]
+                continue
+            if tag == 'key_usage':
+                meta_described[tag] = next(meta_itr).hex()
+                continue
+            tag_data = list()
+            for i in range(tag_size):
+                _id = next(meta_itr)
+                if _id in access_conditions_ids_swaped:
+                    tag_data.append(access_conditions_ids_swaped[_id])
+                elif int.from_bytes(_id, "big") in lifecycle_states:
+                    tag_data.append(lifecycle_states[int.from_bytes(_id, "big")])
+                else:
+                    tag_data.append(_id.hex())
+            if tag_size == 1:
+                tag_data = ''.join(tag_data)
+            meta_described[tag] = tag_data
+    except StopIteration:
+        return meta_described
+
+
+def prepare_meta(new_meta: dict):
+    """
+    This function takes as an imput json-like formatted dictionary and translates it to the data to write into the chip
+
+    :param new_meta:
+        A dictionary (json like formatted) with new metadata; e.g.
+        {
+            "lcso": "creation",
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "algorithm": "nistp384r1",
+            "key_usage": "21"
+        }
+
+    :raises:
+        ValueError - when any of the parameters contain an invalid value
+        TypeError - when any of the parameters are of the wrong type
+        OSError - when an error is returned by the chip initialisation library
+    return:
+        a bytearray with resulting metadata to write into the chip
+    """
+    meta = list()
+    # 0x20 should go first
+    meta.append(32)
+    # then you have length
+    meta.append(0)
+    for key, value in new_meta.items():
+        if key not in meta_tags:
+            raise ValueError(
+                'Wrong value. Accepted values: {0}, you provided {1}'.format(meta_tags.keys(), key)
+            )
+        meta.append(int.from_bytes(meta_tags[key], 'big'))
+        # Update the size
+        meta[1] += 1
+        if key == 'used_size' or key == 'max_size':
+            if not isinstance(value, int):
+                raise TypeError(
+                    'The used size tag should have an int value, you provided {0}'.format(type(value))
+                )
+            meta.append(value >> 8)
+            meta.append(value & 0xff)
+            # Update the size
+            meta[1] += 2
+            continue
+        if key == 'type':
+            if value not in data_object_types:
+                raise ValueError(
+                    'Value for Type meta tag isn\'t found. '
+                    'Accepted values {0}, you provided {1}'.format(data_object_types.keys(), key)
+                )
+            meta.append(int.from_bytes(data_object_types[value], 'big'))
+            # Update the size
+            meta[1] += 1
+            continue
+        if key == 'algorithm':
+            if value not in algorithms:
+                raise ValueError(
+                    'Value for Algorithm meta tag isn\'t found. '
+                    'Accepted values {0}, you provided {1}'.format(algorithms.keys(), key)
+                )
+            meta.append(int.from_bytes(algorithms[value], 'big'))
+            # Update the size
+            meta[1] += 1
+            continue
+        if key == 'key_usage':
+            meta.append(int(value))
+            # Update the size
+            meta[1] += 1
+            continue
+        if isinstance(value, list):
+            meta.append(len(value))
+            meta[1] += 1
+            for element in value:
+                if element not in access_conditions_ids:
+                    raise ValueError(
+                        'Value for Access Condition isn\'t found. '
+                        'Accepted values {0}, you provided {1}'.format(access_conditions_ids.keys(), element)
+                    )
+                meta.append(int.from_bytes(access_conditions_ids[element], 'big'))
+                meta[1] += 1
+        else:
+            meta.append(1)
+            meta[1] += 1
+            meta.append(int.from_bytes(access_conditions_ids[value], 'big'))
+            meta[1] += 1
+    return bytearray(meta)
+
+
 def read_meta(data_id: int):
     """
     This function helps to read the metadata associated with the data object stored on the chip
@@ -399,12 +691,11 @@ def read_meta(data_id: int):
     optiga = init()
     api = optiga.api
 
-    if data_id not in optiga.object_id_values:
+    if (data_id not in optiga.object_id_values) and (data_id not in optiga.key_id_values):
         raise TypeError(
-            "data_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.object_id), data_id))
-    elif data_id not in optiga.key_id_values:
-        raise TypeError(
-            "data_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.key_id), data_id))
+            "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(list(optiga.object_id),
+                                                                                          list(optiga.key_id), data_id)
+        )
 
     api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
     api.exp_optiga_util_read_metadata.restype = c_int
@@ -447,12 +738,11 @@ def write_meta(data, data_id: int):
     if not isinstance(data, bytes) and not isinstance(data, bytearray):
         raise TypeError("data should be bytes type")
 
-    if data_id not in optiga.object_id_values:
+    if (data_id not in optiga.object_id_values) and (data_id not in optiga.key_id_values):
         raise TypeError(
-            "data_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.object_id), data_id))
-    elif data_id not in optiga.key_id_values:
-        raise TypeError(
-            "data_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.key_id), data_id))
+            "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(list(optiga.object_id),
+                                                                                          list(optiga.key_id), data_id)
+        )
 
     _data = (c_ubyte * len(data))(*data)
 
@@ -516,173 +806,25 @@ def write(data, object_id: int, offset=0):
         )
 
 
-def _break_apart(f, sep, step):
-    return sep.join(f[n:n + step] for n in range(0, len(f), step))
+class Object:
+    def __init__(self, _id):
+        self.id = _id
+        self.optiga = init()
 
+    def forward_lifecycle_state(self):
+        """
+        ATTENTION: This funciton changes the lifecylce state of the object, it can't be reverted on Trust M1/X
 
-def read_cert(cert_id=0xe0e0, to_pem=False):
-    """
-    This function returns an exisiting certificate from the OPTIGA(TM) Trust device
+        :return:
+            None
+        """
 
-    :param cert_id:
-        An ID of the Object (e.g. 0xe0e1)
+    @property
+    def meta(self):
+        _array_meta = read_meta(self.id)
+        return describe_meta(_array_meta)
 
-    :param to_pem:
-        A boolean flag to indecate, whether you want return certificate PEM encoded
-
-    :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-
-    :return:
-        A byte string with a PEM certificate or DER encoded byte string
-    """
-    optiga = init()
-
-    oid = optiga.object_id
-
-    if cert_id not in optiga.object_id_values:
-        raise TypeError(
-            'Certificate Slot is not correct. '
-            'Supported values are in ObjectId class you used {0}'.format(cert_id)
-        )
-    if cert_id not in {oid.IFX_CERT.value, oid.USER_CERT_1.value, oid.USER_CERT_2.value, oid.USER_CERT_3.value,
-                       oid.TRUST_ANCHOR_1.value, oid.TRUST_ANCHOR_2.value,
-                       oid.DATA_SLOT_1500B_0, oid.DATA_SLOT_1500B_1}:
-        warnings.warn("You are going to use an object which is outside of the standard certificate storage")
-
-    der_cert = read(cert_id)
-
-    # print(list(der_cert))
-
-    if len(der_cert) == 0:
-        raise ValueError(
-            'Certificate Slot {0} is empty'.format(cert_id)
-        )
-
-    # OPTIGA Trust Code to tag an X509 certificate
-    if der_cert[0] == 0xC0:
-        der_cert = der_cert[9:]
-
-    if to_pem:
-        pem_cert = "-----BEGIN CERTIFICATE-----\n"
-        pem_cert += _break_apart(base64.b64encode(der_cert).decode(), '\n', 64)
-        pem_cert += "\n-----END CERTIFICATE-----"
-        return pem_cert.encode()
-    else:
-        return bytes(der_cert)
-
-
-def _append_length(data, last=False):
-    data_with_length = bytearray(3)
-    left = len(data)
-
-    data_with_length[2] = left % 0x100
-
-    left = left >> 8
-    data_with_length[1] = left % 0x100
-
-    if last:
-        data_with_length[0] = 0xC0
-    else:
-        left = left >> 8
-        data_with_length[0] = left % 0x100
-
-    data_with_length.extend(data)
-
-    return data_with_length
-
-
-def _strip_cert(cert):
-    if cert.split('\n')[0] != "-----BEGIN CERTIFICATE-----":
-        raise ValueError(
-            'Incorrect Certificate '
-            'Should start with "-----BEGIN CERTIFICATE-----" your starts with {0}'.format(cert.split('\n')[0])
-        )
-    raw_cert = cert.replace('-----BEGIN CERTIFICATE-----', '')
-    raw_cert = raw_cert.replace('-----END CERTIFICATE-----', '')
-    raw_cert = raw_cert.replace("\n", "")
-    der_cert = base64.b64decode(raw_cert)
-
-    return der_cert
-
-
-def write_cert(cert, cert_id=0xe0e1):
-    """
-    This function writes a new certificate into the OPTIGA(TM) Trust device
-
-    :param cert:
-        Should be a a string with a PEM file with newlines separated or a bytes insatnce with DER encoded cert
-
-    :param cert_id:
-        An ID of the Object (e.g. 0xe0e1)
-
-    :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-
-    :return:
-        None
-    """
-    optiga = init()
-    api = optiga.api
-    oid = optiga.object_id
-
-    if cert_id not in {oid.IFX_CERT.value, oid.USER_CERT_1.value, oid.USER_CERT_2.value, oid.USER_CERT_3.value,
-                       oid.TRUST_ANCHOR_1.value, oid.TRUST_ANCHOR_2.value,
-                       oid.DATA_SLOT_1500B_0, oid.DATA_SLOT_1500B_1}:
-        warnings.warn("You are going to use an object which is outside of the standard certificate storage")
-
-    if not isinstance(cert, str) and not isinstance(cert, bytes) and not isinstance(cert, bytearray):
-        raise TypeError(
-            'Bad certificate type should be either bytes, bytes string, or string'
-        )
-
-    # Looks like a DER encoded files has been provided
-    if isinstance(cert, bytes) or isinstance(cert, bytearray):
-        try:
-            cert = cert.decode("utf-8")
-            cert = _strip_cert(cert)
-        except UnicodeError:
-            pass
-    elif isinstance(cert, str):
-        cert = _strip_cert(cert)
-    else:
-        raise TypeError(
-            'Bad certificate type should be either bytes, bytes string, or string'
-        )
-
-    der_cert = cert
-
-    if der_cert[0] != 0x30:
-        raise ValueError(
-            'Incorrect Certificate '
-            'Should start with 0x30 your starts with {0}'.format(der_cert[0])
-        )
-
-    # Append tags
-    # [len_byte_2, len_byte_1, len_byte_0] including the certificate and two lengths
-    #   [len_byte_2, len_byte_1, len_byte_0] including the certificate and the length
-    #       [len_byte_2, len_byte_1, len_byte_0]
-    #           [der_encoded_certificate]
-    # Write the result into the given Object ID
-    l1_der_cert = _append_length(der_cert)
-    l2_der_cert = _append_length(l1_der_cert)
-    l3_der_cert = _append_length(l2_der_cert, last=True)
-
-    # print("Certificate without encoding #1 {0}".format(list(der_cert)))
-    # print("Certificate without encoding #2 {0}".format(list(l1_der_cert)))
-    # print("Certificate without encoding #3 {0}".format(list(l2_der_cert)))
-    # print("Certificate without encoding #4 {0}".format(list(l3_der_cert)))
-
-    write(l3_der_cert, cert_id)
-
-
-lifecycle_states = {
-    0x01: 'creation',
-    0x03: 'initialisation',
-    0x05: 'operational',
-    0x07: 'termination'
-}
+    @meta.setter
+    def meta(self, new_meta: dict):
+        meta = prepare_meta(new_meta)
+        write_meta(meta, self.id)

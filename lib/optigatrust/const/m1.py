@@ -31,10 +31,10 @@ class Rng(IntEnum):
 
 
 class Curves(IntEnum):
-    SECP256R1 = 0x03
-    NISTP256R1 = 0x03
-    SECP384R1 = 0x04
-    NISTP384R1 = 0x04
+    SEC_P256R1 = 0x03
+    NIST_P256R1 = 0x03
+    SEC_P384R1 = 0x04
+    NIST_P384R1 = 0x04
 
 
 class KeyUsage(IntEnum):

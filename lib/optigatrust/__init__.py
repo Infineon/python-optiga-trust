@@ -3,8 +3,8 @@ from .random import random
 __all__ = [
     '__version__',
     '__version_info__',
-    'chip.py',
-    'assymetric',
-    'csr',
+    'chip',
+    'asymmetric',
+    'cert',
     'random'
 ]

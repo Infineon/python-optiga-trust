@@ -23,7 +23,7 @@
 # ============================================================================
 from ctypes import *
 
-from optigatrust import ctrl
+from optigatrust import chip
 
 
 def random(n, trng=True):
@@ -43,7 +43,7 @@ def random(n, trng=True):
 	:return:
 		Bytes object with randomness
 	"""
-	api = ctrl
+	api = chip
 
 	api.exp_optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
 	api.exp_optiga_crypt_random.restype = c_int
