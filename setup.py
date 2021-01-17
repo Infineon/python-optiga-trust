@@ -96,7 +96,7 @@ __classifiers = [
 	'Operating System :: POSIX :: Linux'
 ]
 
-with open(os.path.join("lib", __name, "version.py")) as init_root:
+with open(os.path.join( __name, "version.py")) as init_root:
 	for line in init_root:
 		if line.startswith("__version_info__"):
 			__version_tuple__ = eval(line.split("=")[1])
@@ -118,7 +118,7 @@ __package_data = {
 
 
 __package_dir = {
-	"optigatrust": "lib/optigatrust",
+	"optigatrust": "optigatrust",
 }
 
 if __name__ == '__main__':
@@ -139,6 +139,6 @@ if __name__ == '__main__':
 		package_dir=__package_dir,
 		package_data=__package_data,
 		setup_requires=['setuptools>=40', 'wheel'],
-		install_requires=['asn1crypto;python_version<"4"', 'optigatrust'],
+		install_requires=['optigatrust', 'asn1crypto'],
 		python_requires='>=3.5',
 	)

@@ -1,0 +1,541 @@
+{
+    "e0f0": {
+        "metadata": "200fc00101d001ffd30100e00103e10101",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "change": "never",
+            "execute": "always",
+            "algorithm": "nistp256r1",
+            "key_usage": "01"
+        }
+    },
+    "e0f1": {
+        "metadata": "2011c00101d003e1fc07d30100e00104e10121",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "algorithm": "nistp384r1",
+            "key_usage": "21"
+        }
+    },
+    "e0f2": {
+        "metadata": "2011c00101d003e1fc07d30100e00104e10121",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "algorithm": "nistp384r1",
+            "key_usage": "21"
+        }
+    },
+    "e0f3": {
+        "metadata": "2011c00101d003e1fc07d30100e00104e10121",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "algorithm": "nistp384r1",
+            "key_usage": "21"
+        }
+    },
+    "e0fc": {
+        "metadata": "2011c00101d003e1fc07d30100e00142e10123",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "algorithm": "rsa2048",
+            "key_usage": "23"
+        }
+    },
+    "e0fd": {
+        "metadata": "2011c00101d003e1fc07d30100e00142e10123",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "algorithm": "rsa2048",
+            "key_usage": "23"
+        }
+    },
+    "e120": {
+        "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 8,
+            "used_size": 8,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "up_counter"
+        },
+        "data": ""
+    },
+    "e121": {
+        "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 8,
+            "used_size": 8,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "up_counter"
+        },
+        "data": ""
+    },
+    "e122": {
+        "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 8,
+            "used_size": 8,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "up_counter"
+        },
+        "data": ""
+    },
+    "e123": {
+        "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 8,
+            "used_size": 8,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "up_counter"
+        },
+        "data": ""
+    },
+    "e0c0": {
+        "metadata": "2009c40101d00100d10100",
+        "pretty_metadata": {
+            "max_size": 1,
+            "change": "always",
+            "read": "always"
+        },
+        "data": "07"
+    },
+    "e0c1": {
+        "metadata": "2009c40101d00100d10100",
+        "pretty_metadata": {
+            "max_size": 1,
+            "change": "always",
+            "read": "always"
+        },
+        "data": ""
+    },
+    "e0c2": {
+        "metadata": "2009c4011bd001ffd10100",
+        "pretty_metadata": {
+            "max_size": 27,
+            "change": "never",
+            "read": "always"
+        },
+        "data": "cd16338201001c000500000a091b5c0007003e0031801010710809"
+    },
+    "e0c3": {
+        "metadata": "2009c40101d00100d10100",
+        "pretty_metadata": {
+            "max_size": 1,
+            "change": "always",
+            "read": "always"
+        },
+        "data": "14"
+    },
+    "e0c4": {
+        "metadata": "2009c40101d00100d10100",
+        "pretty_metadata": {
+            "max_size": 1,
+            "change": "always",
+            "read": "always"
+        },
+        "data": "0f"
+    },
+    "e0c5": {
+        "metadata": "2009c40101d001ffd10100",
+        "pretty_metadata": {
+            "max_size": 1,
+            "change": "never",
+            "read": "always"
+        },
+        "data": ""
+    },
+    "e0c6": {
+        "metadata": "2006c40102d10100",
+        "pretty_metadata": {
+            "max_size": 2,
+            "read": "always"
+        },
+        "data": "0615"
+    },
+    "e140": {
+        "metadata": "201dc00103c40140c50140d007e1fc07fe20e140d103e1fc07d30100e80122",
+        "pretty_metadata": {
+            "lcso": "initalisation",
+            "max_size": 64,
+            "used_size": 64,
+            "change": [
+                "lcso",
+                "<",
+                "operational",
+                "||",
+                "conf",
+                "e1",
+                "40"
+            ],
+            "read": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "execute": "always",
+            "type": "platform_binding"
+        },
+        "data": "4b50fb6b7a47196e5d10b91b57ad4c94bbd85a6edb9fc2ae06186daa0723ebd1eb8d05a85420a31e21b0bc3aec3ddf96b08bc7f4b3bc52b3f2f64e73c5eca779"
+    },
+    "f1d0": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d1": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d2": {
+        "metadata": "2011c00101c4018cc50143d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 67,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": "04410429a1d12972b040cb9b382d793077250094b0d1a32ca2570d5d3ba1c3b8a245cdea809dfa7756d17cb6de5b1579dfb59eac8197405a0534f8f74f3b1145cef0e8"
+    },
+    "f1d3": {
+        "metadata": "2011c00101c4018cc50143d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 67,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": "044104f311e0f506ebb01fc58d450663ea6047b25b0f08a0506fa759c809729ec962a7649fe7f7ce9d5fb9812082985f044da1471d12541603967a57d1f7b94278e73a"
+    },
+    "f1d4": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d5": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d6": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d7": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d8": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1d9": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1da": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1db": {
+        "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 140,
+            "used_size": 100,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "e0e0": {
+        "metadata": "2017c00101c40206c0c50201e5d001ffd10100d30100e80112",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1728,
+            "used_size": 485,
+            "change": "never",
+            "read": "always",
+            "execute": "always",
+            "type": "device_cert"
+        },
+        "data": "c001e20001df0001dc308201d83082017ea00302010202046bd9b021300a06082a8648ce3d0403023072310b30090603550406130244453121301f060355040a0c18496e66696e656f6e20546563686e6f6c6f6769657320414731133011060355040b0c0a4f505449474128544d29312b302906035504030c22496e66696e656f6e204f505449474128544d29205472757374204d20434120313031301e170d3139303631383036323832335a170d3339303631383036323832335a301c311a301806035504030c11496e66696e656f6e20496f54204e6f64653059301306072a8648ce3d020106082a8648ce3d03010703420004f18cdfd145da274bdd9dc189ef2086670f41eb221620f65719b12bf7bab5d19e32ffc5512cfe28c2cd628242bb98d82b13bf68e089e9a2ce3225e2351159f6bda3583056300e0603551d0f0101ff040403020080300c0603551d130101ff0402300030150603551d20040e300c300a06082a82140044011401301f0603551d230418301680143c308c5cd58ae8a35d3280e45483b2ffcd864d23300a06082a8648ce3d040302034800304502203767638373868b0f6b0306a18d77f09eae1f3b0b53a9d97ae06764e9f09e5c330221009179de47c1b392b9354ba7fdcef6bc27a7def0b61e8d6d797973b00f2b7b36cb"
+    },
+    "e0e1": {
+        "metadata": "2017c00101c40206c0c5020247d00100d10100d30100e80111",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1728,
+            "used_size": 583,
+            "change": "always",
+            "read": "always",
+            "execute": "always",
+            "type": "trust_anchor"
+        },
+        "data": "c0024400024100023e3082023a308201e0a0030201020204175fee8f300a06082a8648ce3d040302302f312d302b06035504030c24496e66696e656f6e20546573742053657276657220496e7465726d656469617465204341301e170d3136313031343038313331375a170d3234313031323038313331375a30363134303206035504030c2b496e66696e656f6e20546573742053657276657220456e6420456e746974792043657274696669636174653059301306072a8648ce3d020106082a8648ce3d03010703420004ba0dfe24ccacf8cd3525f36783187b5ac21ac636490168384ea17c3c0ccfc8a8d19296b855bb7426cbc066a85cc463130aebb2d3f144dd41af5516082a59cae4a381e23081df30090603551d1304023000301d0603551d0e04160414ffa36268a06f99817bde43ec6615331648cb23303081a20603551d2304819a3081978014d43faadd49bfa42bcf7cd521d39e91378fbbe309a178a4763074310b30090603550406130244453121301f060355040a0c18496e66696e656f6e20546563686e6f6c6f67696573204147311b3019060355040b0c124f505449474128544d2920547275737420583125302306035504030c1c496e66696e656f6e20546573742053657276657220526f6f74204341820500d6d31652300e0603551d0f0101ff040403020780300a06082a8648ce3d040302034800304502200b9a86022144cd7de519cb40854e90914c22d9ce0a94d895a82455430ebb249c022100f5911a3db164064e220cf33284c9923f6f58fdfdeee9580bfefc54588f2e0bbc"
+    },
+    "e0e2": {
+        "metadata": "2019c00101c40206c0c502027bd003e1fc07d10100d30100e80112",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1728,
+            "used_size": 635,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "device_cert"
+        },
+        "data": "c002780002750002723082026e30820214020900ea4036b635e60e85300a06082a8648ce3d0403023081be310b30090603550406130255533113301106035504080c0a57617368696e67746f6e3110300e06035504070c0753656174746c6531183016060355040a0c0f416d617a6f6e204672656552544f533121301f060355040b0c18504b43532023313120546573742043726564656e7469616c3128302606035504030c1f444f4e545f5553455f544849535f4b45595f494e5f415f5245414c5f4150503121301f06092a864886f70d01090116126e6f626f6479406e6f77686572652e636f6d301e170d3139303532393231353630305a170d3239303532363231353630305a3081be310b30090603550406130255533113301106035504080c0a57617368696e67746f6e3110300e06035504070c0753656174746c6531183016060355040a0c0f416d617a6f6e204672656552544f533121301f060355040b0c18504b43532023313120546573742043726564656e7469616c3128302606035504030c1f444f4e545f5553455f544849535f4b45595f494e5f415f5245414c5f4150503121301f06092a864886f70d01090116126e6f626f6479406e6f77686572652e636f6d3059301306072a8648ce3d020106082a8648ce3d03010703420004ce0869f90b2d5213a6cca04610beee063b1a05bc9a35330b5ca2d25bbf3e6dda0ff5b2933abaa22a4f46cc593d0a1b611c5b31f93ed4162b616d85ad45fd19c3300a06082a8648ce3d0403020348003045022100acd67de9f9f399c63653f9f9e6dcc41f221c69a4b2a7520815e364803294a779022076e7c7f5c947660addf4756946522e9b2dec20c344bbd7f30bd5d9b12bbcc90f"
+    },
+    "e0e3": {
+        "metadata": "2019c00101c40206c0c502027bd003e1fc07d10100d30100e80112",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1728,
+            "used_size": 635,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "device_cert"
+        },
+        "data": "c002780002750002723082026e30820214020900ea4036b635e60e85300a06082a8648ce3d0403023081be310b30090603550406130255533113301106035504080c0a57617368696e67746f6e3110300e06035504070c0753656174746c6531183016060355040a0c0f416d617a6f6e204672656552544f533121301f060355040b0c18504b43532023313120546573742043726564656e7469616c3128302606035504030c1f444f4e545f5553455f544849535f4b45595f494e5f415f5245414c5f4150503121301f06092a864886f70d01090116126e6f626f6479406e6f77686572652e636f6d301e170d3139303532393231353630305a170d3239303532363231353630305a3081be310b30090603550406130255533113301106035504080c0a57617368696e67746f6e3110300e06035504070c0753656174746c6531183016060355040a0c0f416d617a6f6e204672656552544f533121301f060355040b0c18504b43532023313120546573742043726564656e7469616c3128302606035504030c1f444f4e545f5553455f544849535f4b45595f494e5f415f5245414c5f4150503121301f06092a864886f70d01090116126e6f626f6479406e6f77686572652e636f6d3059301306072a8648ce3d020106082a8648ce3d03010703420004ce0869f90b2d5213a6cca04610beee063b1a05bc9a35330b5ca2d25bbf3e6dda0ff5b2933abaa22a4f46cc593d0a1b611c5b31f93ed4162b616d85ad45fd19c3300a06082a8648ce3d0403020348003045022100acd67de9f9f399c63653f9f9e6dcc41f221c69a4b2a7520815e364803294a779022076e7c7f5c947660addf4756946522e9b2dec20c344bbd7f30bd5d9b12bbcc90f"
+    },
+    "f1e0": {
+        "metadata": "2013c00101c40205dcc50205dcd003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1500,
+            "used_size": 1500,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "f1e1": {
+        "metadata": "2013c00101c40205dcc50205dcd003e1fc07d10100",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1500,
+            "used_size": 1500,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always"
+        },
+        "data": ""
+    },
+    "e0e8": {
+        "metadata": "2019c00101c40204b0c50204b0d003e1fc07d10100d30100e80111",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1200,
+            "used_size": 1200,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "trust_anchor"
+        },
+        "data": ""
+    },
+    "e0ef": {
+        "metadata": "2019c00101c40204b0c50204b0d003e1fc07d10100d30100e80111",
+        "pretty_metadata": {
+            "lcso": "creation",
+            "max_size": 1200,
+            "used_size": 1200,
+            "change": [
+                "lcso",
+                "<",
+                "operational"
+            ],
+            "read": "always",
+            "execute": "always",
+            "type": "trust_anchor"
+        },
+        "data": ""
+    }
+}

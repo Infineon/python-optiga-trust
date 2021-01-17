@@ -17,14 +17,14 @@ A ctypes based Python wrapper to work with the OPTIGA™ Trust security solution
 
 | Function                    | Module                                      |
 | --------------------------- | ------------------------------------------- | 
-| Elliptic Curves Cryptograpy | [`optigatrust.pk.ecc`](lib/optigatrust/pk/ecc.py)       | 
-| ECDSA                       | [`optigatrust.pk.ecdsa`](lib/optigatrust/pk/ecdsa.py)       |
-| RSA                         | [`optigatrust.pk.rsa`](lib/optigatrust/pk/rsa.py)       | 
-| RSA PKCS#1 Ver1.5           | [`optigatrust.pk.rsassa`](lib/optigatrust/pk/rsassa.py)       | 
-| Certificate Signing Request | [`optigatrust.x509.csr`](lib/optigatrust/x509/csr.py)     |
-| Certificate handling        | [`optigatrust.x509.cert`](lib/optigatrust/x509/cert.py)     | 
-| Random Number Generation    | [`optigatrust.rand`](lib/optigatrust/rand/__init__.py)       | 
-| Write/Read General Purpose Data | [`optigatrust.util.io`](lib/optigatrust/device/io.py)       | 
+| Elliptic Curves Cryptograpy | [`optigatrust.pk.ecc`](optigatrust/pk/ecc.py)       | 
+| ECDSA                       | [`optigatrust.pk.ecdsa`](optigatrust/pk/ecdsa.py)       |
+| RSA                         | [`optigatrust.pk.rsa`](optigatrust/pk/rsa.py)       | 
+| RSA PKCS#1 Ver1.5           | [`optigatrust.pk.rsassa`](optigatrust/pk/rsassa.py)       | 
+| Certificate Signing Request | [`optigatrust.x509.csr`](optigatrust/x509/csr.py)     |
+| Certificate handling        | [`optigatrust.x509.cert`](optigatrust/x509/cert.py)     | 
+| Random Number Generation    | [`optigatrust.rand`](optigatrust/rand/__init__.py)       | 
+| Write/Read General Purpose Data | [`optigatrust.util.io`](optigatrust/device/io.py)       | 
 
 ## Dependencies
 

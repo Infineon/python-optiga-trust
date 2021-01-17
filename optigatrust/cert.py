@@ -29,10 +29,10 @@ import re
 import textwrap
 import base64
 import warnings
-import struct
 
-from asn1crypto import x509, keys, csr, pem, core
-from optigatrust import chip, asymmetric
+from asn1crypto import x509, keys, csr, pem
+from asn1crypto import core as c
+from optigatrust import core, asymmetric
 
 int_types = (int,)
 str_cls = str
@@ -160,10 +160,10 @@ class Builder(object):
     def subject_public_key(self, _value):
         if isinstance(_value, asymmetric.EccKey):
             pubkey_alg = keys.PublicKeyAlgorithm({
-                'algorithm': _value.algorithm,
+                'algorithm': 'ec',
                 'parameters': keys.ECDomainParameters('named', _value.curve)
             })
-            pubkey_asn1 = core.BitString.load(_value.pkey)
+            pubkey_asn1 = c.BitString.load(_value.pkey)
             pubkey_info = keys.PublicKeyInfo({
                 'algorithm': pubkey_alg,
                 'public_key': pubkey_asn1.cast(keys.ECPointBitString)
@@ -602,10 +602,11 @@ access_conditions = {
 }
 
 
-class Certificate(chip.Object):
+class Certificate(core.Object):
     def __init__(self, id: int, is_trust_anchor=False):
         super(Certificate, self).__init__(id)
         self._pkey = None
+        self._der = self._read()
 
     def __str__(self):
         header = "================== Certificate Object [{0}] ==================\n".format(hex(self.id))
@@ -631,23 +632,20 @@ class Certificate(chip.Object):
 
     @property
     def der(self):
-        return self._read()
+        if self.updated:
+            self._der = self._read()
+        return self._der
 
     @der.setter
     def der(self, data: str or bytes or bytearray):
-        try:
-            final_cert = self._update(data)
-        except ValueError or TypeError or OSError:
-            print('Failed to update the certificate. Exit.')
-        else:
-            return final_cert
+        final_cert = self._update(data)
 
     @property
     def pem(self):
         pem_cert = "-----BEGIN CERTIFICATE-----\n"
         pem_cert += _break_apart(base64.b64encode(self.der).decode(), '\n', 64)
         pem_cert += "\n-----END CERTIFICATE-----"
-        return pem_cert
+        return pem_cert.encode()
 
     @pem.setter
     def pem(self, data: str):
@@ -684,7 +682,7 @@ class Certificate(chip.Object):
         :raises:
             ValueError - when any of the parameters contain an invalid value
             TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the chip initialisation library
+            OSError - when an error is returned by the core initialisation library
 
         :return:
             None
@@ -738,7 +736,7 @@ class Certificate(chip.Object):
         # print("Certificate without encoding #3 {0}".format(list(l2_der_cert)))
         # print("Certificate without encoding #4 {0}".format(list(l3_der_cert)))
 
-        chip.write(l3_der_cert, self.id)
+        self.write(l3_der_cert)
 
         return l3_der_cert
 
@@ -752,7 +750,7 @@ class Certificate(chip.Object):
         :raises:
             ValueError - when any of the parameters contain an invalid value
             TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the chip initialisation library
+            OSError - when an error is returned by the core initialisation library
 
         :return:
             A byte string with a PEM certificate or DER encoded byte string
@@ -760,16 +758,16 @@ class Certificate(chip.Object):
         oid = self.optiga.object_id
 
         if self.id not in self.optiga.object_id_values:
-            raise TypeError(
+            raise ValueError(
                 'Certificate Slot is not correct. '
-                'Supported values are in ObjectId class you used {0}'.format(self.id)
+                'Supported values are {0} class you used {1}'.format(self.optiga.object_id_values, self.id)
             )
         if self.id not in {oid.IFX_CERT.value, oid.USER_CERT_1.value, oid.USER_CERT_2.value, oid.USER_CERT_3.value,
                            oid.TRUST_ANCHOR_1.value, oid.TRUST_ANCHOR_2.value,
                            oid.DATA_SLOT_1500B_0, oid.DATA_SLOT_1500B_1}:
             warnings.warn("You are going to use an object which is outside of the standard certificate storage")
 
-        der_cert = chip.read(self.id)
+        der_cert = self.read()
 
         # print(list(der_cert))
 

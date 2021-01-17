@@ -95,6 +95,7 @@ class KeyId(IntEnum):
     # Key from key store
     ECC_KEY_E0F3 = 0xE0F3
 
+class SessionId(IntEnum):
     # Key from Session context id 1
     SESSION_ID_1 = 0xE100
     # Key from Session context id 2

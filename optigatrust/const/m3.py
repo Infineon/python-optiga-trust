@@ -104,6 +104,7 @@ class KeyId(IntEnum):
     RSA_KEY_E0FC = 0xe0fc
     RSA_KEY_E0FD = 0xe0fd
 
+class SessionId(IntEnum):
     # Key from Session context id 1
     SESSION_ID_1 = 0xE100
     # Key from Session context id 2

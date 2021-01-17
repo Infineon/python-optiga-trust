@@ -35,13 +35,11 @@ __all__ = [
     'Descriptor',
     'Object',
     'init',
+    'random',
     'get_info',
-    'read',
-    'read_meta',
-    'write',
-    'write_meta',
-    'describe_meta',
-    'prepare_meta'
+    'parse_raw_meta',
+    'prepare_raw_meta',
+    'dump_chip_json'
 ]
 
 
@@ -113,9 +111,9 @@ _optiga_descriptor = None
 
 class Settings:
     def __init__(self):
-        self._current_limit = int.from_bytes(read(0xe0c4, 0), "big")
-        self._sleep_activation_delay = int.from_bytes(read(0xe0c3, 0), "big")
-        _uid = read(object_id=0xE0C2, force=True)
+        self._current_limit = int.from_bytes(Object(0xe0c4).read(), "big")
+        self._sleep_activation_delay = int.from_bytes(Object(0xe0c3).read(), "big")
+        _uid = Object(0xe0c2).read(force=True)
         self._uid = UID(int.from_bytes(_uid[0:1], byteorder='big'),
                         int.from_bytes(_uid[1:2], byteorder='big'),
                         int.from_bytes(_uid[2:3], byteorder='big'),
@@ -126,9 +124,9 @@ class Settings:
                         int.from_bytes(_uid[19:21], byteorder='big'),
                         int.from_bytes(_uid[21:25], byteorder='big'),
                         int.from_bytes(_uid[25:27], byteorder='big'))
-        self._security_status = int.from_bytes(read(0xe0c1, 0), "big")
-        self._global_lifecycle_state = lifecycle_states[int.from_bytes(read(0xe0c0, 0), 'big')]
-        self._security_event_counter = int.from_bytes(read(0xe0c5, 0), "big")
+        self._security_status = int.from_bytes(Object(0xe0c1).read(), "big")
+        self._global_lifecycle_state = lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
+        self._security_event_counter = int.from_bytes(Object(0xe0c5).read(), "big")
 
     @property
     def current_limit(self):
@@ -136,7 +134,7 @@ class Settings:
 
     @current_limit.setter
     def current_limit(self, val: int):
-        write(bytes([val]), 0xe0c4)
+        Object(0xe0c4).write(bytes([val]))
 
     @property
     def sleep_activation_delay(self):
@@ -144,7 +142,7 @@ class Settings:
 
     @sleep_activation_delay.setter
     def sleep_activation_delay(self, val: int):
-        write(bytes([val]), 0xe0c3)
+        Object(0xe0c3).write(bytes([val]))
 
     @property
     def uid(self):
@@ -162,7 +160,7 @@ class Settings:
             )
         for code, state in lifecycle_states.items():
             if state == val:
-                write(bytes(state), 0xe0c0)
+                Object(0xe0c0).write(bytes(state))
 
     @property
     def security_status(self):
@@ -170,12 +168,12 @@ class Settings:
 
     @property
     def security_event_counter(self):
-        self._security_event_counter = int.from_bytes(read(0xe0c5, 0), "big")
+        self._security_event_counter = int.from_bytes(Object(0xe0c5).read(), "big")
         return self._security_event_counter
 
 
 class Descriptor:
-    def __init__(self, api, object_id, key_id, rng, key_usage, curves):
+    def __init__(self, api, object_id, key_id, session_id, rng, key_usage, curves):
         self.api = api
         self.object_id = object_id
         self.object_id_values = set(item.value for item in self.object_id)
@@ -183,6 +181,8 @@ class Descriptor:
         self.key_usage_values = set(item.value for item in self.key_usage)
         self.key_id = key_id
         self.key_id_values = set(item.value for item in self.key_id)
+        self.session_id = session_id
+        self.session_id_values = set(item.value for item in self.session_id)
         self.rng = rng
         self.rng_values = set(item.value for item in self.rng)
         self.curves = curves
@@ -233,6 +233,7 @@ def init():
             api=api,
             object_id=consts.ObjectId,
             key_id=consts.KeyId,
+            session_id=consts.SessionId,
             key_usage=consts.KeyUsage,
             rng=consts.Rng,
             curves=consts.Curves
@@ -281,52 +282,39 @@ def _lookup_optiga(api):
         return x
 
 
-def read(object_id=0xe0e0, offset=0, force=False):
+def random(n, trng=True):
     """
-    This function helps to read the data stored on the chip
+    This function generates a random number
 
-    :param object_id:
-        An ID of the Object (e.g. 0xe0e1)
+    :param n:
+        how much randomness to generate. Valid values are from 8 to 256
 
-    :param offset:
-        An optional parameter defining whether you want to read the data with offset
+    :param trng:
+        If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
 
     :raises:
-        ValueError - when any of the parameters contain an invalid value
         TypeError - when any of the parameters are of the wrong type
         OSError - when an error is returned by the chip initialisation library
 
     :return:
-        bytearray with the data
+        Bytes object with randomness
     """
     optiga = init()
     api = optiga.api
 
-    if offset > 1700:
-        raise ValueError("offset should be less than the limit of 1700 bytes")
+    api.exp_optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
+    api.exp_optiga_crypt_random.restype = c_int
+    p = (c_ubyte * n)()
 
-    if force is False:
-        if object_id not in optiga.object_id_values:
-            raise TypeError(
-                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.object_id),
-                                                                                        object_id))
-
-    api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-    api.exp_optiga_util_read_data.restype = c_int
-
-    d = (c_ubyte * 1700)()
-    c_dlen = c_ushort(1700)
-
-    ret = api.exp_optiga_util_read_data(c_ushort(object_id), offset, d, byref(c_dlen))
-
-    if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
-        data = (c_ubyte * c_dlen.value)()
-        memmove(data, d, c_dlen.value)
-        _bytes = bytearray(data)
+    if trng is True:
+        ret = api.exp_optiga_crypt_random(optiga.rng.TRNG.value, p, len(p))
     else:
-        _bytes = bytearray(0)
+        ret = api.exp_optiga_crypt_random(optiga.rng.DRNG.value, p, len(p))
 
-    return _bytes
+    if ret == 0:
+        return bytes(p)
+    else:
+        return bytes(0)
 
 
 lifecycle_states = {
@@ -455,7 +443,6 @@ access_conditions_ids = {
 
 access_conditions_ids_swaped = {y: x for x, y in access_conditions_ids.items()}
 
-
 data_object_types = {
     # SRM: BSTR. The Byte String data object type is represented by a sequence of bytes, which could be addressed by
     # offset and length.
@@ -484,11 +471,10 @@ data_object_types = {
     'azthorization_ref': b'\x31'
 }
 
-
 data_object_types_swaped = {y: x for x, y in data_object_types.items()}
 
 
-def describe_meta(meta: bytes):
+def parse_raw_meta(meta: bytes):
     """
     This function should process the given metadata and return it in a human readable form.
 
@@ -553,8 +539,15 @@ def describe_meta(meta: bytes):
                     'Metadata size can\'t be less than zero. Ou have {0}'.format(meta_size)
                 )
             if tag == 'used_size' or tag == 'max_size':
-                meta_described[tag] = (int.from_bytes(next(meta_itr), 'big') << 8) + \
-                                      int.from_bytes(next(meta_itr), 'big')
+                if tag_size == 2:
+                    meta_described[tag] = (int.from_bytes(next(meta_itr), 'big') << 8) + \
+                                          int.from_bytes(next(meta_itr), 'big')
+                elif tag_size == 1:
+                    meta_described[tag] = int.from_bytes(next(meta_itr), 'big')
+                else:
+                    raise ValueError(
+                        'Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}'.format(tag_size)
+                    )
                 continue
             if tag == 'type':
                 meta_described[tag] = data_object_types_swaped[next(meta_itr)]
@@ -566,10 +559,24 @@ def describe_meta(meta: bytes):
                 meta_described[tag] = next(meta_itr).hex()
                 continue
             tag_data = list()
-            for i in range(tag_size):
+            i = 0
+            while i < tag_size:
                 _id = next(meta_itr)
+                i += 1
                 if _id in access_conditions_ids_swaped:
-                    tag_data.append(access_conditions_ids_swaped[_id])
+                    # Conf, Int, auto and luc have as the last two bytes a reference to the oid used for the expression
+                    # it is just another OID from the system
+                    if _id == access_conditions_ids['conf'] \
+                            or _id == access_conditions_ids['int'] \
+                            or _id == access_conditions_ids['auto'] \
+                            or _id == access_conditions_ids['luc']:
+                        tag_data.append(access_conditions_ids_swaped[_id])
+                        tag_data.append(next(meta_itr).hex())
+                        tag_data.append(next(meta_itr).hex())
+                        i += 2
+                    else:
+                        tag_data.append(access_conditions_ids_swaped[_id])
+                # if we didn't meet the number, it should be in the lifecycle states
                 elif int.from_bytes(_id, "big") in lifecycle_states:
                     tag_data.append(lifecycle_states[int.from_bytes(_id, "big")])
                 else:
@@ -581,7 +588,7 @@ def describe_meta(meta: bytes):
         return meta_described
 
 
-def prepare_meta(new_meta: dict):
+def prepare_raw_meta(new_meta: dict):
     """
     This function takes as an imput json-like formatted dictionary and translates it to the data to write into the chip
 
@@ -673,158 +680,263 @@ def prepare_meta(new_meta: dict):
     return bytearray(meta)
 
 
-def read_meta(data_id: int):
+def dump_chip_json():
     """
-    This function helps to read the metadata associated with the data object stored on the chip
-
-    :param data_id:
-        An ID of the Object (e.g. 0xe0e1)
+    This function will secentially read all metadata from all available OIDs and return a dictionary with all entrie
 
     :raises:
         ValueError - when any of the parameters contain an invalid value
         TypeError - when any of the parameters are of the wrong type
         OSError - when an error is returned by the chip initialisation library
-
-    :return:
-        bytearray with the data
+    return:
+        a dictionary will all available metadata per object; e.g.
+        {
+            "e0f1":
+            {
+                "metadata":"200fc00101d001ffd30100e00103e10101",
+                "pretty_metadata":
+                {
+                    "lcso": "creation",
+                    "change": "never",
+                    "execute": "always",
+                    "algorithm": "nistp256r1",
+                    "key_usage": "01"
+                }
+            },
+            "e0c2":
+            {
+                "metadata":"2009c4011bd001ffd10100",
+                "pretty_metadata":
+                {
+                    "max_size": 27,
+                    "change": "never",
+                    "read": "always"
+                }
+                "data":"cd16338201001c000500000a091b5c0007006200ad801010710809"
+            }
+        }
     """
     optiga = init()
-    api = optiga.api
+    output = dict()
+    # Read metadata from available keys
+    for oid in optiga.key_id_values:
+        key = Object(oid)
+        raw_meta = key.read_raw_meta().hex()
+        if len(raw_meta) == 0:
+            continue
+        output[hex(oid)[2:]] = {
+            "metadata": raw_meta,
+            "pretty_metadata": key.meta
+        }
+        del key
 
-    if (data_id not in optiga.object_id_values) and (data_id not in optiga.key_id_values):
-        raise TypeError(
-            "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(list(optiga.object_id),
-                                                                                          list(optiga.key_id), data_id)
-        )
+    for oid in optiga.object_id_values:
+        key = Object(oid)
+        raw_meta = key.read_raw_meta().hex()
+        if len(raw_meta) == 0:
+            continue
+        output[hex(oid)[2:]] = {
+            "metadata": raw_meta,
+            "pretty_metadata": key.meta,
+            "data": key.read().hex()
+        }
+        del key
 
-    api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-    api.exp_optiga_util_read_metadata.restype = c_int
-
-    d = (c_ubyte * 100)()
-    c_dlen = c_ushort(100)
-
-    ret = api.exp_optiga_util_read_metadata(c_ushort(data_id), d, byref(c_dlen))
-
-    if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
-        data = (c_ubyte * c_dlen.value)()
-        memmove(data, d, c_dlen.value)
-        _bytes = bytearray(data)
-    else:
-        _bytes = bytearray(0)
-
-    return _bytes
-
-
-def write_meta(data, data_id: int):
-    """
-    This function helps to write the metadata associated with the data object stored on the chip
-
-    :param data:
-        Data to write, should be bytearray
-
-    :param data_id:
-        An ID of the Object (e.g. 0xe0e1)
-
-    :raises
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-
-    :return:
-    """
-    optiga = init()
-    api = optiga.api
-
-    if not isinstance(data, bytes) and not isinstance(data, bytearray):
-        raise TypeError("data should be bytes type")
-
-    if (data_id not in optiga.object_id_values) and (data_id not in optiga.key_id_values):
-        raise TypeError(
-            "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(list(optiga.object_id),
-                                                                                          list(optiga.key_id), data_id)
-        )
-
-    _data = (c_ubyte * len(data))(*data)
-
-    api.exp_optiga_util_write_metadata.argtypes = c_ushort, POINTER(c_ubyte), c_ubyte
-    api.exp_optiga_util_write_metadata.restype = c_int
-
-    ret = api.exp_optiga_util_write_metadata(c_ushort(data_id), _data, len(_data))
-
-    if ret != 0:
-        raise ValueError(
-            'Some problems during communication. You have possible selected one of locked objects'
-        )
-
-
-def write(data, object_id: int, offset=0):
-    """
-    This function helps to write the data stored on the chip
-
-    :param data:
-        Data to write, should be either bytes of bytearray
-
-    :param object_id:
-        An ID of the Object (e.g. 0xe0e1)
-
-    :param offset:
-        An optional parameter defining whether you want to read the data with offset
-
-    :raises
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-
-    :return:
-    """
-    optiga = init()
-    api = optiga.api
-
-    if not isinstance(data, bytes) and not isinstance(data, bytearray):
-        raise TypeError("data should be bytes type")
-
-    if object_id not in optiga.object_id_values:
-        raise TypeError(
-            "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(optiga.object_id), object_id))
-
-    if len(data) > 1700:
-        raise ValueError("length of data exceeds the limit of 1700")
-
-    if offset > 1700:
-        raise ValueError("offset should be less than the limit of 1700 bytes")
-
-    api.exp_optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
-    api.exp_optiga_util_write_data.restype = c_int
-
-    _data = (c_ubyte * len(data))(*data)
-
-    ret = api.exp_optiga_util_write_data(c_ushort(object_id), 0x40, offset, _data, len(data))
-
-    if ret != 0:
-        raise ValueError(
-            'Some problems during communication. You have possible selected one of locked objects'
-        )
+    return output
 
 
 class Object:
     def __init__(self, _id):
         self.id = _id
         self.optiga = init()
-
-    def forward_lifecycle_state(self):
-        """
-        ATTENTION: This funciton changes the lifecylce state of the object, it can't be reverted on Trust M1/X
-
-        :return:
-            None
-        """
+        # A flag to understand whether the object was recently updated
+        self.updated = False
 
     @property
     def meta(self):
-        _array_meta = read_meta(self.id)
-        return describe_meta(_array_meta)
+        _array_meta = self.read_raw_meta()
+        return parse_raw_meta(_array_meta)
 
     @meta.setter
     def meta(self, new_meta: dict):
-        meta = prepare_meta(new_meta)
-        write_meta(meta, self.id)
+        meta = prepare_raw_meta(new_meta)
+        self.write_raw_meta(meta)
+
+    def read(self, offset=0, force=False):
+        """
+        This function helps to read the data stored on the chip
+
+        :param offset:
+            An optional parameter defining whether you want to read the data with offset
+
+        :param force:
+            This is a parameter which can be used to try to read the data even if id can't be somehow finden
+
+        :raises:
+            ValueError - when any of the parameters contain an invalid value
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
+
+        :return:
+            bytearray with the data
+        """
+        api = self.optiga.api
+
+        if offset > 1700:
+            raise ValueError("offset should be less than the limit of 1700 bytes")
+
+        if force is False:
+            if self.id not in self.optiga.object_id_values:
+                raise TypeError(
+                    "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.object_id),
+                                                                                            self.id))
+
+        api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
+        api.exp_optiga_util_read_data.restype = c_int
+
+        d = (c_ubyte * 1700)()
+        c_dlen = c_ushort(1700)
+
+        ret = api.exp_optiga_util_read_data(c_ushort(self.id), offset, d, byref(c_dlen))
+
+        if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+            data = (c_ubyte * c_dlen.value)()
+            memmove(data, d, c_dlen.value)
+            _bytes = bytearray(data)
+        else:
+            _bytes = bytearray(0)
+
+        return _bytes
+
+    def write(self, data, offset=0):
+        """
+        This function helps to write the data stored on the chip
+
+        :param data:
+            Data to write, should be either bytes of bytearray
+
+        :param object_id:
+            An ID of the Object (e.g. 0xe0e1)
+
+        :param offset:
+            An optional parameter defining whether you want to read the data with offset
+
+        :raises
+            ValueError - when any of the parameters contain an invalid value
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
+
+        :return:
+        """
+        api = self.optiga.api
+
+        if not isinstance(data, bytes) and not isinstance(data, bytearray):
+            raise TypeError("data should be bytes type")
+
+        if self.id not in self.optiga.object_id_values:
+            raise TypeError(
+                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.object_id),
+                                                                                        self.id))
+
+        if len(data) > 1700:
+            raise ValueError("length of data exceeds the limit of 1700")
+
+        if offset > 1700:
+            raise ValueError("offset should be less than the limit of 1700 bytes")
+
+        api.exp_optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
+        api.exp_optiga_util_write_data.restype = c_int
+
+        _data = (c_ubyte * len(data))(*data)
+
+        ret = api.exp_optiga_util_write_data(c_ushort(self.id), 0x40, offset, _data, len(data))
+
+        if ret != 0:
+            raise ValueError(
+                'Some problems during communication. You have possible selected one of locked objects'
+            )
+
+        self.updated = True
+
+    def read_raw_meta(self) -> bytearray:
+        """
+        This function helps to read the metadata associated with the data object stored on the chip
+
+        :raises:
+            ValueError - when any of the parameters contain an invalid value
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
+
+        :return:
+            bytearray with the data
+        """
+        api = self.optiga.api
+
+        if (self.id not in self.optiga.object_id_values) and (self.id not in self.optiga.key_id_values):
+            raise TypeError(
+                "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
+                    list(self.optiga.object_id),
+                    list(self.optiga.key_id),
+                    self.id)
+            )
+
+        api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
+        api.exp_optiga_util_read_metadata.restype = c_int
+
+        d = (c_ubyte * 100)()
+        c_dlen = c_ushort(100)
+
+        ret = api.exp_optiga_util_read_metadata(c_ushort(self.id), d, byref(c_dlen))
+
+        if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+            data = (c_ubyte * c_dlen.value)()
+            memmove(data, d, c_dlen.value)
+            _bytes = bytearray(data)
+        else:
+            _bytes = bytearray(0)
+
+        return _bytes
+
+    def write_raw_meta(self, data):
+        """
+        This function helps to write the metadata associated with the data object stored on the chip
+
+        :param data:
+            Data to write, should be bytearray
+
+        :param data_id:
+            An ID of the Object (e.g. 0xe0e1)
+
+        :raises
+            ValueError - when any of the parameters contain an invalid value
+            TypeError - when any of the parameters are of the wrong type
+            OSError - when an error is returned by the chip initialisation library
+
+        :return:
+        """
+        api = self.optiga.api
+
+        if not isinstance(data, bytes) and not isinstance(data, bytearray):
+            raise TypeError("data should be bytes type")
+
+        if (self.id not in self.optiga.object_id_values) and (self.id not in self.optiga.key_id_values):
+            raise TypeError(
+                "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
+                    list(self.optiga.object_id),
+                    list(self.optiga.key_id),
+                    self.id)
+            )
+
+        _data = (c_ubyte * len(data))(*data)
+
+        api.exp_optiga_util_write_metadata.argtypes = c_ushort, POINTER(c_ubyte), c_ubyte
+        api.exp_optiga_util_write_metadata.restype = c_int
+
+        ret = api.exp_optiga_util_write_metadata(c_ushort(self.id), _data, len(_data))
+
+        if ret != 0:
+            raise ValueError(
+                'Some problems during communication. You have possible selected one of locked objects'
+            )
+
+        self.updated = True
