@@ -37,9 +37,19 @@ __all__ = [
     'init',
     'random',
     'get_info',
+    'lifecycle_states',
+    'key_usages',
+    'key_usages_swaped',
+    'meta_tags',
+    'meta_tags_swaped',
+    'algorithms',
+    'algorithms_swaped',
+    'access_conditions_ids',
+    'access_conditions_ids_swaped',
+    'data_object_types',
+    'data_object_types_swaped',
     'parse_raw_meta',
     'prepare_raw_meta',
-    'dump_chip_json'
 ]
 
 
@@ -106,6 +116,12 @@ def _load_lib(interface):
 
 
 UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
+_lifecycle_states = {
+    1: 'creation',
+    3: 'initalisation',
+    7: 'operational',
+    15: 'termination'
+}
 _optiga_descriptor = None
 
 
@@ -125,7 +141,7 @@ class Settings:
                         int.from_bytes(_uid[21:25], byteorder='big'),
                         int.from_bytes(_uid[25:27], byteorder='big'))
         self._security_status = int.from_bytes(Object(0xe0c1).read(), "big")
-        self._global_lifecycle_state = lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
+        self._global_lifecycle_state = _lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
         self._security_event_counter = int.from_bytes(Object(0xe0c5).read(), "big")
 
     @property
@@ -154,11 +170,11 @@ class Settings:
 
     @global_lifecycle_state.setter
     def global_lifecycle_state(self, val: str):
-        if val not in lifecycle_states.values():
+        if val not in _lifecycle_states.values():
             raise ValueError(
-                'Wrong lifecycle state. Expected {0}, your provided {1}'.format(lifecycle_states, val)
+                'Wrong lifecycle state. Expected {0}, your provided {1}'.format(_lifecycle_states, val)
             )
-        for code, state in lifecycle_states.items():
+        for code, state in _lifecycle_states.items():
             if state == val:
                 Object(0xe0c0).write(bytes(state))
 
@@ -173,8 +189,9 @@ class Settings:
 
 
 class Descriptor:
-    def __init__(self, api, object_id, key_id, session_id, rng, key_usage, curves):
+    def __init__(self, api, name, object_id, key_id, session_id, rng, key_usage, curves):
         self.api = api
+        self.name = name
         self.object_id = object_id
         self.object_id_values = set(item.value for item in self.object_id)
         self.key_usage = key_usage
@@ -228,9 +245,10 @@ def init():
             api = _load_lib('i2c')
             print('Loaded: {0}'.format(_get_lib_name('i2c')))
 
-        consts = _lookup_optiga(api)
+        consts, name = _lookup_optiga(api)
         _optiga_descriptor = Descriptor(
             api=api,
+            name=name,
             object_id=consts.ObjectId,
             key_id=consts.KeyId,
             session_id=consts.SessionId,
@@ -277,9 +295,9 @@ def _lookup_optiga(api):
     _fw_build = int.from_bytes(_bytes[25:27], byteorder='big')
 
     if _fw_build in {0x809, 0x2440}:
-        return m1
+        return m1, "OPTIGA™ Trust M V1 (SLS32AIA010MH/S)"
     else:
-        return x
+        return x, "OPTIGA™ Trust X (SLS32AIA020X2/4)"
 
 
 def random(n, trng=True):
@@ -323,6 +341,15 @@ lifecycle_states = {
     7: 'operational',
     15: 'termination'
 }
+
+key_usages = {
+    'authentication': b'\x01',
+    'encryption': b'\x02',
+    'sign': b'\x10',
+    'key_agreement': b'\x20',
+}
+
+key_usages_swaped = {y: x for x, y in key_usages.items()}
 
 meta_tags = {
     'execute': b'\xd3',
@@ -556,7 +583,17 @@ def parse_raw_meta(meta: bytes):
                 meta_described[tag] = algorithms_swaped[next(meta_itr)]
                 continue
             if tag == 'key_usage':
-                meta_described[tag] = next(meta_itr).hex()
+                key_usage_bytes = int.from_bytes(next(meta_itr), 'big')
+                tag_data = list()
+                if key_usage_bytes & int.from_bytes(key_usages['authentication'], 'big'):
+                    tag_data.append('authentication')
+                if key_usage_bytes & int.from_bytes(key_usages['encryption'], 'big'):
+                    tag_data.append('encryption')
+                if key_usage_bytes & int.from_bytes(key_usages['sign'], 'big'):
+                    tag_data.append('sign')
+                if key_usage_bytes & int.from_bytes(key_usages['key_agreement'], 'big'):
+                    tag_data.append('key_agreement')
+                meta_described[tag] = tag_data
                 continue
             tag_data = list()
             i = 0
@@ -657,9 +694,19 @@ def prepare_raw_meta(new_meta: dict):
             meta[1] += 1
             continue
         if key == 'key_usage':
-            meta.append(int(value))
-            # Update the size
-            meta[1] += 1
+            # the value should be of type list()
+            if not isinstance(value, list):
+                raise TypeError(
+                    'key usage tag should be provided in the form of a lost for instance [\'x\', \'y\', \'z\']'
+                )
+            for i in value:
+                if i not in key_usages:
+                    raise ValueError(
+                        'key usage isn\'t supported. Supported values {0}, you provided {1}'.format(key_usages, i)
+                    )
+                meta.append(int(i))
+                # Update the size
+                meta[1] += 1
             continue
         if isinstance(value, list):
             meta.append(len(value))
@@ -678,71 +725,6 @@ def prepare_raw_meta(new_meta: dict):
             meta.append(int.from_bytes(access_conditions_ids[value], 'big'))
             meta[1] += 1
     return bytearray(meta)
-
-
-def dump_chip_json():
-    """
-    This function will secentially read all metadata from all available OIDs and return a dictionary with all entrie
-
-    :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-    return:
-        a dictionary will all available metadata per object; e.g.
-        {
-            "e0f1":
-            {
-                "metadata":"200fc00101d001ffd30100e00103e10101",
-                "pretty_metadata":
-                {
-                    "lcso": "creation",
-                    "change": "never",
-                    "execute": "always",
-                    "algorithm": "nistp256r1",
-                    "key_usage": "01"
-                }
-            },
-            "e0c2":
-            {
-                "metadata":"2009c4011bd001ffd10100",
-                "pretty_metadata":
-                {
-                    "max_size": 27,
-                    "change": "never",
-                    "read": "always"
-                }
-                "data":"cd16338201001c000500000a091b5c0007006200ad801010710809"
-            }
-        }
-    """
-    optiga = init()
-    output = dict()
-    # Read metadata from available keys
-    for oid in optiga.key_id_values:
-        key = Object(oid)
-        raw_meta = key.read_raw_meta().hex()
-        if len(raw_meta) == 0:
-            continue
-        output[hex(oid)[2:]] = {
-            "metadata": raw_meta,
-            "pretty_metadata": key.meta
-        }
-        del key
-
-    for oid in optiga.object_id_values:
-        key = Object(oid)
-        raw_meta = key.read_raw_meta().hex()
-        if len(raw_meta) == 0:
-            continue
-        output[hex(oid)[2:]] = {
-            "metadata": raw_meta,
-            "pretty_metadata": key.meta,
-            "data": key.read().hex()
-        }
-        del key
-
-    return output
 
 
 class Object:

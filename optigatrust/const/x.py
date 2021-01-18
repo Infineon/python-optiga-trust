@@ -70,6 +70,8 @@ class ObjectId(IntEnum):
     # 1500 bytes each
     DATA_SLOT_1500B_0 = 0xF1E0
     DATA_SLOT_1500B_1 = 0xF1E1
+    LCSA = 0xF1C0
+    APP_SEC_STATUS = 0xF1C1
     COPROC_UID = 0xE0C2
     # Global lifecycle state
     LCSG = 0xe0c0

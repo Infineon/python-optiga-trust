@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!--OPTIGA™ Trust Configurator-->
+<OPTIGA>
+    <Tool_Version>1.00.0177</Tool_Version>
+    <Product Version="{{ name }}">
+    <!--Infineon Contact Details-->
+        <Contact_infineon Domain="Infineon">
+            <Contact>
+                <First_Name>Sample Employee</First_Name>
+                <Email>SampleEmployee@infineon.com</Email>
+            </Contact>
+        </Contact_infineon>
+        <Contact_customer Domain="customer">
+            <Contact>
+                <Name>Sample Customer</Name>
+                <Email>SampleCustomer@domain.com</Email>
+                <Company>Sample Company</Company>
+                <Project_Name></Project_Name>
+            </Contact>
+        </Contact_customer>
+        <Chip_config value="product_config">
+        <!--I2C slave address in HEX format. Supported values: 0x00 to 0x7F-->
+            <Slave_Address>0x30</Slave_Address>
+            <Temp_Variant>STR (Standard, -25°c to +85°c)</Temp_Variant>
+            <Chip_Label>01</Chip_Label>
+            <Chip_Id_Name user_modified="true">FIXME</Chip_Id_Name>
+        </Chip_config>
+        <objects>
+        <!--OPTIGA Objects Metadata and Data-->
+			{% for entry in param -%}
+            <oid id="{{ entry.id }}">
+                <metadata value="Updated_Tags">{{ entry.meta }}</metadata>
+                <data data_from="{% if entry.data %}Customer{% else %}Infineon{% endif %}" value="{% if entry.data %}Updated{% else %}Default{% endif %}" type="Plain" chip_individual="false">{% if entry.data %}{{ entry.id }}.dat{% endif %}</data>
+            </oid>
+			{% endfor -%}
+        </objects>
+        <keypairs>
+			<keypair>
+            </keypair>
+        </keypairs>
+        <additional_info></additional_info>
+    <!--path to generate the output test reports-->
+        <common>
+            <outputpath>../../../Results</outputpath>
+        <!--device Coprocessor UID-->
+            <deviceCUID>
+                <build-version>XXXX</build-version>
+            </deviceCUID>
+            <shielded-connection>
+                <is-enabled>no</is-enabled>
+                <pre-shared-secret>E140.dat</pre-shared-secret>
+            </shielded-connection>
+        </common>
+    </Product>
+</OPTIGA>

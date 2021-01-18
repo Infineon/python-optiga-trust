@@ -50,7 +50,8 @@ class ObjectId(IntEnum):
     USER_CERT_2 = 0xE0E2
     USER_CERT_3 = 0xE0E3
     TRUST_ANCHOR_1 = 0xE0E8
-    TRUST_ANCHOR_2 = 0xE0EF
+    TRUST_ANCHOR_2 = 0xE0E9
+    TRUST_ANCHOR_3 = 0xE0EF
     DATA_SLOT_140B_0 = 0xF1D0
     DATA_SLOT_140B_1 = 0xF1D1
     DATA_SLOT_140B_2 = 0xF1D2
@@ -67,6 +68,9 @@ class ObjectId(IntEnum):
     # 1500 bytes each
     DATA_SLOT_1500B_0 = 0xF1E0
     DATA_SLOT_1500B_1 = 0xF1E1
+    # Lifecicle State of the Application
+    LCSA = 0xF1C0
+    APP_SEC_STATUS = 0xF1C1
     COPROC_UID = 0xE0C2
     # Global lifecycle state
     LCSG = 0xe0c0
