@@ -8,4 +8,3 @@ __pycache__/
 .vs/
 dist/
 venv/
-build/
