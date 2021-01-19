@@ -15,16 +15,20 @@ A ctypes based Python wrapper to work with the OPTIGA™ Trust security solution
 
 ## Features
 
-| Function                    | Module                                      |
-| --------------------------- | ------------------------------------------- | 
-| Elliptic Curves Cryptograpy | [`optigatrust.pk.ecc`](optigatrust/pk/ecc.py)       | 
-| ECDSA                       | [`optigatrust.pk.ecdsa`](optigatrust/pk/ecdsa.py)       |
-| RSA                         | [`optigatrust.pk.rsa`](optigatrust/pk/rsa.py)       | 
-| RSA PKCS#1 Ver1.5           | [`optigatrust.pk.rsassa`](optigatrust/pk/rsassa.py)       | 
-| Certificate Signing Request | [`optigatrust.x509.csr`](optigatrust/x509/csr.py)     |
-| Certificate handling        | [`optigatrust.x509.cert`](optigatrust/x509/cert.py)     | 
-| Random Number Generation    | [`optigatrust.rand`](optigatrust/rand/__init__.py)       | 
-| Write/Read General Purpose Data | [`optigatrust.util.io`](optigatrust/device/io.py)       | 
+*optigatrust* is a library which helps to manage the OPTIGA Trust family of security solutions
+Find more about these products here:
+* [OPTIGA™ Trust M](https://github.com/Infineon/optiga-trust-m)
+* [OPTIGA™ Trust Charge](https://github.com/Infineon/optiga-trust-charge)
+* [OPTIGA™ Trust X](https://github.com/Infineon/optiga-trust-x)
+
+| Submodule                                | Functionality                                                                                 |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------- |
+| [`optigatrust.core`](docs/core.md)   | Chip initialiastion, Random, work with Metadata 
+| [`optigatrust.symmetric`](docs/symmetric.md)     | AES encryption/decryption, HMAC                                                  |
+| [`optigatrust.asymmetric`](docs/asymmetric.md)   | RSA, ECDSA and EC-key signing, verification, and key pair generation, RSA encryption                                  |
+| [`optigatrust.kdf`](docs/kdf.md)                 | HKDF, TLS PRF 1.2 key derivation functions                                           |
+| [`optigatrust.cert`](docs/cert.md)               | Certificate, public key and private key loading, parsing                    |                                           |
+| [`optigatrust.export`](docs/export.md)               | Dump chip's configuration in json or OPTIGA Trust Configurator supported formats                                       |
 
 ## Dependencies
 
