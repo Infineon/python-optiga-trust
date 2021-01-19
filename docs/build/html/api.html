@@ -1,0 +1,876 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>5. API Documentation &mdash; optigatrust 1.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="4. Export Chip Data and Metadata" href="export.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> optigatrust
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">1. Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">2. Crypto Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">3. Metadata Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="export.html">4. Export Chip Data and Metadata</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. API Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.asymmetric">5.1. optigatrust.asymmetric module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.cert">5.2. optigatrust.cert module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.core">5.3. optigatrust.core module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.export">5.4. optigatrust.export module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">optigatrust</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">5. </span>API Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="api-documentation">
+<h1><span class="section-number">5. </span>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-optigatrust.asymmetric">
+<span id="optigatrust-asymmetric-module"></span><h2><span class="section-number">5.1. </span>optigatrust.asymmetric module<a class="headerlink" href="#module-optigatrust.asymmetric" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="optigatrust.asymmetric.EccKey">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">EccKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">'secp256r1'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EccKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#optigatrust.core.Object" title="optigatrust.core.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.core.Object</span></code></a></p>
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.curve">
+<em class="property">property </em><code class="sig-name descname">curve</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.ecdsa_sign">
+<code class="sig-name descname">ecdsa_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EccKey.ecdsa_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function signs given data based on the provided EccKey object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>EcdsaSignature object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">'secp256r1'</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EccKey.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates an ECC keypair, the private part is stored on the core based on the provided slot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curve</strong> – Curve name, should be either secp256r1 or secp384r1</p></li>
+<li><p><strong>key_usage</strong> – A key usage indicator. The value should be the KeyUsage Enumeration. By default
+[KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>EccKey object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.hash_alg">
+<em class="property">property </em><code class="sig-name descname">hash_alg</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.hash_alg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.key_id">
+<em class="property">property </em><code class="sig-name descname">key_id</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.key_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.key_usage">
+<em class="property">property </em><code class="sig-name descname">key_usage</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.key_usage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.pkey">
+<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.pkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.signature">
+<em class="property">property </em><code class="sig-name descname">signature</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.asymmetric.EcdsaSignature">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">EcdsaSignature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_alg</span></em>, <em class="sig-param"><span class="n">key_id</span></em>, <em class="sig-param"><span class="n">signature</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EcdsaSignature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.asymmetric._Signature</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.asymmetric.RsaKey">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">RsaKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#optigatrust.core.Object" title="optigatrust.core.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.core.Object</span></code></a></p>
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_size</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates an RSA keypair, the private part is stored on the core based on the provided slot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_size</strong> – Size of the key, can be 1024 or 2048</p></li>
+<li><p><strong>key_usage</strong> – A key usage indicator. The value should be the KeyUsage Enumeration. By default
+[KEY_AGR, AUTH, ENCRYPT]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RsaKey object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.key_size">
+<em class="property">property </em><code class="sig-name descname">key_size</code><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.key_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.key_usage">
+<em class="property">property </em><code class="sig-name descname">key_usage</code><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.key_usage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.pkcs1v15_sign">
+<code class="sig-name descname">pkcs1v15_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">bytes</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.pkcs1v15_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function signs given data based on the provided RsaKey object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to sign</p></li>
+<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. SHA256 by default</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RsaPkcs1v15Signature object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.pkey">
+<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.pkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.asymmetric.RsaPkcs1v15Signature">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">RsaPkcs1v15Signature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_alg</span></em>, <em class="sig-param"><span class="n">keyid</span></em>, <em class="sig-param"><span class="n">signature</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaPkcs1v15Signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.asymmetric._Signature</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-optigatrust.cert">
+<span id="optigatrust-cert-module"></span><h2><span class="section-number">5.2. </span>optigatrust.cert module<a class="headerlink" href="#module-optigatrust.cert" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="optigatrust.cert.Builder">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.cert.</code><code class="sig-name descname">Builder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subject</span></em>, <em class="sig-param"><span class="n">subject_public_key</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">signing_key</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Builder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates the certificate information, constructs an X.509 certificate and then signs it
+:param signing_key: An asn1crypto.keys.PrivateKeyInfo or oscrypto.asymmetric.PrivateKey object for the private
+key to sign the request with. This should be the private key that matches the public key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An asn1crypto.csr.CertificationRequest object of the request</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.ca">
+<em class="property">property </em><code class="sig-name descname">ca</code><a class="headerlink" href="#optigatrust.cert.Builder.ca" title="Permalink to this definition">¶</a></dt>
+<dd><p>None or a bool - if the request is for a CA cert. None indicates no
+basic constraints extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.extended_key_usage">
+<em class="property">property </em><code class="sig-name descname">extended_key_usage</code><a class="headerlink" href="#optigatrust.cert.Builder.extended_key_usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of unicode strings representing the allowed usage of the key from
+the extended key usage extension. Empty set indicates no extended key
+usage extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.hash_algo">
+<em class="property">property </em><code class="sig-name descname">hash_algo</code><a class="headerlink" href="#optigatrust.cert.Builder.hash_algo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.key_usage">
+<em class="property">property </em><code class="sig-name descname">key_usage</code><a class="headerlink" href="#optigatrust.cert.Builder.key_usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of unicode strings representing the allowed usage of the key.
+Empty set indicates no key usage extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.set_extension">
+<code class="sig-name descname">set_extension</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Builder.set_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the value for an extension using a fully constructed Asn1Value object from asn1crypto. Normally this should
+not be needed, and the convenience attributes should be sufficient. See the definition of
+asn1crypto.x509.Extension to determine the appropriate object type for a given extension. Extensions are marked
+as critical when RFC5280 or RFC6960 indicate so. If an extension is validly marked as critical or not
+(such as certificate policies and extended key usage), this class will mark it as non-critical.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – A unicode string of an extension id name from asn1crypto.x509.ExtensionId</p></li>
+<li><p><strong>value</strong> – A value object per the specs defined by asn1crypto.x509.Extension</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject">
+<em class="property">property </em><code class="sig-name descname">subject</code><a class="headerlink" href="#optigatrust.cert.Builder.subject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject_alt_domains">
+<em class="property">property </em><code class="sig-name descname">subject_alt_domains</code><a class="headerlink" href="#optigatrust.cert.Builder.subject_alt_domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of unicode strings of all domains in the subject alt name
+extension request. Empty list indicates no subject alt name extension
+request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject_alt_ips">
+<em class="property">property </em><code class="sig-name descname">subject_alt_ips</code><a class="headerlink" href="#optigatrust.cert.Builder.subject_alt_ips" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of unicode strings of all IPs in the subject alt name extension
+request. Empty list indicates no subject alt name extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject_public_key">
+<em class="property">property </em><code class="sig-name descname">subject_public_key</code><a class="headerlink" href="#optigatrust.cert.Builder.subject_public_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.cert.Certificate">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.cert.</code><code class="sig-name descname">Certificate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">is_trust_anchor</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Certificate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#optigatrust.core.Object" title="optigatrust.core.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.core.Object</span></code></a></p>
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.der">
+<em class="property">property </em><code class="sig-name descname">der</code><a class="headerlink" href="#optigatrust.cert.Certificate.der" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.pem">
+<em class="property">property </em><code class="sig-name descname">pem</code><a class="headerlink" href="#optigatrust.cert.Certificate.pem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.pkey">
+<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.cert.Certificate.pkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.signature">
+<em class="property">property </em><code class="sig-name descname">signature</code><a class="headerlink" href="#optigatrust.cert.Certificate.signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.cert.pem_armor_csr">
+<code class="sig-prename descclassname">optigatrust.cert.</code><code class="sig-name descname">pem_armor_csr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">certification_request</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.pem_armor_csr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a CSR into PEM format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>certification_request</strong> – An asn1crypto.csr.CertificationRequest object of the CSR to armor. Typically this</p>
+</dd>
+</dl>
+<p>is obtained from Builder.build().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A byte string of the PEM-encoded CSR</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-optigatrust.core">
+<span id="optigatrust-core-module"></span><h2><span class="section-number">5.3. </span>optigatrust.core module<a class="headerlink" href="#module-optigatrust.core" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="optigatrust.core.Descriptor">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">Descriptor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em>, <em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">object_id</span></em>, <em class="sig-param"><span class="n">key_id</span></em>, <em class="sig-param"><span class="n">session_id</span></em>, <em class="sig-param"><span class="n">rng</span></em>, <em class="sig-param"><span class="n">key_usage</span></em>, <em class="sig-param"><span class="n">curves</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Descriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.settings">
+<em class="property">property </em><code class="sig-name descname">settings</code><a class="headerlink" href="#optigatrust.core.Descriptor.settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.core.Object">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">Object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class used to represent an Object on the OPTIGA Trust Chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>int</em>) – the id of the object; e.g. 0xe0e0</p></li>
+<li><p><strong>optiga</strong> (<a class="reference internal" href="#optigatrust.core.Descriptor" title="optigatrust.core.Descriptor"><em>core.Descriptor</em></a>) – the instance of the OPTIGA handler used internally by the Object class</p></li>
+<li><p><strong>updated</strong> – This boolean variable notifies whether metadata or data has been updated and this can bu used to</p></li>
+</ul>
+</dd>
+</dl>
+<p>notify other modules to reread data if needed
+:vartype updated: bool</p>
+<dl class="py method">
+<dt id="optigatrust.core.Object.meta">
+<em class="property">property </em><code class="sig-name descname">meta</code><a class="headerlink" href="#optigatrust.core.Object.meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of the metadata present right now on the chip for the given object. It is writable,
+so user can update the metadata assigning the value to it</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">force</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to read the data stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> – An optional parameter defining whether you want to read the data with offset</p></li>
+<li><p><strong>force</strong> – This is a parameter which can be used to try to read the data even if id can’t be somehow finden</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>bytearray with the data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.read_raw_meta">
+<code class="sig-name descname">read_raw_meta</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bytearray<a class="headerlink" href="#optigatrust.core.Object.read_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to read the metadata associated with the data object stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytearray with the data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to write the data onto the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to write, should be either bytes of bytearray</p></li>
+<li><p><strong>offset</strong> – An optional parameter defining whether you want to read the data with offset</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:raises</dt><dd><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.write_raw_meta">
+<code class="sig-name descname">write_raw_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object.write_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to write the metadata associated with the data object stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – Data to write, should be bytearray</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:raises</dt><dd><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.core.Settings">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">Settings</code><a class="headerlink" href="#optigatrust.core.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="optigatrust.core.Settings.current_limit">
+<em class="property">property </em><code class="sig-name descname">current_limit</code><a class="headerlink" href="#optigatrust.core.Settings.current_limit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Settings.global_lifecycle_state">
+<em class="property">property </em><code class="sig-name descname">global_lifecycle_state</code><a class="headerlink" href="#optigatrust.core.Settings.global_lifecycle_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Settings.security_event_counter">
+<em class="property">property </em><code class="sig-name descname">security_event_counter</code><a class="headerlink" href="#optigatrust.core.Settings.security_event_counter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Settings.security_status">
+<em class="property">property </em><code class="sig-name descname">security_status</code><a class="headerlink" href="#optigatrust.core.Settings.security_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Settings.sleep_activation_delay">
+<em class="property">property </em><code class="sig-name descname">sleep_activation_delay</code><a class="headerlink" href="#optigatrust.core.Settings.sleep_activation_delay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Settings.uid">
+<em class="property">property </em><code class="sig-name descname">uid</code><a class="headerlink" href="#optigatrust.core.Settings.uid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.get_info">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">get_info</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.get_info" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.init">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">init</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function either initialises non-initialised communication channel between the chip and the application, or
+returns an existing communication
+ONLY ONE Optiga Instance is supported</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – </p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p>OSError: If some problems occured during the initialisation of the library or the chip</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a CDLL Instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.parse_raw_meta">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">parse_raw_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">meta</span><span class="p">:</span> <span class="n">bytes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.parse_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function should process the given metadata and return it in a human readable form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>meta</strong> – metadata represented in bytes</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>A dictionary of the following format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;read&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span>
+    <span class="s1">&#39;execute&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.prepare_raw_meta">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">prepare_raw_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_meta</span><span class="p">:</span> <span class="n">dict</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.prepare_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes as an imput json-like formatted dictionary and translates it to the data to write into the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_meta</strong> – <p>A dictionary (json like formatted) with new metadata; e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;lcso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;operational&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;nistp384r1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="s2">&quot;21&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a bytearray with resulting metadata to write into the chip</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.random">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">random</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">trng</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.random" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates a random number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – how much randomness to generate. Valid values are from 8 to 256</p></li>
+<li><p><strong>trng</strong> – If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Bytes object with randomness</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-optigatrust.export">
+<span id="optigatrust-export-module"></span><h2><span class="section-number">5.4. </span>optigatrust.export module<a class="headerlink" href="#module-optigatrust.export" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="optigatrust.export.to_json">
+<code class="sig-prename descclassname">optigatrust.export.</code><code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.export.to_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will secentially read all metadata from all available OIDs and return a dictionary with all entrie</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><p>a dictionary will all available metadata per object; e.g.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;e0f1&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;200fc00101d001ffd30100e00103e10101&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;nistp256r1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="s2">&quot;01&quot;</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;e0c2&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;2009c4011bd001ffd10100&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span>
+        <span class="p">}</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="s2">&quot;cd16338201001c000500000a091b5c0007006200ad801010710809&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.export.to_otc">
+<code class="sig-prename descclassname">optigatrust.export.</code><code class="sig-name descname">to_otc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.export.to_otc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function exports the whole available dump of the chip in the format compatible with
+the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
+an xml file with metadata stored. The function uses <span class="xref std std-doc">const/conf_template.xml</span> and add seqentially all objects
+found on the chip. There are exceptions, objects [“f1c1”, “e0c2”, “e0c0”, “e0c1”, “e0c5”, “e0c6”] are excluded and
+Objects which don’t have ‘used_size’ metatag defined are excluded</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param</dt>
+<dd class="field-odd"><p>path Path to the folder where to store the resulting data.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>an xml string according to the template <span class="xref std std-doc">const/conf_template.xml</span></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;objects&gt;
+&lt;!--OPTIGA Objects Metadata and Data--&gt;
+    &lt;oid id=&quot;E0F0&quot;&gt;
+        &lt;metadata value=&quot;Updated_Tags&quot;&gt;C00101D001FFD30100E00103E10101&lt;/metadata&gt;
+        &lt;data
+            data_from=&quot;Infineon&quot;
+            value=&quot;Default&quot;
+            type=&quot;Plain&quot;
+            chip_individual=&quot;false&quot;&gt;
+        &lt;/data&gt;
+    &lt;/oid&gt;
+    ...
+&lt;/objects&gt;
+</pre></div>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="export.html" class="btn btn-neutral float-left" title="4. Export Chip Data and Metadata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Infineon Technologies AG
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
