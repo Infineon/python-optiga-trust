@@ -39,36 +39,39 @@ def to_json():
     This function will secentially read all metadata from all available OIDs and return a dictionary with all entrie
 
     :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-    return:
-        a dictionary will all available metadata per object; e.g.
-        {
-            "e0f1":
+        - ValueError - when any of the parameters contain an invalid value
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
+
+    :returns:
+        a dictionary will all available metadata per object; e.g. ::
+
             {
-                "metadata":"200fc00101d001ffd30100e00103e10101",
-                "pretty_metadata":
+                "e0f1":
                 {
-                    "lcso": "creation",
-                    "change": "never",
-                    "execute": "always",
-                    "algorithm": "nistp256r1",
-                    "key_usage": "01"
-                }
-            },
-            "e0c2":
-            {
-                "metadata":"2009c4011bd001ffd10100",
-                "pretty_metadata":
+                    "metadata":"200fc00101d001ffd30100e00103e10101",
+                    "pretty_metadata":
+                    {
+                        "lcso": "creation",
+                        "change": "never",
+                        "execute": "always",
+                        "algorithm": "nistp256r1",
+                        "key_usage": "01"
+                    }
+                },
+                "e0c2":
                 {
-                    "max_size": 27,
-                    "change": "never",
-                    "read": "always"
+                    "metadata":"2009c4011bd001ffd10100",
+                    "pretty_metadata":
+                    {
+                        "max_size": 27,
+                        "change": "never",
+                        "read": "always"
+                    }
+                    "data":"cd16338201001c000500000a091b5c0007006200ad801010710809"
                 }
-                "data":"cd16338201001c000500000a091b5c0007006200ad801010710809"
             }
-        }
+
     """
     optiga = init()
     output = dict()
@@ -101,15 +104,16 @@ def to_json():
 
 def _to_xml(meta):
     """
-    This function will secentially read all metadata from all available OIDs and return an xml compliant string
+    This function will sequentially read all metadata from all available OIDs and return an xml compliant string
 
     :param: meta json formatted metadata
 
     :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-    return:
+        - ValueError - when any of the parameters contain an invalid value
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
+
+    :returns:
         an xml string
     """
     optiga = init()
@@ -146,16 +150,33 @@ def to_otc(path):
     """
     This function exports the whole available dump of the chip in the format compatible with
     the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
-    an xml file with metadata stored.
+    an xml file with metadata stored. The function uses :doc:`const/conf_template.xml` and add seqentially all objects
+    found on the chip. There are exceptions, objects ["f1c1", "e0c2", "e0c0", "e0c1", "e0c5", "e0c6"] are excluded and
+    Objects which don't have 'used_size' metatag defined are excluded
 
     :param: path Path to the folder where to store the resulting data.
 
     :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-    return:
-        an xml string
+        - ValueError - when any of the parameters contain an invalid value
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
+    :returns:
+        an xml string according to the template :doc:`const/conf_template.xml` ::
+
+            <objects>
+            <!--OPTIGA Objects Metadata and Data-->
+                <oid id="E0F0">
+                    <metadata value="Updated_Tags">C00101D001FFD30100E00103E10101</metadata>
+                    <data
+                        data_from="Infineon"
+                        value="Default"
+                        type="Plain"
+                        chip_individual="false">
+                    </data>
+                </oid>
+                ...
+            </objects>
+
     """
     meta = to_json()
     filepath = os.path.abspath(path + '/' + 'OPTIGA_Trust.xml')

@@ -126,11 +126,11 @@ class EccKey(core.Object):
             A key usage indicator. The value should be the KeyUsage Enumeration. By default
             [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
 
-        :raises
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the core initialisation library
+        :raises:
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
 
-        :return:
+        :returns:
             EccKey object or None
         """
         if key_usage is None:
@@ -174,10 +174,10 @@ class EccKey(core.Object):
             Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384
 
         :raises:
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the core initialisation library
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
 
-        :return:
+        :returns:
             EcdsaSignature object or None
         """
         if not isinstance(data, bytes) and not isinstance(data, bytearray):
@@ -256,13 +256,13 @@ class RsaKey(core.Object):
 
         :param key_usage:
             A key usage indicator. The value should be the KeyUsage Enumeration. By default
-            [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+            [KEY_AGR, AUTH, ENCRYPT]
 
         :raises:
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the core initialisation library
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
 
-        :return:
+        :returns:
             RsaKey object or None
         """
         _bytes = None
@@ -318,10 +318,10 @@ class RsaKey(core.Object):
             Hash algorithm which should be used to sign data. SHA256 by default
 
         :raises:
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the core initialisation library
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
 
-        :return:
+        :returns:
             RsaPkcs1v15Signature object or None
         """
         api = self.optiga.api

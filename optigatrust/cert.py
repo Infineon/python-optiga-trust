@@ -56,9 +56,10 @@ def _writer(func):
 def pem_armor_csr(certification_request):
     """
     Encodes a CSR into PEM format
-    :param certification_request:
-        An asn1crypto.csr.CertificationRequest object of the CSR to armor.
-        Typically this is obtained from Builder.build().
+
+    :param certification_request: An asn1crypto.csr.CertificationRequest object of the CSR to armor. Typically this
+    is obtained from Builder.build().
+
     :return:
         A byte string of the PEM-encoded CSR
     """
@@ -360,17 +361,14 @@ class Builder(object):
 
     def set_extension(self, name, value):
         """
-        Sets the value for an extension using a fully constructed Asn1Value
-        object from asn1crypto. Normally this should not be needed, and the
-        convenience attributes should be sufficient.
-        See the definition of asn1crypto.x509.Extension to determine the
-        appropriate object type for a given extension. Extensions are marked
-        as critical when RFC5280 or RFC6960 indicate so. If an extension is
-        validly marked as critical or not (such as certificate policies and
-        extended key usage), this class will mark it as non-critical.
-        :param name:
-            A unicode string of an extension id name from
-            asn1crypto.x509.ExtensionId
+        Sets the value for an extension using a fully constructed Asn1Value object from asn1crypto. Normally this should
+        not be needed, and the convenience attributes should be sufficient. See the definition of
+        asn1crypto.x509.Extension to determine the appropriate object type for a given extension. Extensions are marked
+        as critical when RFC5280 or RFC6960 indicate so. If an extension is validly marked as critical or not
+        (such as certificate policies and extended key usage), this class will mark it as non-critical.
+
+        :param name: A unicode string of an extension id name from asn1crypto.x509.ExtensionId
+
         :param value:
             A value object per the specs defined by asn1crypto.x509.Extension
         """
@@ -403,7 +401,7 @@ class Builder(object):
 
     def _determine_critical(self, name):
         """
-        :return:
+        :returns:
             A boolean indicating the correct value of the critical flag for
             an extension, based on information from RFC5280 and RFC 6960. The
             correct value is based on the terminology SHOULD or MUST.
@@ -435,13 +433,11 @@ class Builder(object):
 
     def build(self, signing_key):
         """
-        Validates the certificate information, constructs an X.509 certificate
-        and then signs it
-        :param signing_key:
-            An asn1crypto.keys.PrivateKeyInfo or oscrypto.asymmetric.PrivateKey
-            object for the private key to sign the request with. This should be
-            the private key that matches the public key.
-        :return:
+        Validates the certificate information, constructs an X.509 certificate and then signs it
+        :param signing_key: An asn1crypto.keys.PrivateKeyInfo or oscrypto.asymmetric.PrivateKey object for the private
+        key to sign the request with. This should be the private key that matches the public key.
+
+        :returns:
             An asn1crypto.csr.CertificationRequest object of the request
         """
 
@@ -523,7 +519,7 @@ def _pretty_message(string, *params):
         The string to format
     :param *params:
         Params to interpolate into the string
-    :return:
+    :returns:
         The formatted string
     """
     output = textwrap.dedent(string)
@@ -545,7 +541,7 @@ def _type_name(value):
     """
     :param value:
         A value to get the object name of
-    :return:
+    :returns:
         A unicode string of the object name
     """
 
@@ -680,12 +676,9 @@ class Certificate(core.Object):
             Should be a a string with a PEM file with newlines separated or a bytes insatnce with DER encoded cert
 
         :raises:
-            ValueError - when any of the parameters contain an invalid value
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the core initialisation library
-
-        :return:
-            None
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
         """
         oids = self.optiga.object_id
 
@@ -748,11 +741,11 @@ class Certificate(core.Object):
             A boolean flag to indecate, whether you want return certificate PEM encoded
 
         :raises:
-            ValueError - when any of the parameters contain an invalid value
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the core initialisation library
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
 
-        :return:
+        :returns:
             A byte string with a PEM certificate or DER encoded byte string
         """
         oid = self.optiga.object_id

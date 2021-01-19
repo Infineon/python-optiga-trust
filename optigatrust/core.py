@@ -227,7 +227,7 @@ def init():
     :raises:
         OSError: If some problems occured during the initialisation of the library or the chip
 
-    :return:
+    :returns:
         a CDLL Instance
     """
     global _optiga_descriptor
@@ -311,10 +311,10 @@ def random(n, trng=True):
         If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
 
     :raises:
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
 
-    :return:
+    :returns:
         Bytes object with randomness
     """
     optiga = init()
@@ -509,16 +509,18 @@ def parse_raw_meta(meta: bytes):
         metadata represented in bytes
 
     :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
+        - ValueError - when any of the parameters contain an invalid value
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
 
-    :return:
-        A dictionary of the following format
-        {
-            'read': 'always'
-            'execute': ['lcso', '<', 'operational']
-        }
+    :returns:
+        A dictionary of the following format::
+
+            {
+                'read': 'always'
+                'execute': ['lcso', '<', 'operational']
+            }
+
     """
     global access_conditions_ids_swaped
     global meta_tags_swaped
@@ -630,24 +632,25 @@ def prepare_raw_meta(new_meta: dict):
     This function takes as an imput json-like formatted dictionary and translates it to the data to write into the chip
 
     :param new_meta:
-        A dictionary (json like formatted) with new metadata; e.g.
-        {
-            "lcso": "creation",
-            "change": [
-                "lcso",
-                "<",
-                "operational"
-            ],
-            "execute": "always",
-            "algorithm": "nistp384r1",
-            "key_usage": "21"
-        }
+        A dictionary (json like formatted) with new metadata; e.g.::
+
+            {
+                "lcso": "creation",
+                "change": [
+                    "lcso",
+                    "<",
+                    "operational"
+                ],
+                "execute": "always",
+                "algorithm": "nistp384r1",
+                "key_usage": "21"
+            }
 
     :raises:
-        ValueError - when any of the parameters contain an invalid value
-        TypeError - when any of the parameters are of the wrong type
-        OSError - when an error is returned by the chip initialisation library
-    return:
+        - ValueError - when any of the parameters contain an invalid value
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
+    :returns:
         a bytearray with resulting metadata to write into the chip
     """
     meta = list()
@@ -728,7 +731,30 @@ def prepare_raw_meta(new_meta: dict):
 
 
 class Object:
+    """
+    A class used to represent an Object on the OPTIGA Trust Chip
+
+    :ivar id: the id of the object; e.g. 0xe0e0
+    :vartype id: int
+
+    :ivar optiga: the instance of the OPTIGA handler used internally by the Object class
+    :vartype optiga: core.Descriptor
+
+    :ivar updated: This boolean variable notifies whether metadata or data has been updated and this can bu used to
+    notify other modules to reread data if needed
+    :vartype updated: bool
+    """
+
     def __init__(self, _id):
+        """
+        This class
+
+        :param _id:
+            an Object ID which you would like to initialise; e.g. 0xe0e0
+
+        return:
+            self
+        """
         self.id = _id
         self.optiga = init()
         # A flag to understand whether the object was recently updated
@@ -736,6 +762,9 @@ class Object:
 
     @property
     def meta(self):
+        """ A dictionary of the metadata present right now on the chip for the given object. It is writable,
+        so user can update the metadata assigning the value to it
+        """
         _array_meta = self.read_raw_meta()
         return parse_raw_meta(_array_meta)
 
@@ -755,9 +784,9 @@ class Object:
             This is a parameter which can be used to try to read the data even if id can't be somehow finden
 
         :raises:
-            ValueError - when any of the parameters contain an invalid value
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the chip initialisation library
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the chip initialisation library
 
         :return:
             bytearray with the data
@@ -792,23 +821,18 @@ class Object:
 
     def write(self, data, offset=0):
         """
-        This function helps to write the data stored on the chip
+        This function helps to write the data onto the chip
 
         :param data:
             Data to write, should be either bytes of bytearray
-
-        :param object_id:
-            An ID of the Object (e.g. 0xe0e1)
 
         :param offset:
             An optional parameter defining whether you want to read the data with offset
 
         :raises
-            ValueError - when any of the parameters contain an invalid value
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the chip initialisation library
-
-        :return:
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the chip initialisation library
         """
         api = self.optiga.api
 
@@ -845,11 +869,11 @@ class Object:
         This function helps to read the metadata associated with the data object stored on the chip
 
         :raises:
-            ValueError - when any of the parameters contain an invalid value
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the chip initialisation library
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the chip initialisation library
 
-        :return:
+        :returns:
             bytearray with the data
         """
         api = self.optiga.api
@@ -886,15 +910,10 @@ class Object:
         :param data:
             Data to write, should be bytearray
 
-        :param data_id:
-            An ID of the Object (e.g. 0xe0e1)
-
         :raises
-            ValueError - when any of the parameters contain an invalid value
-            TypeError - when any of the parameters are of the wrong type
-            OSError - when an error is returned by the chip initialisation library
-
-        :return:
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the chip initialisation library
         """
         api = self.optiga.api
 
