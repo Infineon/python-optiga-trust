@@ -23,7 +23,7 @@
 # ============================================================================
 import os
 import re
-import struct
+import codecs
 from jinja2 import Environment, FileSystemLoader
 from optigatrust.core import *
 
@@ -143,10 +143,24 @@ def _to_xml(meta):
 
 
 def to_otc(path):
-    optiga = init()
+    """
+    This function exports the whole available dump of the chip in the format compatible with
+    the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
+    an xml file with metadata stored.
+
+    :param: path Path to the folder where to store the resulting data.
+
+    :raises:
+        ValueError - when any of the parameters contain an invalid value
+        TypeError - when any of the parameters are of the wrong type
+        OSError - when an error is returned by the chip initialisation library
+    return:
+        an xml string
+    """
     meta = to_json()
     filepath = os.path.abspath(path + '/' + 'OPTIGA_Trust.xml')
-    with open(filepath, 'w+') as f:
+    # OTC understands only UTF-8, so the file should be encoded in it
+    with codecs.open(filepath, 'w+', encoding='utf8') as f:
         supermeta = _to_xml(meta)
         f.write(supermeta)
 
