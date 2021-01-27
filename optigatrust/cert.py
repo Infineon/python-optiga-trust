@@ -481,7 +481,7 @@ class Builder(object):
                 'type': 'extension_request',
                 'values': [extensions]
             })
-
+        print(attributes)
         certification_request_info = csr.CertificationRequestInfo({
             'version': 'v1',
             'subject': self._subject,
@@ -489,16 +489,16 @@ class Builder(object):
             'attributes': attributes
         })
 
-        if signing_key.algorithm == 'ec':
-            sign_func = asymmetric.ecdsa_sign
-        elif signing_key.algorithm == 'rsa':
-            sign_func = asymmetric.rsassa_sign
+        if isinstance(signing_key, asymmetric.EccKey):
+            sign_func = signing_key.ecdsa_sign
+        elif isinstance(signing_key, asymmetric.RsaKey):
+            sign_func = signing_key.pkcs1v15_sign
         else:
             raise ValueError(
                 'Algorithm isn\'t supported, use either ecc or rsa'
             )
 
-        s = sign_func(signing_key, certification_request_info.dump())
+        s = sign_func(certification_request_info.dump())
 
         return csr.CertificationRequest({
             'certification_request_info': certification_request_info,
@@ -614,9 +614,9 @@ class Certificate(core.Object):
         cert = x509.Certificate.load(self.der)
         tbs_certificate = cert['tbs_certificate']
         issuer_cn = '{0:<30}:{1}\n'.format("Issuer: Common Name",
-                                             tbs_certificate['issuer'].native['common_name'])
+                                           tbs_certificate['issuer'].native['common_name'])
         subject_cn = '{0:<30}:{1}\n'.format("Subject: Common Name",
-                                              tbs_certificate['subject'].native['common_name'])
+                                            tbs_certificate['subject'].native['common_name'])
         pkey = '{0:<30}:{1}\n'.format("Public Key", self.pkey)
         signature = '{0:<30}:{1}\n'.format("Signature", self.signature)
         footer = "============================================================"
@@ -645,15 +645,11 @@ class Certificate(core.Object):
 
     @pem.setter
     def pem(self, data: str):
-        try:
-            final_cert = self._update(data)
-        except ValueError or TypeError or OSError:
-            print('Failed to update the certificate. Exit.')
-        else:
-            pem_cert = "-----BEGIN CERTIFICATE-----\n"
-            pem_cert += _break_apart(base64.b64encode(final_cert).decode(), '\n', 64)
-            pem_cert += "\n-----END CERTIFICATE-----"
-            return pem_cert.encode()
+        final_cert = self._update(data)
+        pem_cert = "-----BEGIN CERTIFICATE-----\n"
+        pem_cert += _break_apart(base64.b64encode(final_cert).decode(), '\n', 64)
+        pem_cert += "\n-----END CERTIFICATE-----"
+        return pem_cert.encode()
 
     @property
     def pkey(self):
