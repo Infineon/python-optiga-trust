@@ -34,6 +34,7 @@ __all__ = [
     'Settings',
     'Descriptor',
     'Object',
+    'ValueMap',
     'init',
     'random',
     'get_info',
@@ -116,12 +117,6 @@ def _load_lib(interface):
 
 
 UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
-_lifecycle_states = {
-    1: 'creation',
-    3: 'initalisation',
-    7: 'operational',
-    15: 'termination'
-}
 _optiga_descriptor = None
 
 
@@ -141,7 +136,7 @@ class Settings:
                         int.from_bytes(_uid[21:25], byteorder='big'),
                         int.from_bytes(_uid[25:27], byteorder='big'))
         self._security_status = int.from_bytes(Object(0xe0c1).read(), "big")
-        self._global_lifecycle_state = _lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
+        self._global_lifecycle_state = lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
         self._security_event_counter = int.from_bytes(Object(0xe0c5).read(), "big")
 
     @property
@@ -170,11 +165,11 @@ class Settings:
 
     @global_lifecycle_state.setter
     def global_lifecycle_state(self, val: str):
-        if val not in _lifecycle_states.values():
+        if val not in lifecycle_states.values():
             raise ValueError(
-                'Wrong lifecycle state. Expected {0}, your provided {1}'.format(_lifecycle_states, val)
+                'Wrong lifecycle state. Expected {0}, your provided {1}'.format(lifecycle_states, val)
             )
-        for code, state in _lifecycle_states.items():
+        for code, state in lifecycle_states.items():
             if state == val:
                 Object(0xe0c0).write(bytes(state))
 
@@ -294,8 +289,10 @@ def _lookup_optiga(api):
 
     _fw_build = int.from_bytes(_bytes[25:27], byteorder='big')
 
-    if _fw_build in {0x809, 0x2440}:
+    if _fw_build in {0x809}:
         return m1, "OPTIGA™ Trust M V1 (SLS32AIA010MH/S)"
+    if _fw_build in {0x2440}:
+        return m3, "OPTIGA™ Trust M V3 (SLS32AIA010ML/K)"
     else:
         return x, "OPTIGA™ Trust X (SLS32AIA020X2/4)"
 
@@ -357,6 +354,7 @@ meta_tags = {
     'read': b'\xd1',
     'metadata': b'\x20',
     'lcso': b'\xc0',
+    'version': b'\xc1',
     'max_size': b'\xc4',
     'used_size': b'\xc5',
     'algorithm': b'\xe0',
@@ -495,7 +493,7 @@ data_object_types = {
     'update_secret': b'\x23',
     # SRM: AUTOREF. The Authorization Reference contains a binary data string which makes up a reference value for
     # verifying an external entity (admin, user, etc.) authorization.
-    'azthorization_ref': b'\x31'
+    'authorization_ref': b'\x31'
 }
 
 data_object_types_swaped = {y: x for x, y in data_object_types.items()}
@@ -556,7 +554,7 @@ def parse_raw_meta(meta: bytes):
         raise ValueError(
             'Metadata Size can\'t be more than 64 bytes. You have {0}'.format(meta_size)
         )
-    meta_described = dict()
+    meta_parsed = dict()
     try:
         while True:
             tag = meta_tags_swaped[next(meta_itr)]
@@ -569,20 +567,20 @@ def parse_raw_meta(meta: bytes):
                 )
             if tag == 'used_size' or tag == 'max_size':
                 if tag_size == 2:
-                    meta_described[tag] = (int.from_bytes(next(meta_itr), 'big') << 8) + \
+                    meta_parsed[tag] = (int.from_bytes(next(meta_itr), 'big') << 8) + \
                                           int.from_bytes(next(meta_itr), 'big')
                 elif tag_size == 1:
-                    meta_described[tag] = int.from_bytes(next(meta_itr), 'big')
+                    meta_parsed[tag] = int.from_bytes(next(meta_itr), 'big')
                 else:
                     raise ValueError(
                         'Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}'.format(tag_size)
                     )
                 continue
             if tag == 'type':
-                meta_described[tag] = data_object_types_swaped[next(meta_itr)]
+                meta_parsed[tag] = data_object_types_swaped[next(meta_itr)]
                 continue
             if tag == 'algorithm':
-                meta_described[tag] = algorithms_swaped[next(meta_itr)]
+                meta_parsed[tag] = algorithms_swaped[next(meta_itr)]
                 continue
             if tag == 'key_usage':
                 key_usage_bytes = int.from_bytes(next(meta_itr), 'big')
@@ -595,7 +593,7 @@ def parse_raw_meta(meta: bytes):
                     tag_data.append('sign')
                 if key_usage_bytes & int.from_bytes(key_usages['key_agreement'], 'big'):
                     tag_data.append('key_agreement')
-                meta_described[tag] = tag_data
+                meta_parsed[tag] = tag_data
                 continue
             tag_data = list()
             i = 0
@@ -622,9 +620,9 @@ def parse_raw_meta(meta: bytes):
                     tag_data.append(_id.hex())
             if tag_size == 1:
                 tag_data = ''.join(tag_data)
-            meta_described[tag] = tag_data
+            meta_parsed[tag] = tag_data
     except StopIteration:
-        return meta_described
+        return meta_parsed
 
 
 def prepare_raw_meta(new_meta: dict):
@@ -667,15 +665,9 @@ def prepare_raw_meta(new_meta: dict):
         # Update the size
         meta[1] += 1
         if key == 'used_size' or key == 'max_size':
-            if not isinstance(value, int):
-                raise TypeError(
-                    'The used size tag should have an int value, you provided {0}'.format(type(value))
-                )
-            meta.append(value >> 8)
-            meta.append(value & 0xff)
-            # Update the size
-            meta[1] += 2
-            continue
+            raise ValueError(
+                'The used size tag and max size tag can#t be set by user'
+            )
         if key == 'type':
             if value not in data_object_types:
                 raise ValueError(
@@ -799,8 +791,8 @@ class Object:
         if force is False:
             if self.id not in self.optiga.object_id_values:
                 raise TypeError(
-                    "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.object_id),
-                                                                                            self.id))
+                    "object_id not found. \n\r Supported = {0},\n\r  "
+                    "Provided = {1}".format(list(hex(self.optiga.object_id)), self.id))
 
         api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
         api.exp_optiga_util_read_data.restype = c_int
@@ -810,12 +802,12 @@ class Object:
 
         ret = api.exp_optiga_util_read_data(c_ushort(self.id), offset, d, byref(c_dlen))
 
-        if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+        if ret == 0:
             data = (c_ubyte * c_dlen.value)()
             memmove(data, d, c_dlen.value)
             _bytes = bytearray(data)
         else:
-            _bytes = bytearray(0)
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
         return _bytes
 
@@ -841,8 +833,8 @@ class Object:
 
         if self.id not in self.optiga.object_id_values:
             raise TypeError(
-                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.object_id),
-                                                                                        self.id))
+                "object_id not found. \n\r Supported = {0},\n\r  "
+                "Provided = {1}".format(list(hex(self.optiga.object_id)), self.id))
 
         if len(data) > 1700:
             raise ValueError("length of data exceeds the limit of 1700")
@@ -858,9 +850,7 @@ class Object:
         ret = api.exp_optiga_util_write_data(c_ushort(self.id), 0x40, offset, _data, len(data))
 
         if ret != 0:
-            raise ValueError(
-                'Some problems during communication. You have possible selected one of locked objects'
-            )
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
         self.updated = True
 
@@ -881,8 +871,8 @@ class Object:
         if (self.id not in self.optiga.object_id_values) and (self.id not in self.optiga.key_id_values):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
-                    list(self.optiga.object_id),
-                    list(self.optiga.key_id),
+                    list(hex(self.optiga.object_id)),
+                    list(hex(self.optiga.key_id)),
                     self.id)
             )
 
@@ -894,12 +884,12 @@ class Object:
 
         ret = api.exp_optiga_util_read_metadata(c_ushort(self.id), d, byref(c_dlen))
 
-        if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+        if ret == 0:
             data = (c_ubyte * c_dlen.value)()
             memmove(data, d, c_dlen.value)
             _bytes = bytearray(data)
         else:
-            _bytes = bytearray(0)
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
         return _bytes
 
@@ -923,8 +913,8 @@ class Object:
         if (self.id not in self.optiga.object_id_values) and (self.id not in self.optiga.key_id_values):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
-                    list(self.optiga.object_id),
-                    list(self.optiga.key_id),
+                    list(hex(self.optiga.object_id)),
+                    list(hex(self.optiga.key_id)),
                     self.id)
             )
 
@@ -936,8 +926,6 @@ class Object:
         ret = api.exp_optiga_util_write_metadata(c_ushort(self.id), _data, len(_data))
 
         if ret != 0:
-            raise ValueError(
-                'Some problems during communication. You have possible selected one of locked objects'
-            )
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
         self.updated = True
