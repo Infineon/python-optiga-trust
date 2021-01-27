@@ -32,11 +32,8 @@ class Rng(IntEnum):
 
 class Curves(IntEnum):
     SEC_P256R1 = 0x03
-    NIST_P256R1 = 0x03
     SEC_P384R1 = 0x04
-    NIST_P384R1 = 0x04
     SEC_P521R1 = 0x05
-    NIST_P521R1 = 0x05
     BRAINPOOL_P256R1 = 0x13
     BRAINPOOL_P384R1 = 0x15
     BRAINPOOL_P512R1 = 0x16
@@ -106,6 +103,7 @@ class KeyId(IntEnum):
     ECC_KEY_E0F3 = 0xE0F3
     RSA_KEY_E0FC = 0xe0fc
     RSA_KEY_E0FD = 0xe0fd
+
 
 class SessionId(IntEnum):
     # Key from Session context id 1
