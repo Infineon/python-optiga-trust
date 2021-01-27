@@ -28,6 +28,134 @@ Reading a key object
 Metadata
 ^^^^^^^^
 
+Options
+-------
+Users can work with metadata directly in human-readable form.
+Metadata should be contructed in the following manner::
+
+	{'<metadata_tag>': '<metadata_value>'}
+	
+Where metadata can take the following values:
+
+Metadata Tags
++++++++++++++
+
+All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle state of the object is either 'creation' or 'initialisation'
+
+.. list-table:: Metadata Tags Table
+   :widths: 10 30 70
+   :header-rows: 1
+
+   * - Tag
+     - Expected values
+     - Meaning
+   * - 'execute'
+     - Values are defined in the Access Conditions Table below
+     - Define Execute Access Condition for the object. In other words under which conditions the chip can make use of the object **internally**; e.g. signature generation using object 0xe0f1.
+   * - 'change'
+     - Values are defined in the Access Conditions Table below
+     - Define Change Access Condition for the object. Define when it's possible to update/overwrite the object.
+   * - 'read'
+     - Values are defined in the Access Conditions Table below
+     - Define Read Access Condition for the object. Define when it's possible to read the object.
+   * - 'lcso'
+     - ['creation', 'initialisation', 'operational', 'termination']
+     - Define lifecycle state of the object. Attention, in most of cases this action is one-way
+   * - 'max_size'
+     - integer
+     - Automatically calculated by the chip, can't be defined by a user
+   * - 'used_size'
+     - integer
+     - Automatically calculated by the chip, can't be defined by a user
+   * - 'algorithm'
+     - Automatically set by the chip, can't be defined by a user
+     - This tag is applicable only for Key Objects. The chip selects automatically the value for this tag based on the keypair generation parameters.
+   * - 'key_usage'
+     - [ 'authentication', 'encryption', 'sign', 'key_agreement']
+     - This tag is applicable only for Key Objects. It can be defined in a list to reflect multiple options; e.g. {'key_usage': [[ 'authentication', 'sign', 'key_agreement']]}
+   * - 'type'
+     - Refer to the types Table below
+     - Type of the object. Some functions; e.g. hmac, do work only if a specific type is defined
+   * - 'reset_type'
+     -
+     - It defines what happens with the object data in case of updating the metadata
+
+Access Conditions
++++++++++++++++++
+
+The '<metadata_value>' should be defined either as a single value, or a list of values; e.g.
+
+ - a constructed value
+    - {'read': ['lcso', '<', 'operational']}
+    - Read is allowed only if the lifecycle state of the object is less than operational
+ - a more complex constructed value
+    - {'read': ['lcso', '<', 'operational', '&&', 'conf', 'e1', '40']}
+    - Read is allowed only if the lifecycle state of the object is less than operation and under shielded connection (using e140 OID as a binding secret)
+
+
+.. list-table:: Access Conditions Table (SRM M V3 - Table 69)
+   :widths: 10 90
+   :header-rows: 1
+   :class: longtable
+
+   * - Tag
+     - Meaning
+   * - 'always'
+     - an action (for instance 'read') is always allowed
+   * - 'never'
+     - an action (for instance 'read') is forbidden
+   * - 'lcsg'
+     - Global Lifecycle State (Object ID 0xe0c0) this tag is used as a first argument for a complex expressions; e.g. ['lcsg', '<', 'operational']
+   * - 'lcsa'
+     -  Application Lifecycle State (Object ID 0xf1c0) this tag is used as a first argument for a complex expressions; e.g. ['lcsa', '<', 'operational']
+   * - 'lcso'
+     - Object Lifecycle State (it is part of the metadata, see the section above) this tag is used as a first argument for a complex expressions; e.g. ['lcso', '<', 'operational']
+   * - 'conf'
+     -
+        - An action is permitted only if the host establishes the shielded connection with the chip using the specified Binding secret (e.g. 0xE140) and the response is requested with protection (encrypted).
+        - Typical values are ['conf', 'e1', '40'] and ['conf', 'f1', 'd0'], where instead of 'f1', 'd0' can be used any properly configured Application Data Object
+        - In the latter case (Secret in Application Data Object) it is recomended to use as well the 'int' (descrebed below) Access Condition
+   * - 'int'
+     -
+        - An action is permitted only if the host establishes the shielded connection with the chip using the specified Binding secret (e.g. 0xE140) and the response is requested with protection (MAC).
+        - Typical values are ['int', 'e1', '40'] and ['int', 'e0', 'ef'], where instead of 'e0', 'ef' can be used any properly configured Data Object of {'type': 'trust_anchor'}
+        - In the latter case (Secret in Application Data Object) it is recomended to use as well the 'int' (descrebed below) Access Condition
+        - Example ::
+
+            ta_obj = Object(0xe0ef)
+            ta_obj.meta = {'type': 'trust_anchor', 'read': 'always', 'change': ['lcso', '<', 'operational']}
+            ta_obj.write(<X509 Certificate>)
+            # This action is one-way and can't be reverted, for demo can be skipped
+            # ta_obj.meta = {'lcso': 'operational'}
+            protected_obj = Object(0xf1d0)
+            protected_obj.meta = {'change': ['lcso', '<', 'operational', '&&', 'int', 'e0', 'ef']}
+            # This action is one-way and can't be reverted, for demo can be skipped
+            # protected_obj.meta = {'lcso': 'operational'}
+            # The above means: in case of writing the f1d0 Application Data Object, the signature associated with the metadata
+            # in the manifest must be verified with the addressed trust anchor e0ef.
+   * - 'auto'
+     -
+       - An authorization reference Object ID. The action (for instance 'execute') is allowed only if the given object reached the AUTO (Authorised)
+       - Typical values are ['auto', 'f1', 'd0']
+   * - 'luc'
+     -
+   * - 'sec_sta_g'
+     - x
+   * - 'sec_sta_a'
+     - x
+   * - '=='
+     - "If equal". Typical values ['lcso', **'=='**, 'initialiastion']
+   * - '>'
+     - "If more". Typical values ['lcso', **'>'**, 'initialiastion']
+   * - '<'
+     - "If less". Typical values ['lcso', **'<'**, 'initialiastion']
+   * - '&&'
+     - "And". Typical values ['lcso', **'<'**, 'initialiastion', **'&&'**, 'conf', 'e1', '40']
+   * - '||'
+     - "or". Typical values ['lcso', **'<'**, 'initialiastion', **'&&'**, 'conf', 'e1', '40']
+
+
+
 Printing All metadata in human readbale form
 --------------------------------------------
 
