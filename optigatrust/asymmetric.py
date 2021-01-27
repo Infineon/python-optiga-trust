@@ -24,7 +24,6 @@
 from ctypes import *
 import warnings
 import hashlib
-import struct
 
 from optigatrust import core
 from optigatrust.const import x, m1, m3, charge
@@ -37,27 +36,22 @@ __all__ = [
 ]
 
 
-def _str2curve(optiga, curve_str, return_value=False):
-    if curve_str == 'secp256r1' or curve_str == 'nistp256r1':
-        c = optiga.curves.SEC_P256R1
-    elif curve_str == 'secp384r1' or curve_str == 'nistp384r1':
-        c = optiga.curves.SEC_P384R1
-    elif curve_str == 'secp521r1' or curve_str == 'nistp521r1':
-        c = optiga.curves.SEC_P521R1
-    elif curve_str == 'brainpool256r1':
-        c = optiga.curves.BRAINPOOL_P256R1
-    elif curve_str == 'brainpoolp384r1':
-        c = optiga.curves.BRAINPOOL_P384R1
-    elif curve_str == 'brainpoolp512r1':
-        c = optiga.curves.BRAINPOOL_P512R1
+def _str2curve(curve_str, return_value=False):
+    _map = {
+        'secp256r1': m3.Curves.SEC_P256R1,
+        'secp384r1': m3.Curves.SEC_P384R1,
+        'secp521r1': m3.Curves.SEC_P521R1,
+        'brainpoolp256r1': m3.Curves.BRAINPOOL_P256R1,
+        'brainpoolp384r1': m3.Curves.BRAINPOOL_P384R1,
+        'brainpoolp512r1': m3.Curves.BRAINPOOL_P512R1
+    }
+    if curve_str in _map:
+        if return_value:
+            return _map[curve_str].value
+        else:
+            return _map[curve_str]
     else:
-        raise ValueError('Curve not supported use one of these: secp256r1/nistp256r1, secp384r1/nistp384r1, '
-                         'secp521r1/nistp521r1, brainpool256r1, brainpoolp384r1, brainpoolp512r1')
-
-    if return_value:
-        return c.value
-    else:
-        return c
+        raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
 
 
 class _Signature:
@@ -85,6 +79,12 @@ class EccKey(core.Object):
         super(EccKey, self).__init__(key_id)
         self._curve = curve
         self._pkey = None
+        id_ref = self.optiga.key_id
+        if key_id not in (id_ref.ECC_KEY_E0F0.value, id_ref.ECC_KEY_E0F1.value, id_ref.ECC_KEY_E0F2.value,
+                          id_ref.ECC_KEY_E0F3.value) and key_id not in self.optiga.session_id_values:
+            raise ValueError(
+                'Your key_id {0} can\'t be sued to generate an ECC Key'.format(hex(key_id))
+            )
         self._key_id = key_id
         self._key_usage = None
         self._hash_alg = None
@@ -120,7 +120,8 @@ class EccKey(core.Object):
         This function generates an ECC keypair, the private part is stored on the core based on the provided slot
 
         :param curve:
-            Curve name, should be either secp256r1 or secp384r1
+            Curve name, should be one of supported by the chip curves. For instance m3 has
+            the widest range of supported algorithms: nistp256r1, nistp384r1, nistp521r1, bra
 
         :param key_usage:
             A key usage indicator. The value should be the KeyUsage Enumeration. By default
@@ -136,11 +137,11 @@ class EccKey(core.Object):
         if key_usage is None:
             key_usage = [self.optiga.key_usage.KEY_AGR, self.optiga.key_usage.AUTH]
 
-        c = _str2curve(self.optiga, curve, return_value=True)
+        c = _str2curve(curve, return_value=True)
         if c not in self.optiga.curves_values:
             raise TypeError(
-                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(list(self.optiga.curves_values),
-                                                                                        c))
+                "object_id not found. \n\r Supported = {0},\n\r  "
+                "Provided = {1}".format(list(self.optiga.curves_values), c))
 
         self.optiga.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
             c_ubyte), POINTER(
@@ -149,7 +150,7 @@ class EccKey(core.Object):
 
         c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
         c_keyid = c_ushort(self.key_id)
-        p = (c_ubyte * 100)()
+        p = (c_ubyte * 150)()
         c_plen = c_ushort(len(p))
 
         ret = self.optiga.api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, 0, byref(c_keyid), p, byref(c_plen))
@@ -163,15 +164,15 @@ class EccKey(core.Object):
             self._curve = curve
             return self
         else:
-            warnings.warn("Failed to generate an ECC keypair, return a NoneType")
-            return None
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
     def ecdsa_sign(self, data):
         """
         This function signs given data based on the provided EccKey object
 
         :param data:
-            Data to sign, the data will be hashed based on the used curve. If secp256r1 then sha256, otherwise sha384
+            Data to sign, the data will be hashed based on the used curve.
+            If secp256r1 then sha256, secp384r1 sha384 etc.
 
         :raises:
             - TypeError - when any of the parameters are of the wrong type
@@ -192,19 +193,25 @@ class EccKey(core.Object):
         self.optiga.api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(
             c_ubyte), POINTER(c_ubyte)
         self.optiga.api.exp_optiga_crypt_ecdsa_sign.restype = c_int
+        _map = {
+            'secp256r1': [hashlib.sha256, 32, 'sha256'],
+            'secp384r1': [hashlib.sha384, 48, 'sha384'],
+            'secp521r1': [hashlib.sha512, 64, 'sha512'],
+            'brainpoolp256r1': [hashlib.sha256, 32, 'sha256'],
+            'brainpoolp384r1': [hashlib.sha384, 48, 'sha384'],
+            'brainpoolp512r1': [hashlib.sha512, 64, 'sha512']
+        }
+        # The curve should be one of supported, so no need for extra check
+        param = _map[self.curve]
+        # This lines are evaluates as following; i.e.
+        # digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
+        # s = (c_ubyte * ((32*2 + 2) + 6))()
+        # hash_algorithm = 'sha256'
+        digest = (c_ubyte * param[1])(*param[0](_d).digest())
+        # We reserve two extra bytes for nistp512r1 curve, shich has signature r/s values longer than a hash size
+        s = (c_ubyte * ((param[1]*2 + 2) + 6))()
+        hash_algorithm = param[2]
 
-        if self.curve == 'secp256r1':
-            digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
-            s = (c_ubyte * (64 + 6))()
-            hash_algorithm = 'sha256'
-        elif self.curve == 'secp384r1':
-            digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
-            s = (c_ubyte * (96 + 6))()
-            hash_algorithm = 'sha384'
-        else:
-            digest = (c_ubyte * 0)(*hashlib.sha256(_d).digest())
-            s = (c_ubyte * 0)()
-            hash_algorithm = 'None'
         c_slen = c_ubyte(len(s))
         self._hash_alg = hash_algorithm
 
@@ -218,18 +225,16 @@ class EccKey(core.Object):
 
             return EcdsaSignature(hash_algorithm, self.key_id, bytes(signature))
         else:
-            warnings.warn("Failed to sign a data, return a NoneType")
-            return None
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
 class RsaKey(core.Object):
     def __init__(self, key_id: int):
         super(RsaKey, self).__init__(key_id)
 
-        if key_id != self.optiga.key_id.RSA_KEY_E0FC.value or key_id != self.optiga.key_id.RSA_KEY_E0FD.value:
+        if key_id != 0xe0fc and key_id != 0xe0fd:
             raise ValueError(
-                'key_id isn\'t supported should be either {0}, or {1}, you provided {2}'.format(
-                    self.optiga.key_id.RSA_KEY_E0FC.value, self.optiga.key_id.RSA_KEY_E0FD.value, key_id)
+                'key_id isn\'t supported should be either 0xe0fc, or 0xe0fd, you provided {0}'.format(hex(key_id))
             )
         self._key_usage = None
         self._key_size = None
@@ -304,8 +309,7 @@ class RsaKey(core.Object):
             self._key_size = key_size
             return self
         else:
-            warnings.warn("Failed to generate an rsa keypair, return a NoneType")
-            return None
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
     def pkcs1v15_sign(self, data: bytes or bytearray or str, hash_algorithm='sha256'):
         """
@@ -361,5 +365,4 @@ class RsaKey(core.Object):
             print(bytes(signature))
             return RsaPkcs1v15Signature(hash_algorithm, self.id, bytes(signature))
         else:
-            warnings.warn("Failed to sign a data, return a NoneType")
-            return None
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
