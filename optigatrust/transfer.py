@@ -23,6 +23,7 @@
 # ============================================================================
 import os
 import re
+import json
 from jinja2 import Environment, FileSystemLoader
 from optigatrust.core import *
 
@@ -99,6 +100,77 @@ def to_json():
         del key
 
     return output
+
+
+def from_json(path: str):
+    """
+    This function will take as an inout your data and populate the chip with it, whatever is possible
+
+    :param: path to the json file. The content should be formed like the following  ::
+
+        {
+            "e0f1":
+            {
+                "metadata":"200fc00101d001ffd30100e00103e10101",
+                "pretty_metadata":
+                {
+                    "lcso": "creation",
+                    "change": "never",
+                    "execute": "always",
+                    "algorithm": "nistp256r1",
+                    "key_usage": "01"
+                }
+            },
+            "e0c2":
+            {
+                "metadata":"2009c4011bd001ffd10100",
+                "pretty_metadata":
+                {
+                    "max_size": 27,
+                    "change": "never",
+                    "read": "always"
+                }
+                "data":"cd16338201001c000500000a091b5c0007006200ad801010710809"
+            }
+        }
+
+    :raises:
+        - ValueError - when any of the parameters contain an invalid value
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
+
+    :returns:
+
+
+    """
+    abs_path = os.path.abspath(path)
+    with open(abs_path, 'r', encoding='utf8') as f:
+        supermeta = json.loads(f)
+
+    # Iterate through the dictionary and check all keys and values one by one
+    for oid, content in supermeta.iteritems():
+        # A flag whic we use to identify whether metadata should be reverted for data population
+        metadata_changed = False
+        old_meta = {}
+        try:
+            # Initialize the object with the object ID in the config
+            obj = Object(int(oid))
+
+            # try at first to write down the data, otherwise it wont be possible to do this later (maybe)
+            if 'data' in content:
+                old_meta = {'change': obj.meta['change']}
+                obj.meta = {'change': 'always'}
+                metadata_changed = True
+                obj.write(bytes.fromhex(content['data']))
+
+            # Wtite raw metadata, this would be the fastest way, don't forget to convert hexstring to bytes
+            obj.write_raw_meta(bytes.fromhex(content['metadata']))
+
+        except OSError or ValueError or TypeError:
+            print('Warning. Failed to update {0} metadata. Skipping'.format(oid))
+        else:
+            if metadata_changed:
+                obj.meta = old_meta
 
 
 def _to_xml(meta):
