@@ -6,66 +6,44 @@ LOGGER = logging.getLogger(__name__)
 
 
 def test_keypair_default():
-	LOGGER.info('Generate a keypair using default parameters')
-	k = EccKey(0xe0f1).generate()
-	assert isinstance(k.pkey, bytes)
-	assert len(k.pkey) > 0
-	assert len(k.pkey) == 68
-	assert isinstance(k.curve, str)
+    LOGGER.info('Generate a keypair using default parameters')
+    k = EccKey(0xe0f1).generate()
+    assert isinstance(k.pkey, bytes)
+    assert len(k.pkey) > 0
+    assert len(k.pkey) == 68
+    assert isinstance(k.curve, str)
 
 
-def test_keypair_nistp256():
-	LOGGER.info('Generate a keypair NIST P-256')
-	k = EccKey(0xe0f1).generate(curve='secp256r1')
-	assert isinstance(k.pkey, bytes)
-	assert len(k.pkey) > 0
-	assert len(k.pkey) == 68
-	assert k.id == 0xe0f1
-	assert k.curve == 'secp256r1'
-
-
-@pytest.mark.parametrize("ki", [
-	0xe0f1,	0xe0f2,	0xe0f3,	0xE100,
-	0xe101,	0xe102,	0xe103,
+@pytest.mark.parametrize("oid, curve, pub_key_size", [
+    (0xe0f1, 'secp256r1', 68), (0xe0f1, 'secp384r1', 100), (0xe0f1, 'secp521r1', 137),
+    (0xe0f1, 'brainpoolp256r1', 68), (0xe0f1, 'brainpoolp384r1', 100), (0xe0f1, 'brainpoolp512r1', 133),
+    (0xe0f2, 'secp256r1', 68), (0xe0f2, 'secp384r1', 100), (0xe0f2, 'secp521r1', 137),
+    (0xe0f2, 'brainpoolp256r1', 68), (0xe0f2, 'brainpoolp384r1', 100), (0xe0f2, 'brainpoolp512r1', 133),
+    (0xe0f3, 'secp256r1', 68), (0xe0f3, 'secp384r1', 100), (0xe0f3, 'secp521r1', 137),
+    (0xe0f3, 'brainpoolp256r1', 68), (0xe0f3, 'brainpoolp384r1', 100), (0xe0f3, 'brainpoolp512r1', 133),
+    (0xE100, 'secp256r1', 68), (0xE100, 'secp384r1', 100), (0xE100, 'secp521r1', 137),
+    (0xE100, 'brainpoolp256r1', 68), (0xE100, 'brainpoolp384r1', 100), (0xE100, 'brainpoolp512r1', 133),
+    (0xE101, 'secp256r1', 68), (0xE101, 'secp384r1', 100), (0xE101, 'secp521r1', 137),
+    (0xE101, 'brainpoolp256r1', 68), (0xE101, 'brainpoolp384r1', 100), (0xE101, 'brainpoolp512r1', 133),
+    (0xE102, 'secp256r1', 68), (0xE102, 'secp384r1', 100), (0xE102, 'secp521r1', 137),
+    (0xE102, 'brainpoolp256r1', 68), (0xE102, 'brainpoolp384r1', 100), (0xE102, 'brainpoolp512r1', 133),
+    (0xE103, 'secp256r1', 68), (0xE103, 'secp384r1', 100), (0xE103, 'secp521r1', 137),
+    (0xE103, 'brainpoolp256r1', 68), (0xE103, 'brainpoolp384r1', 100), (0xE103, 'brainpoolp512r1', 133)
 ])
-def test_keypair_nistp256_keyid(ki):
-	LOGGER.info('Generate a NIST P-256 keypair for a specific Object ID {0}'.format(ki))
-	k = EccKey(ki).generate(curve='secp256r1')
-	assert isinstance(k.pkey, bytes)
-	assert len(k.pkey) > 0
-	assert len(k.pkey) == 68
-	assert k.id == ki
-	assert k.curve == 'secp256r1'
-
-
-def test_keypair_nistp384():
-	LOGGER.info('Generate a keypair NIST P-384')
-	k = EccKey(0xe0f1).generate(curve='secp384r1')
-	assert isinstance(k.pkey, bytes)
-	assert len(k.pkey) > 0
-	assert len(k.pkey) == 100
-	assert k.id == 0xe0f1
-	assert k.curve == 'secp384r1'
-
-
-@pytest.mark.parametrize("ki", [
-	0xe0f1,	0xe0f2,	0xe0f3,	0xE100,
-	0xE101,	0xE102,	0xE103,
-])
-def test_keypair_nistp384_keyid(ki):
-	LOGGER.info('Generate a NIST P-384 keypair for a specific Object ID {0}'.format(ki))
-	k = EccKey(ki).generate(curve='secp384r1')
-	assert isinstance(k.pkey, bytes)
-	assert len(k.pkey) > 0
-	assert len(k.pkey) == 100
-	assert k.id == ki
-	assert k.curve == 'secp384r1'
+def test_keypair_x_y(oid, curve, pub_key_size):
+    LOGGER.info('Generate a keypair on {0} slot using {1} curve'.format(hex(oid), curve))
+    k = EccKey(oid).generate(curve=curve)
+    assert isinstance(k.pkey, bytes)
+    assert len(k.pkey) > 0
+    assert len(k.pkey) == pub_key_size
+    assert k.id == oid
+    assert k.curve == curve
 
 
 def test_keypair_faulty():
-	LOGGER.info('Try to use faulty curves and keyid')
-	with pytest.raises(ValueError):
-		EccKey(0xe0f1).generate(curve='nistp384')
+    LOGGER.info('Try to use faulty curves and keyid')
+    with pytest.raises(ValueError):
+        EccKey(0xe0f1).generate(curve='secp384')
 
-	key = EccKey(0xe0fc).generate(curve='secp384r1')
-	assert key is None
+    with pytest.raises(ValueError):
+        EccKey(0xe0fc).generate(curve='secp384r1')

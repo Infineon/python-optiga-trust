@@ -1,4 +1,10 @@
 import pytest
+import os
+from oscrypto import use_openssl
+libcrypto_path = os.path.abspath("C:\\Program Files (x86)\\OpenSSL-Win32\\libcrypto-1_1.dll")
+libssl_path = os.path.abspath("C:\\Program Files (x86)\\OpenSSL-Win32\\libssl-1_1.dll")
+use_openssl(libcrypto_path, libssl_path)
+
 from oscrypto.asymmetric import ecdsa_verify, load_public_key
 from oscrypto.errors import SignatureError
 from asn1crypto import keys, core
@@ -9,150 +15,111 @@ import logging
 
 LOGGER = logging.getLogger(__name__)
 
-pytest.p256 = None
-pytest.p256_fail = None
-pytest.p384 = None
-pytest.p384_fail = None
 tbs_str = b'Test String to Sign'
 tbs_str_fail = b'FAILED Test String to Sign'
 
 
-def setup_keys():
-	pytest.p256 = EccKey(0xE100).generate(curve='secp256r1')
-	pytest.p256_fail = EccKey(0xE101).generate(curve='secp256r1')
-	pytest.p384 = EccKey(0xE102).generate(curve='secp384r1')
-	pytest.p384_fail = EccKey(0xE103).generate(curve='secp384r1')
+@pytest.mark.parametrize("oid, curve, max_sign_size, hashname", [
+    (0xe0f1, 'secp256r1', 72, 'sha256'), (0xe0f1, 'secp384r1', 104, 'sha384'), (0xe0f1, 'secp521r1', 141, 'sha512'),
+    (0xe0f1, 'brainpoolp256r1', 72, 'sha256'), (0xe0f1, 'brainpoolp384r1', 104, 'sha384'),
+    (0xe0f1, 'brainpoolp512r1', 137, 'sha512'),
+
+    (0xe0f2, 'secp256r1', 72, 'sha256'), (0xe0f2, 'secp384r1', 104, 'sha384'), (0xe0f2, 'secp521r1', 141, 'sha512'),
+    (0xe0f2, 'brainpoolp256r1', 72, 'sha256'), (0xe0f2, 'brainpoolp384r1', 104, 'sha384'),
+    (0xe0f2, 'brainpoolp512r1', 137, 'sha512'),
+
+    (0xe0f3, 'secp256r1', 72, 'sha256'), (0xe0f3, 'secp384r1', 104, 'sha384'), (0xe0f3, 'secp521r1', 141, 'sha512'),
+    (0xe0f3, 'brainpoolp256r1', 72, 'sha256'), (0xe0f3, 'brainpoolp384r1', 104, 'sha384'),
+    (0xe0f3, 'brainpoolp512r1', 137, 'sha512'),
+
+    (0xE100, 'secp256r1', 72, 'sha256'), (0xE100, 'secp384r1', 104, 'sha384'), (0xE100, 'secp521r1', 141, 'sha512'),
+    (0xE100, 'brainpoolp256r1', 72, 'sha256'), (0xE100, 'brainpoolp384r1', 104, 'sha384'),
+    (0xE100, 'brainpoolp512r1', 137, 'sha512'),
+
+    (0xE101, 'secp256r1', 72, 'sha256'), (0xE101, 'secp384r1', 104, 'sha384'), (0xE101, 'secp521r1', 141, 'sha512'),
+    (0xE101, 'brainpoolp256r1', 72, 'sha256'), (0xE101, 'brainpoolp384r1', 104, 'sha384'),
+    (0xE101, 'brainpoolp512r1', 137, 'sha512'),
+
+    (0xE102, 'secp256r1', 72, 'sha256'), (0xE102, 'secp384r1', 104, 'sha384'), (0xE102, 'secp521r1', 141, 'sha512'),
+    (0xE102, 'brainpoolp256r1', 72, 'sha256'), (0xE102, 'brainpoolp384r1', 104, 'sha384'),
+    (0xE102, 'brainpoolp512r1', 137, 'sha512'),
+
+    (0xE103, 'secp256r1', 72, 'sha256'), (0xE103, 'secp384r1', 104, 'sha384'), (0xE103, 'secp521r1', 141, 'sha512'),
+    (0xE103, 'brainpoolp256r1', 72, 'sha256'), (0xE103, 'brainpoolp384r1', 104, 'sha384'),
+    (0xE103, 'brainpoolp512r1', 137, 'sha512')
+])
+def test_ecdsa(oid, curve, max_sign_size, hashname):
+    LOGGER.info('Sign data on slot {0} with {1} using {2}'.format(hex(oid), curve, hashname))
+    key = EccKey(oid).generate(curve=curve)
+    s = key.ecdsa_sign(tbs_str)
+    assert isinstance(s.signature, bytes)
+    assert len(s.signature) > 0
+    assert len(s.signature) <= max_sign_size
+    assert s.hash_alg == hashname
+    assert s.algorithm == hashname + '_ecdsa'
 
 
-def test_ecdsa_checkcopy():
-	LOGGER.info('Sign data with newly generated NIST P-256 key and check return value')
-	setup_keys()
-	s = pytest.p256.ecdsa_sign(tbs_str)
-	assert s.id == pytest.p256.id
+@pytest.mark.parametrize("curve, hashname", [
+    ('secp256r1', 'sha256'), ('brainpoolp256r1', 'sha256'),
+    ('secp384r1', 'sha384'), ('brainpoolp384r1', 'sha384'),
+    ('secp521r1', 'sha512'), ('brainpoolp512r1', 'sha512'),
+])
+def test_ecdsa_signverify(curve, hashname):
+    LOGGER.info('Sign data with {0} using {1} and verify the result'.format(curve, hashname))
+    ecc_key = EccKey(0xE100).generate(curve=curve)
+    ecc_fail_key = EccKey(0xE101).generate(curve=curve)
+    ha = hashname
+    s = ecc_key.ecdsa_sign(tbs_str)
+    print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
 
+    # Preparing an algoroithm
+    pubkey_alg = keys.PublicKeyAlgorithm({
+        'algorithm': keys.PublicKeyAlgorithmId('ec'),
+        'parameters': keys.ECDomainParameters(
+            name='named',
+            value=curve
+        )
+    })
 
-def test_ecdsa_p256():
-	LOGGER.info('Sign data with newly generated NIST P-256 key')
-	setup_keys()
-	s = pytest.p256.ecdsa_sign(tbs_str)
-	assert isinstance(s.signature, bytes)
-	assert len(s.signature) > 0
-	assert len(s.signature) <= 72
-	assert s.hash_alg == 'sha256'
-	assert s.algorithm == 'sha256_ecdsa'
+    # Preparing a PublicKeyInfo
+    pubkey_asn1 = core.BitString.load(ecc_key.pkey)
+    pubkey_info = keys.PublicKeyInfo({
+        'algorithm': pubkey_alg,
+        'public_key': pubkey_asn1.cast(keys.ECPointBitString)
+    })
 
+    # Load a public key into the oscrypto engine to using it in the verify function
+    public = load_public_key(pubkey_info)
 
-def test_ecdsa_p384():
-	LOGGER.info('Sign data with newly generated NIST P-384 key')
-	setup_keys()
-	s = pytest.p384.ecdsa_sign(tbs_str)
-	assert isinstance(s.signature, bytes)
-	assert len(s.signature) > 0
-	assert len(s.signature) <= 104
-	assert s.hash_alg == 'sha384'
-	assert s.algorithm == 'sha384_ecdsa'
+    ecdsa_verify(public, s.signature, tbs_str, ha)
 
+    # Assert wrong text
+    with pytest.raises(SignatureError):
+        ecdsa_verify(public, s.signature, tbs_str_fail, ha)
 
-def test_ecdsa_p256_signverify():
-	LOGGER.info('Sign data with newly generated NIST P-256 key and verify result')
-	setup_keys()
-	ha = 'sha256'
-	s = pytest.p256.ecdsa_sign(tbs_str)
-	print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
+    # Assert wrong key
+    with pytest.raises(SignatureError):
+        # Preparing a PublicKeyInfo
+        pubkey_asn1 = core.BitString.load(ecc_fail_key.pkey)
+        pubkey_info = keys.PublicKeyInfo({
+            'algorithm': pubkey_alg,
+            'public_key': pubkey_asn1.cast(keys.ECPointBitString)
+        })
 
-	# Preparing an algoroithm
-	pubkey_alg = keys.PublicKeyAlgorithm({
-		'algorithm': keys.PublicKeyAlgorithmId('ec'),
-		'parameters': keys.ECDomainParameters(
-			name='named',
-			value=pytest.p256.curve
-		)
-	})
-
-	# Preparing a PublicKeyInfo
-	pubkey_asn1 = core.BitString.load(pytest.p256.pkey)
-	pubkey_info = keys.PublicKeyInfo({
-		'algorithm': pubkey_alg,
-		'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-	})
-
-	# Load a public key into the oscrypto engine to using it in the verify function
-	public = load_public_key(pubkey_info)
-
-	ecdsa_verify(public, s.signature, tbs_str, ha)
-
-	# Assert wrong text
-	with pytest.raises(SignatureError):
-		ecdsa_verify(public, s.signature, tbs_str_fail, ha)
-
-	# Assert wrong key
-	with pytest.raises(SignatureError):
-		# Preparing a PublicKeyInfo
-		pubkey_asn1 = core.BitString.load(pytest.p256_fail.pkey)
-		pubkey_info = keys.PublicKeyInfo({
-			'algorithm': pubkey_alg,
-			'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-		})
-
-		# Load a public key into the oscrypto engine to using it in the verify function
-		public = load_public_key(pubkey_info)
-		ecdsa_verify(public, s.signature, tbs_str, ha)
-
-
-def test_ecdsa_p384_signverify():
-	LOGGER.info('Sign data with newly generated NIST P-384 key and verify result')
-	setup_keys()
-	ha = 'sha384'
-	s = pytest.p384.ecdsa_sign(tbs_str)
-	print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
-
-	# Preparing an algoroithm
-	pubkey_alg = keys.PublicKeyAlgorithm({
-		'algorithm': keys.PublicKeyAlgorithmId('ec'),
-		'parameters': keys.ECDomainParameters(
-			name='named',
-			value=pytest.p384.curve
-		)
-	})
-
-	# Preparing a PublicKeyInfo
-	pubkey_asn1 = core.BitString.load(pytest.p384.pkey)
-	pubkey_info = keys.PublicKeyInfo({
-		'algorithm': pubkey_alg,
-		'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-	})
-
-	# Load a public key into the oscrypto engine to using it in the verify function
-	public = load_public_key(pubkey_info)
-
-	# Assert wrong text
-	with pytest.raises(SignatureError):
-		ecdsa_verify(public, s.signature, tbs_str_fail, ha)
-
-	# Assert wrong key
-	with pytest.raises(SignatureError):
-		# Preparing a PublicKeyInfo
-		pubkey_asn1 = core.BitString.load(pytest.p384_fail.pkey)
-		pubkey_info = keys.PublicKeyInfo({
-			'algorithm': pubkey_alg,
-			'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-		})
-
-		# Load a public key into the oscrypto engine to using it in the verify function
-		public = load_public_key(pubkey_info)
-		ecdsa_verify(public, s.signature, tbs_str, ha)
+        # Load a public key into the oscrypto engine to using it in the verify function
+        public = load_public_key(pubkey_info)
+        ecdsa_verify(public, s.signature, tbs_str, ha)
 
 
 def test_ecdsa_nonkey():
-	LOGGER.info('Sign data with empty key')
-	setup_keys()
-	with pytest.raises(TypeError):
-		pytest.p256.ecdsa_sign(bytearray(35), tbs_str)
+    LOGGER.info('Sign data with empty key')
+    ecc_key = EccKey(0xE100).generate()
+    with pytest.raises(TypeError):
+        ecc_key.ecdsa_sign(bytearray(35), tbs_str)
 
 
 def test_ecdsa_nonkey_2():
-	LOGGER.info('Sign faulty data with a correct key')
-	setup_keys()
-	with pytest.raises(TypeError):
-		pytest.p256.ecdsa_sign(int(19273917398739829))
-
+    LOGGER.info('Sign faulty data with a correct key')
+    ecc_key = EccKey(0xE100).generate()
+    with pytest.raises(TypeError):
+        ecc_key.ecdsa_sign(int(19273917398739829))

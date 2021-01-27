@@ -41,15 +41,9 @@ def test_read_existing_faulty_objid():
         Certificate(0xe0e7)
 
 
-def test_read_default_empty():
-    LOGGER.info('Try to read an empty certificate')
-    with pytest.raises(ValueError):
-        Certificate(0xe0e8)
-
-
 def test_write_new_default():
     LOGGER.info('Write new certificate in a default slot')
-    with pytest.raises(ValueError):
+    with pytest.raises(IOError):
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
             der_bytes = f.read()
         Certificate(0xe0e0).der = der_bytes
@@ -59,7 +53,11 @@ def test_write_new_specific():
     LOGGER.info('Write new certificate in a specific slot')
     with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
         der_bytes = f.read()
+    obj = Certificate(0xe0e1)
+    old_meta = {'change': obj.meta['change']}
+    obj.meta = {'change': 'always'}
     Certificate(0xe0e1).der = der_bytes
+    obj.meta = old_meta
 
 
 def test_write_new_faulty_objid():
@@ -68,7 +66,7 @@ def test_write_new_faulty_objid():
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
             wr_bytes = f.read()
 
-        Certificate(0xe0e9).der = wr_bytes
+        Certificate(0xe0ec).der = wr_bytes
 
 
 def test_write_new_faulty_cert():
@@ -77,14 +75,14 @@ def test_write_new_faulty_cert():
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-faulty-cert.pem'), 'rb') as f:
             wr_bytes = f.read()
 
-        Certificate(0xe0e1).der = wr_bytes
+        Certificate(0xe0e1).pem = wr_bytes
 
 
 def test_write_new_locked_object():
     LOGGER.info('Try to write a certificate into a locked object')
     c = Certificate(0xe0e1)
     old_meta = c.meta['change']
-    with pytest.raises(ValueError):
+    with pytest.raises(IOError):
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
             wr_bytes = f.read()
 
