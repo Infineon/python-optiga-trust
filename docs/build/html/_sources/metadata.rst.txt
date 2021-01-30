@@ -4,7 +4,22 @@ Object and Metadata Management
 Objects
 ^^^^^^^
 
-Reading a certificate object
+An object within this library is a generic class, which represents basic functionality and features valid for all
+OIDs (Object IDs) located on one chip.
+Here are basic features what you can do with a generic Object instance (if access condition allows):
+ - Read/write data from/to the object
+ - Read/write metadata from/to the object
+::
+
+    from optigatrust import core
+
+    # Create an instance of object.
+    object = Object(0xf1d0)
+
+    # Read data
+
+
+A Certificate object
 ----------------------------
 
 ::
@@ -83,7 +98,7 @@ All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle
 Access Conditions
 +++++++++++++++++
 
-The '<metadata_value>' should be defined either as a single value, or a list of values; e.g.
+The '<metadata_value>' should be defined either as a list of values; e.g.
 
  - a constructed value
     - {'read': ['lcso', '<', 'operational']}
@@ -96,7 +111,6 @@ The '<metadata_value>' should be defined either as a single value, or a list of 
 .. list-table:: Access Conditions Table (SRM M V3 - Table 69)
    :widths: 10 90
    :header-rows: 1
-   :class: longtable
 
    * - Tag
      - Meaning
@@ -156,7 +170,7 @@ The '<metadata_value>' should be defined either as a single value, or a list of 
 
 
 
-Printing All metadata in human readbale form
+Printing All metadata in human readable form
 --------------------------------------------
 
 ::

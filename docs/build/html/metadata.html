@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="crypto.html">2. Crypto Operations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">3. Object and Metadata Management</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#objects">3.1. Objects</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#reading-a-certificate-object">3.1.1. Reading a certificate object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#a-certificate-object">3.1.1. A Certificate object</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#reading-a-key-object">3.1.2. Reading a key object</a></li>
 </ul>
 </li>
@@ -98,7 +98,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#access-conditions">3.2.1.2. Access Conditions</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#printing-all-metadata-in-human-readbale-form">3.2.2. Printing All metadata in human readbale form</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#printing-all-metadata-in-human-readable-form">3.2.2. Printing All metadata in human readable form</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#updating-metadata-of-the-certificate-object">3.2.3. Updating Metadata of the Certificate Object</a></li>
 </ul>
 </li>
@@ -175,8 +175,25 @@
 <h1><span class="section-number">3. </span>Object and Metadata Management<a class="headerlink" href="#object-and-metadata-management" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="objects">
 <h2><span class="section-number">3.1. </span>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="reading-a-certificate-object">
-<h3><span class="section-number">3.1.1. </span>Reading a certificate object<a class="headerlink" href="#reading-a-certificate-object" title="Permalink to this headline">¶</a></h3>
+<p>An object within this library is a generic class, which represents basic functionality and features valid for all
+OIDs (Object IDs) located on one chip.
+Here are basic features what you can do with a generic Object instance (if access condition allows):</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Read/write data from/to the object</p></li>
+<li><p>Read/write metadata from/to the object</p></li>
+</ul>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">core</span>
+
+<span class="c1"># Create an instance of object.</span>
+<span class="nb">object</span> <span class="o">=</span> <span class="n">Object</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
+
+<span class="c1"># Read data</span>
+</pre></div>
+</div>
+<div class="section" id="a-certificate-object">
+<h3><span class="section-number">3.1.1. </span>A Certificate object<a class="headerlink" href="#a-certificate-object" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.cert</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">cert_object</span> <span class="o">=</span> <span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
@@ -267,7 +284,7 @@ Metadata should be contructed in the following manner:</p>
 </div>
 <div class="section" id="access-conditions">
 <h4><span class="section-number">3.2.1.2. </span>Access Conditions<a class="headerlink" href="#access-conditions" title="Permalink to this headline">¶</a></h4>
-<p>The ‘&lt;metadata_value&gt;’ should be defined either as a single value, or a list of values; e.g.</p>
+<p>The ‘&lt;metadata_value&gt;’ should be defined either as a list of values; e.g.</p>
 <blockquote>
 <div><ul class="simple">
 <li><dl class="simple">
@@ -288,7 +305,7 @@ Metadata should be contructed in the following manner:</p>
 </li>
 </ul>
 </div></blockquote>
-<table class="colwidths-given longtable docutils align-default" id="id2">
+<table class="colwidths-given docutils align-default" id="id2">
 <caption><span class="caption-text">Access Conditions Table (SRM M V3 - Table 69)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
 <col style="width: 10%" />
@@ -381,8 +398,8 @@ Metadata should be contructed in the following manner:</p>
 </table>
 </div>
 </div>
-<div class="section" id="printing-all-metadata-in-human-readbale-form">
-<h3><span class="section-number">3.2.2. </span>Printing All metadata in human readbale form<a class="headerlink" href="#printing-all-metadata-in-human-readbale-form" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="printing-all-metadata-in-human-readable-form">
+<h3><span class="section-number">3.2.2. </span>Printing All metadata in human readable form<a class="headerlink" href="#printing-all-metadata-in-human-readable-form" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.cert</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
