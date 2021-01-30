@@ -90,12 +90,17 @@ def to_json():
     for oid in optiga.object_id_values:
         key = Object(oid)
         raw_meta = key.read_raw_meta().hex()
+        try:
+            data = key.read().hex()
+        except IOError:
+            print('Data in {0} is not readable - skip.'.format(oid))
+            data = ""
         if len(raw_meta) == 0:
             continue
         output[hex(oid)[2:]] = {
             "metadata": raw_meta,
             "pretty_metadata": key.meta,
-            "data": key.read().hex()
+            "data": data
         }
         del key
 
