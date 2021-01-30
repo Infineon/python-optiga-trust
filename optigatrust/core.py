@@ -26,7 +26,7 @@ import platform
 import sys
 from ctypes import *
 from collections import namedtuple
-import struct
+import warnings
 
 from optigatrust.const import x, m1, m3, m2id2, charge
 
@@ -34,21 +34,10 @@ __all__ = [
     'Settings',
     'Descriptor',
     'Object',
-    'ValueMap',
     'init',
     'random',
     'get_info',
     'lifecycle_states',
-    'key_usages',
-    'key_usages_swaped',
-    'meta_tags',
-    'meta_tags_swaped',
-    'algorithms',
-    'algorithms_swaped',
-    'access_conditions_ids',
-    'access_conditions_ids_swaped',
-    'data_object_types',
-    'data_object_types_swaped',
     'parse_raw_meta',
     'prepare_raw_meta',
 ]
@@ -333,61 +322,63 @@ def random(n, trng=True):
 
 
 lifecycle_states = {
-    1: 'creation',
-    3: 'initalisation',
-    7: 'operational',
-    15: 'termination'
+    0x01: 'creation',
+    0x03: 'initalisation',
+    0x07: 'operational',
+    0x0f: 'termination'
 }
 
-key_usages = {
-    'authentication': b'\x01',
-    'encryption': b'\x02',
-    'sign': b'\x10',
-    'key_agreement': b'\x20',
+_lifecycle_states_swaped = {y: x for x, y in lifecycle_states.items()}
+
+_key_usages = {
+    'authentication': 0x01,
+    'encryption': 0x02,
+    'signature': 0x10,
+    'key_agreement': 0x20,
 }
 
-key_usages_swaped = {y: x for x, y in key_usages.items()}
+_key_usages_swaped = {y: x for x, y in _key_usages.items()}
 
-meta_tags = {
-    'execute': b'\xd3',
-    'change': b'\xd0',
-    'read': b'\xd1',
-    'metadata': b'\x20',
-    'lcso': b'\xc0',
-    'version': b'\xc1',
-    'max_size': b'\xc4',
-    'used_size': b'\xc5',
-    'algorithm': b'\xe0',
-    'key_usage': b'\xe1',
-    'type': b'\xe8',
-    'reset_type': b'\xf0',
+_meta_tags = {
+    'execute': 0xd3,
+    'change': 0xd0,
+    'read': 0xd1,
+    'metadata': 0x20,
+    'lcso': 0xc0,
+    'version': 0xc1,
+    'max_size': 0xc4,
+    'used_size': 0xc5,
+    'algorithm': 0xe0,
+    'key_usage': 0xe1,
+    'type': 0xe8,
+    'reset_type': 0xf0,
 }
 
-meta_tags_swaped = {y: x for x, y in meta_tags.items()}
+_meta_tags_swaped = {y: x for x, y in _meta_tags.items()}
 
-algorithms = {
-    'nistp256r1': b'\x03',
-    'nistp384r1': b'\x04',
-    'nistp512r1': b'\x05',
-    'brainpool256r1': b'\x13',
-    'brainpool384r1': b'\x15',
-    'brainpool521r1': b'\x16',
-    'rsa1024': b'\x41',
-    'rsa2048': b'\x42',
-    'aes128': b'\x81',
-    'aes192': b'\x82',
-    'aes256': b'\x83',
-    'sha256': b'\xe2'
+_algorithms = {
+    'secp256r1': 0x03,
+    'secp384r1': 0x04,
+    'secp521r1': 0x05,
+    'brainpoolp256r1': 0x13,
+    'brainpoolp384r1': 0x15,
+    'brainpoolp512r1': 0x16,
+    'rsa1024': 0x41,
+    'rsa2048': 0x42,
+    'aes128': 0x81,
+    'aes192': 0x82,
+    'aes256': 0x83,
+    'sha256': 0xe2
 }
 
-algorithms_swaped = {y: x for x, y in algorithms.items()}
+_algorithms_swaped = {y: x for x, y in _algorithms.items()}
 
-access_conditions_ids = {
-    'always': b'\x00',
+_access_conditions_ids = {
+    'always': 0x00,
     # 2 bytes, e.g. Enable access if boot phase flag in Security Status application is set → 0x10, 0x20
     # Note: SetDataObject with Param = erase&write clears all bits and with Param = write clears all corresponding
     # bits not set to 1 in data to be written
-    'sec_sta_g': b'\x10',
+    'sec_sta_g': 0x10,
     # 3 bytes, for instance data object read is allowed only under shielded connection using a pre shared secret
     # 1) Read, Conf, Binding Secret (e.g. 0xD1, 0x03, 0x20, 0xE1, 0x40) In case of reading a data object (e.g. using
     # GetDataObject), the shielded connection must be established already using the specified Binding secret (e.g.
@@ -411,7 +402,7 @@ access_conditions_ids = {
     # object data as part of fragments. The usage of this identifier is to enforce the right secret used (Integrity
     # Trust Anchor, Operator AND, Confidentiality Protected Update Secret OID). The Protected Update Secret must not
     # same as the target data object to be updated.
-    'conf': b'\x20',
+    'conf': 0x20,
     # 3 byte; Value, Key Reference
     # (e.g. Int first Session Key → 0x21, 0xF1, 0xF0)
     # 1) Read, Int, Binding Secret (e.g. 0xD1, 0x03, 0x21, 0xE1, 0x40)
@@ -429,10 +420,10 @@ access_conditions_ids = {
     # in the manifest must be verified with the addressed trust anchor (e.g. 0xE0EF) in the access conditions. In case
     # of SetObjectProtected command, the change access conditions of target OID must have Integrity access condition
     # identifier with the respective Trust Anchor.
-    'int': b'\x21',
+    'int': 0x21,
     # 3 byte; Value, Reference (Authorization Reference OID)
     # (e.g. Auto → 0x23, 0xF1, 0xD0)
-    'auto': b'\x23',
+    'auto': 0x23,
     # 3 byte; Value, Counter Reference
     # (e.g. Linked Counter 1 → 0x40, 0xE1, 0x20)
     # For example, The arbitrary data object holds a pre-shared secret and this secret is allowed to be used for
@@ -443,60 +434,60 @@ access_conditions_ids = {
     # (e.g. EXE, Luc, Counter Object → 0xD3, 0x03, 0x40, 0xE1, 0x20)
     # The counter data objects gets updated (counter value gets incremented by 1 up to maximum limit)
     # automatically when the DeriveKey command is performed.
-    'luc': b'\x40',
+    'luc': 0x40,
     # 3 byte; Value, Qualifier, Reference
     # (e.g. LcsG < op → 0x70, 0xFC, 0x07)
-    'lcsg': b'\x70',
+    'lcsg': 0x70,
     # 2 byte; Value
     # (e.g. Enable access if boot phase flag in Security Status application is set → 0x90, 0x20)
     # Note: SetDataObject with Param = erase&write clears all bits and with Param = write clears all corresponding
     # bits not set to 1 in data to be written
-    'sec_sta_a': b'\x90',
+    'sec_sta_a': 0x90,
     # 3 byte; Value, Qualifier, Reference
     # (e.g. LcsA > in → 0xE0, 0xFB, 0x03)
-    'lcsa': b'\xe0',
+    'lcsa': 0xe0,
     # 3 byte; Value, Qualifier, Reference
     # (e.g. LcsO < op → 0xE1, 0xFC, 0x07)
-    'lcso': b'\xe1',
-    '==': b'\xfa',
-    '>': b'\xfb',
-    '<': b'\xfc',
-    '&&': b'\xfd',
-    '||': b'\xfe',
-    'never': b'\xff'
+    'lcso': 0xe1,
+    '==': 0xfa,
+    '>': 0xfb,
+    '<': 0xfc,
+    '&&': 0xfd,
+    '||': 0xfe,
+    'never': 0xff
 }
 
-access_conditions_ids_swaped = {y: x for x, y in access_conditions_ids.items()}
+_access_conditions_ids_swaped = {y: x for x, y in _access_conditions_ids.items()}
 
-data_object_types = {
+_data_object_types = {
     # SRM: BSTR. The Byte String data object type is represented by a sequence of bytes, which could be addressed by
     # offset and length.
-    'byte_string': b'\x00',
+    'byte_string': 0x00,
     # SRM: UPCTR. The Up-counter data type implements a counter with a current value which could be increased only
     # and a threshold terminating the counter.
-    'up_counter': b'\x01',
+    'up_counter': 0x01,
     # SRM: TA. The Trust Anchor data type contains a single X.509 certificate which could be used in various commands
     # requiring a root of trust.
-    'trust_anchor': b'\x11',
+    'trust_anchor': 0x11,
     # SRM: DEVCERT. The Device Identity data type contains a single X.509 certificate or a chain of certificates
     # (TLS, USB-Type C, ...) which was issued to vouch for the cryptographic identity of the end-device.
-    'device_cert': b'\x12',
+    'device_cert': 0x12,
     # SRM: PRESSEC. The Pre-shared Secret contains a binary data string which makes up a pre-shared secret for various
     # purposes (FW-decryption, ...).
-    'pre_sh_secret': b'\x21',
+    'pre_sh_secret': 0x21,
     # SRM: PTFBIND. The Platform Binding contains a binary data string which makes up a pre-shared secret for platform
     # binding (e.g. used for OPTIGA™ Shielded Connection).
-    'platform_binding': b'\x22',
+    'platform_binding': 0x22,
     # SRM: UPDATESEC. The Protected Update Secret contains a binary data string which makes up a pre-shared secret for
     # confidentiality protected update of data or key objects. The maximum length is limited to 64 bytes, even if the
     # hosting data object has a higher maximum length.
-    'update_secret': b'\x23',
+    'update_secret': 0x23,
     # SRM: AUTOREF. The Authorization Reference contains a binary data string which makes up a reference value for
     # verifying an external entity (admin, user, etc.) authorization.
-    'authorization_ref': b'\x31'
+    'authorization_ref': 0x31
 }
 
-data_object_types_swaped = {y: x for x, y in data_object_types.items()}
+_data_object_types_swaped = {y: x for x, y in _data_object_types.items()}
 
 
 def parse_raw_meta(meta: bytes):
@@ -520,29 +511,29 @@ def parse_raw_meta(meta: bytes):
             }
 
     """
-    global access_conditions_ids_swaped
-    global meta_tags_swaped
+    global _access_conditions_ids_swaped
+    global _meta_tags_swaped
     if not isinstance(meta, bytes) and not isinstance(meta, bytearray):
         raise TypeError(
             'Metadata (meta) should be in bytes form, you provided {0}'.format(type(meta))
         )
-    meta_unpacked = list(struct.unpack(str(len(meta)) + 'c', meta))
-    meta_itr = iter(meta_unpacked)
-    # First byte is always \x20
+    meta_tuple = tuple(meta)
+    meta_itr = iter(meta_tuple)
+    # First byte is always 20
     # For instance
-    # [ b'\x20',
-    #   b'\x17',
-    #   b'\xc0', b'\x01', b'\x01',
-    #   b'\xc4', b'\x02', b'\x06', b'\xc0',
-    #   b'\xc5', b'\x02', b'\x01', b'\xe5',
-    #   b'\xd0', b'\x01', b'\xff',
-    #   b'\xd1', b'\x01', b'\x00',
-    #   b'\xd3', b'\x01', b'\x00',
-    #   b'\xe8', b'\x01', b'\x12' ]
+    # [ 20,
+    #   17,
+    #   c0, 01, 01,
+    #   c4, 02, 06, c0,
+    #   c5, 02, 01, e5',
+    #   d0, 01, ff,
+    #   d1, 01, 00,
+    #   d3, 01, 00,
+    #   e8, 01, 12 ]
     # We skip the very first tag, then record the length o the meta data, then go tag by tag (line by line here).
     # Some tags, like lcso or algorithm have a different value which should be interepeted differently
     next(meta_itr)
-    meta_size = int.from_bytes(next(meta_itr), "big")
+    meta_size = next(meta_itr)
     if meta_size == 0:
         return None
     if meta_size < 0:
@@ -557,8 +548,8 @@ def parse_raw_meta(meta: bytes):
     meta_parsed = dict()
     try:
         while True:
-            tag = meta_tags_swaped[next(meta_itr)]
-            tag_size = int.from_bytes(next(meta_itr), 'big')
+            tag = _meta_tags_swaped[next(meta_itr)]
+            tag_size = next(meta_itr)
             if tag_size == 0:
                 return None
             if tag_size < 0:
@@ -567,31 +558,30 @@ def parse_raw_meta(meta: bytes):
                 )
             if tag == 'used_size' or tag == 'max_size':
                 if tag_size == 2:
-                    meta_parsed[tag] = (int.from_bytes(next(meta_itr), 'big') << 8) + \
-                                          int.from_bytes(next(meta_itr), 'big')
+                    meta_parsed[tag] = (next(meta_itr) << 8) + next(meta_itr)
                 elif tag_size == 1:
-                    meta_parsed[tag] = int.from_bytes(next(meta_itr), 'big')
+                    meta_parsed[tag] = next(meta_itr)
                 else:
                     raise ValueError(
                         'Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}'.format(tag_size)
                     )
                 continue
             if tag == 'type':
-                meta_parsed[tag] = data_object_types_swaped[next(meta_itr)]
+                meta_parsed[tag] = _data_object_types_swaped[next(meta_itr)]
                 continue
             if tag == 'algorithm':
-                meta_parsed[tag] = algorithms_swaped[next(meta_itr)]
+                meta_parsed[tag] = _algorithms_swaped[next(meta_itr)]
                 continue
             if tag == 'key_usage':
-                key_usage_bytes = int.from_bytes(next(meta_itr), 'big')
+                key_usage_bytes = next(meta_itr)
                 tag_data = list()
-                if key_usage_bytes & int.from_bytes(key_usages['authentication'], 'big'):
+                if key_usage_bytes & _key_usages['authentication']:
                     tag_data.append('authentication')
-                if key_usage_bytes & int.from_bytes(key_usages['encryption'], 'big'):
+                if key_usage_bytes & _key_usages['encryption']:
                     tag_data.append('encryption')
-                if key_usage_bytes & int.from_bytes(key_usages['sign'], 'big'):
-                    tag_data.append('sign')
-                if key_usage_bytes & int.from_bytes(key_usages['key_agreement'], 'big'):
+                if key_usage_bytes & _key_usages['signature']:
+                    tag_data.append('signature')
+                if key_usage_bytes & _key_usages['key_agreement']:
                     tag_data.append('key_agreement')
                 meta_parsed[tag] = tag_data
                 continue
@@ -600,29 +590,154 @@ def parse_raw_meta(meta: bytes):
             while i < tag_size:
                 _id = next(meta_itr)
                 i += 1
-                if _id in access_conditions_ids_swaped:
+                if _id in _access_conditions_ids_swaped:
                     # Conf, Int, auto and luc have as the last two bytes a reference to the oid used for the expression
                     # it is just another OID from the system
-                    if _id == access_conditions_ids['conf'] \
-                            or _id == access_conditions_ids['int'] \
-                            or _id == access_conditions_ids['auto'] \
-                            or _id == access_conditions_ids['luc']:
-                        tag_data.append(access_conditions_ids_swaped[_id])
-                        tag_data.append(next(meta_itr).hex())
-                        tag_data.append(next(meta_itr).hex())
+                    if _id == _access_conditions_ids['conf'] \
+                            or _id == _access_conditions_ids['int'] \
+                            or _id == _access_conditions_ids['auto'] \
+                            or _id == _access_conditions_ids['luc']:
+                        tag_data.append(_access_conditions_ids_swaped[_id])
+                        tag_data.append(hex(next(meta_itr)))
+                        tag_data.append(hex(next(meta_itr)))
                         i += 2
+                    elif _id == _access_conditions_ids['sec_sta_a'] \
+                            or _id == _access_conditions_ids['sec_sta_g']:
+                        tag_data.append(_access_conditions_ids_swaped[_id])
+                        tag_data.append(hex(next(meta_itr)))
+                        i += 1
                     else:
-                        tag_data.append(access_conditions_ids_swaped[_id])
+                        tag_data.append(_access_conditions_ids_swaped[_id])
                 # if we didn't meet the number, it should be in the lifecycle states
-                elif int.from_bytes(_id, "big") in lifecycle_states:
-                    tag_data.append(lifecycle_states[int.from_bytes(_id, "big")])
+                elif _id in lifecycle_states:
+                    tag_data.append(lifecycle_states[_id])
                 else:
-                    tag_data.append(_id.hex())
+                    tag_data.append(hex(_id))
             if tag_size == 1:
                 tag_data = ''.join(tag_data)
             meta_parsed[tag] = tag_data
     except StopIteration:
         return meta_parsed
+
+
+def _prepare_access_conditions(key, value: list) -> list:
+    meta = list()
+    size = 0
+    meta.append(_meta_tags[key])
+    # as this is a list, we can find out how many bytes is required in advance
+    meta.append(len(value))
+    # we would like to skip some of values
+    value_iter = iter(value)
+    for element in value_iter:
+        if element == 'int' or element == 'conf' or element == 'auto' or element == 'luc':
+            _meta = [
+                _access_conditions_ids[element],
+                int(next(value_iter), 16),
+                int(next(value_iter), 16),
+            ]
+        elif element == 'sec_sta_g' or element == 'sec_sta_a':
+            _meta = [
+                _access_conditions_ids[element],
+                int(next(value_iter), 16)
+            ]
+        elif element in _lifecycle_states_swaped:
+            _meta = [_lifecycle_states_swaped[element]]
+        elif element not in _access_conditions_ids:
+            raise ValueError(
+                'Value for Access Condition isn\'t found. '
+                'Accepted values {0}, you provided {1}'.format(_access_conditions_ids.keys(), element)
+            )
+        else:
+            _meta = [_access_conditions_ids[element]]
+        meta += _meta
+        # Update the size (1 comes from the length done at the beggining )
+        size += len(_meta)
+
+    return meta
+
+
+def _prepare_key_usage(key, value) -> int and list:
+    key_usage = 0
+    # the value should be of type list()
+    if not isinstance(value, list):
+        raise TypeError(
+            'key usage tag should be provided in the form of a list for instance [\'x\', \'y\', \'z\']'
+        )
+    for i in value:
+        if i not in _key_usages:
+            raise ValueError(
+                'key usage isn\'t supported. Supported values {0}, you provided {1}'.format(_key_usages, i)
+            )
+        key_usage |= _key_usages[i]
+
+    meta = [
+        _meta_tags[key],  # key
+        1,                # size
+        key_usage         # value
+    ]
+
+    return meta
+
+
+def _prepare_algorithm(key, value) -> list:
+    if value not in _algorithms:
+        raise ValueError(
+            'Value for Algorithm meta tag isn\'t found. '
+            'Accepted values {0}, you provided {1}'.format(_algorithms.keys(), value)
+        )
+    meta = [
+        _meta_tags[key],    # key
+        1,                  # size
+        _algorithms[value]  # value
+    ]
+
+    return meta
+
+
+def _prepare_type(key, value) -> list:
+    if value not in _data_object_types:
+        raise ValueError(
+            'Value for Type meta tag isn\'t found. '
+            'Accepted values {0}, you provided {1}'.format(_data_object_types.keys(), value)
+        )
+    meta = [
+        _meta_tags[key],           # key
+        1,                         # size
+        _data_object_types[value]  # value
+    ]
+
+    return meta
+
+
+def _prepare_meta_and_size(key, value) -> list:
+    # This is how the result should look like
+    # key  size  value
+    # Used size and max size tags can't be send to the chip, so ignore them with a warning
+    if key == 'used_size' or key == 'max_size':
+        warnings.warn('The used size tag and max size tag cannot be defined by a user.Skip.')
+        return list()
+    # Parse each key, and construct a
+    elif key == 'type':
+        meta = _prepare_type(key, value)
+    elif key == 'algorithm':
+        meta = _prepare_algorithm(key, value)
+    elif key == 'key_usage':
+        meta = _prepare_key_usage(key, value)
+    # otherwise the value is most likely an access condition expression
+    elif isinstance(value, list):
+        meta = _prepare_access_conditions(key, value)
+    else:
+        if value not in _access_conditions_ids:
+            raise ValueError(
+                'Tag {0} isn\'t supported'.format(value)
+            )
+        # typical for 'always', 'never'
+        meta = [
+            _meta_tags[key],               # key
+            1,                             # size
+            _access_conditions_ids[value]  # value
+        ]
+    return meta
 
 
 def prepare_raw_meta(new_meta: dict):
@@ -652,73 +767,25 @@ def prepare_raw_meta(new_meta: dict):
         a bytearray with resulting metadata to write into the chip
     """
     meta = list()
-    # 0x20 should go first
-    meta.append(32)
-    # then you have length
+    # This is how the result should look like
+    # Global tag   size  key[0]  size[0]  value[0]  key[1]  size[1]  value[1]  key[2]  size[2]  value[2]
+    # 20           09    C0      01       03        C4      01       8C        C5      01       0A
+    meta.append(0x20)
+    # first global size, we will update it later on with new keys, sizes and values appended
     meta.append(0)
+    # We get as an input a dictionary, which is handy, we go entry by entry and add them correspondingly in the meta
     for key, value in new_meta.items():
-        if key not in meta_tags:
+        if key not in _meta_tags:
             raise ValueError(
-                'Wrong value. Accepted values: {0}, you provided {1}'.format(meta_tags.keys(), key)
+                'Wrong value. Accepted values: {0}, you provided {1}'.format(_meta_tags.keys(), key)
             )
-        meta.append(int.from_bytes(meta_tags[key], 'big'))
-        # Update the size
-        meta[1] += 1
-        if key == 'used_size' or key == 'max_size':
-            raise ValueError(
-                'The used size tag and max size tag can#t be set by user'
-            )
-        if key == 'type':
-            if value not in data_object_types:
-                raise ValueError(
-                    'Value for Type meta tag isn\'t found. '
-                    'Accepted values {0}, you provided {1}'.format(data_object_types.keys(), key)
-                )
-            meta.append(int.from_bytes(data_object_types[value], 'big'))
-            # Update the size
-            meta[1] += 1
-            continue
-        if key == 'algorithm':
-            if value not in algorithms:
-                raise ValueError(
-                    'Value for Algorithm meta tag isn\'t found. '
-                    'Accepted values {0}, you provided {1}'.format(algorithms.keys(), key)
-                )
-            meta.append(int.from_bytes(algorithms[value], 'big'))
-            # Update the size
-            meta[1] += 1
-            continue
-        if key == 'key_usage':
-            # the value should be of type list()
-            if not isinstance(value, list):
-                raise TypeError(
-                    'key usage tag should be provided in the form of a lost for instance [\'x\', \'y\', \'z\']'
-                )
-            for i in value:
-                if i not in key_usages:
-                    raise ValueError(
-                        'key usage isn\'t supported. Supported values {0}, you provided {1}'.format(key_usages, i)
-                    )
-                meta.append(int(i))
-                # Update the size
-                meta[1] += 1
-            continue
-        if isinstance(value, list):
-            meta.append(len(value))
-            meta[1] += 1
-            for element in value:
-                if element not in access_conditions_ids:
-                    raise ValueError(
-                        'Value for Access Condition isn\'t found. '
-                        'Accepted values {0}, you provided {1}'.format(access_conditions_ids.keys(), element)
-                    )
-                meta.append(int.from_bytes(access_conditions_ids[element], 'big'))
-                meta[1] += 1
-        else:
-            meta.append(1)
-            meta[1] += 1
-            meta.append(int.from_bytes(access_conditions_ids[value], 'big'))
-            meta[1] += 1
+        # here we call a global parser for all known keys, as a result we should get a sequence of bytes which will have
+        # key[n], size[n], value[n] prepared based on the given key entry (n)
+        _meta = _prepare_meta_and_size(key, value)
+        meta += _meta
+        # Update the size of the metadata based on the returned value
+        meta[1] += len(_meta)
+    print(meta)
     return bytearray(meta)
 
 
