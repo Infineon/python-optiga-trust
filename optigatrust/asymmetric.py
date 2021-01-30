@@ -124,8 +124,8 @@ class EccKey(core.Object):
             the widest range of supported algorithms: nistp256r1, nistp384r1, nistp521r1, bra
 
         :param key_usage:
-            A key usage indicator. The value should be the KeyUsage Enumeration. By default
-            [KeyUsage.KEY_AGREEMENT, KeyUsage.AUTHENTICATION]
+            Key usage defined per string. Can be selected as following:
+            ['key_agreement', 'authentication', 'encryption', 'signature']
 
         :raises:
             - TypeError - when any of the parameters are of the wrong type
@@ -134,9 +134,23 @@ class EccKey(core.Object):
         :returns:
             EccKey object or None
         """
+        _allowed_key_usage = {
+            'key_agreement': self.optiga.key_usage.KEY_AGR,
+            'authentication': self.optiga.key_usage.AUTH,
+            'signature': self.optiga.key_usage.SIGN
+        }
+        _key_usage = list()
         if key_usage is None:
-            key_usage = [self.optiga.key_usage.KEY_AGR, self.optiga.key_usage.AUTH]
+            _key_usage = [self.optiga.key_usage.KEY_AGR, self.optiga.key_usage.SIGN]
+        else:
+            for entry in key_usage:
+                if entry not in _allowed_key_usage:
+                    raise ValueError(
+                        'Wrong Key Usage value {0}, supported are {1}'.format(entry, _allowed_key_usage.keys())
+                    )
+                _key_usage.append(_allowed_key_usage[entry])
 
+        print(_key_usage)
         c = _str2curve(curve, return_value=True)
         if c not in self.optiga.curves_values:
             raise TypeError(
@@ -148,7 +162,7 @@ class EccKey(core.Object):
             c_ushort)
         self.optiga.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
 
-        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
+        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
         c_keyid = c_ushort(self.key_id)
         p = (c_ubyte * 150)()
         c_plen = c_ushort(len(p))
@@ -160,7 +174,7 @@ class EccKey(core.Object):
 
         if ret == 0:
             self._pkey = bytes(pubkey)
-            self._key_usage = key_usage
+            self._key_usage = _key_usage
             self._curve = curve
             return self
         else:
@@ -260,6 +274,10 @@ class RsaKey(core.Object):
             Size of the key, can be 1024 or 2048
 
         :param key_usage:
+            Key usage defined per string. Can be selected as following:
+            ['key_agreement', 'authentication', 'encryption', 'signature']
+
+        :param key_usage:
             A key usage indicator. The value should be the KeyUsage Enumeration. By default
             [KEY_AGR, AUTH, ENCRYPT]
 
@@ -270,11 +288,25 @@ class RsaKey(core.Object):
         :returns:
             RsaKey object or None
         """
+        _allowed_key_usages = {
+            'key_agreement': self.optiga.key_usage.KEY_AGR,
+            'authentication': self.optiga.key_usage.AUTH,
+            'encryption': self.optiga.key_usage.ENCRYPT,
+            'signature': self.optiga.key_usage.SIGN
+        }
+        _key_usage = list()
+        if key_usage is None:
+            _key_usage = [self.optiga.key_usage.KEY_AGR, self.optiga.key_usage.SIGN]
+        else:
+            for entry in key_usage:
+                if entry not in _allowed_key_usages:
+                    raise ValueError(
+                        'Wrong Key Usage value {0}, supported are {1}'.format(entry, _allowed_key_usages.keys())
+                    )
+                _key_usage.append(_allowed_key_usages[entry])
+
         _bytes = None
         api = self.optiga.api
-
-        if key_usage is None:
-            key_usage = [self.optiga.key_usage.KEY_AGR, self.optiga.key_usage.AUTH, self.optiga.key_usage.ENCRYPT]
 
         allowed_key_sizes = {1024, 2048}
         if key_size not in allowed_key_sizes:
@@ -293,7 +325,7 @@ class RsaKey(core.Object):
             c_keytype = 0x42
             rsa_header = b'\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00'
 
-        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, key_usage)))
+        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
         c_keyid = c_ushort(self.id)
         p = (c_ubyte * 320)()
         c_plen = c_ushort(len(p))
@@ -305,7 +337,7 @@ class RsaKey(core.Object):
 
         if ret == 0:
             self._pkey = rsa_header + bytes(pubkey)
-            self._key_usage = key_usage
+            self._key_usage = _key_usage
             self._key_size = key_size
             return self
         else:
