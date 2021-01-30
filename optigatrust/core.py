@@ -323,7 +323,7 @@ def random(n, trng=True):
 
 lifecycle_states = {
     0x01: 'creation',
-    0x03: 'initalisation',
+    0x03: 'initialization',
     0x07: 'operational',
     0x0f: 'termination'
 }
@@ -490,6 +490,155 @@ _data_object_types = {
 _data_object_types_swaped = {y: x for x, y in _data_object_types.items()}
 
 
+_reset_types = {
+    # Setting the LcsO of either a key or data object.
+    'lcso_to_creation': 0x01,
+    'lcso_to_initialisation': 0x02,
+    'lcso_to_operational': 0x07,
+    'lcso_to_termination': 0x0f,
+    # - Flushing of either a key or data object with zero and set the used length of data objects, if present, to 0x0000
+    # - If none of the flushing options is set in metadata, then the SetObjectProtected Manifest setting (if present)
+    # gets used.
+    # - In case of a key object the algorithm associated gets cleared and sets again with successful generation or
+    # writing (protected update) a new key.
+    'flushing': 0x10,
+    # - Overwriting either a key or data object with random values and set the used length of data objects,
+    # if present, to 0x0000.
+    # - If none of the flushing options is set in metadata, then the SetObjectProtected Manifest setting
+    # (if present) gets used.
+    # - In case of a key object the algorithm associated gets cleared and sets again with successful generation or
+    # writing (protected update) a new key
+    'random_data': 0x20
+}
+
+_reset_types_swaped = {y: x for x, y in _reset_types.items()}
+
+
+def _parse_version(tag_size, meta_itr):
+    if tag_size == 2:
+        value = int((next(meta_itr) << 8) + next(meta_itr))
+        is_valid = bool((value >> 15) & 0x01)
+        value &= value & 0x7fff
+    else:
+        raise ValueError(
+            'Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}'.format(tag_size)
+        )
+    return [is_valid, value]
+
+
+def _parse_access_conditions(tag_size, meta_itr):
+    access_conditions = list()
+    i = 0
+    while i < tag_size:
+        _id = next(meta_itr)
+        i += 1
+        if _id in _access_conditions_ids_swaped:
+            # Conf, Int, auto and luc have as the last two bytes a reference to the oid used for the expression
+            # it is just another OID from the system
+            if _id == _access_conditions_ids['conf'] \
+                    or _id == _access_conditions_ids['int'] \
+                    or _id == _access_conditions_ids['auto'] \
+                    or _id == _access_conditions_ids['luc']:
+                access_conditions.append(_access_conditions_ids_swaped[_id])
+                access_conditions.append(hex(next(meta_itr)))
+                access_conditions.append(hex(next(meta_itr)))
+                i += 2
+            elif _id == _access_conditions_ids['sec_sta_a'] \
+                    or _id == _access_conditions_ids['sec_sta_g']:
+                access_conditions.append(_access_conditions_ids_swaped[_id])
+                access_conditions.append(hex(next(meta_itr)))
+                i += 1
+            else:
+                access_conditions.append(_access_conditions_ids_swaped[_id])
+        # if we didn't meet the number, it should be in the lifecycle states
+        elif _id in lifecycle_states:
+            access_conditions.append(lifecycle_states[_id])
+        else:
+            access_conditions.append(hex(_id))
+    if tag_size == 1:
+        access_conditions = ''.join(access_conditions)
+
+    return access_conditions
+
+
+def _parse_lifecycle_state(tag_size, meta_itr):
+    lcso = next(meta_itr)
+    if lcso not in lifecycle_states:
+        raise ValueError(
+            'Algorithm tag value {0} not found in supported {1}'.format(lcso, lifecycle_states)
+        )
+    return lifecycle_states[lcso]
+
+
+def _parse_key_usage(tag_size: int, meta_itr) -> list:
+    key_usage_bytes = next(meta_itr)
+    tag_data = list()
+    if key_usage_bytes & _key_usages['authentication']:
+        tag_data.append('authentication')
+    if key_usage_bytes & _key_usages['encryption']:
+        tag_data.append('encryption')
+    if key_usage_bytes & _key_usages['signature']:
+        tag_data.append('signature')
+    if key_usage_bytes & _key_usages['key_agreement']:
+        tag_data.append('key_agreement')
+
+    return tag_data
+
+
+def _parse_algorithm(tag_size, meta_itr):
+    algorithm = next(meta_itr)
+    if algorithm not in _algorithms_swaped:
+        raise ValueError(
+            'Algorithm tag value {0} not found in supported {1}'.format(algorithm, _algorithms_swaped)
+        )
+    return _algorithms_swaped[algorithm]
+
+
+def _parse_reset_type(tag_size, meta_itr):
+    reset_type = next(meta_itr)
+    if reset_type not in _reset_types_swaped:
+        raise ValueError(
+            'Reset Type tag value {0} not found in supported {1}'.format(reset_type, _reset_types_swaped)
+        )
+    return _reset_types_swaped[reset_type]
+
+
+def _parse_type(tag_size, meta_itr):
+    object_type = next(meta_itr)
+    if object_type not in _data_object_types_swaped:
+        raise ValueError(
+            'Type tag value {0} not found in supported {1}'.format(object_type, _data_object_types_swaped)
+        )
+    return _data_object_types_swaped[object_type]
+
+
+def _parse_used_max_size(tag_size: int, meta_itr) -> int:
+    if tag_size == 2:
+        value = int((next(meta_itr) << 8) + next(meta_itr))
+    elif tag_size == 1:
+        value = int(next(meta_itr))
+    else:
+        raise ValueError(
+            'Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}'.format(tag_size)
+        )
+    return value
+
+
+_parser_map = {
+    'used_size': _parse_used_max_size,
+    'max_size': _parse_used_max_size,
+    'type': _parse_type,
+    'reset_type': _parse_reset_type,
+    'algorithm': _parse_algorithm,
+    'key_usage': _parse_key_usage,
+    'lcso': _parse_lifecycle_state,
+    'change': _parse_access_conditions,
+    'execute': _parse_access_conditions,
+    'read': _parse_access_conditions,
+    'version': _parse_version
+}
+
+
 def parse_raw_meta(meta: bytes):
     """
     This function should process the given metadata and return it in a human readable form.
@@ -511,8 +660,6 @@ def parse_raw_meta(meta: bytes):
             }
 
     """
-    global _access_conditions_ids_swaped
-    global _meta_tags_swaped
     if not isinstance(meta, bytes) and not isinstance(meta, bytearray):
         raise TypeError(
             'Metadata (meta) should be in bytes form, you provided {0}'.format(type(meta))
@@ -536,14 +683,9 @@ def parse_raw_meta(meta: bytes):
     meta_size = next(meta_itr)
     if meta_size == 0:
         return None
-    if meta_size < 0:
+    if meta_size < 0 or meta_size > 62:
         raise ValueError(
-            'Metadata size can\'t be less than zero. Ou have {0}'.format(meta_size)
-        )
-    # 64 for is the maximum
-    if meta_size > 62:
-        raise ValueError(
-            'Metadata Size can\'t be more than 64 bytes. You have {0}'.format(meta_size)
+            'Metadata size can\'t be less than zero and more than 64. Ou have {0}'.format(meta_size)
         )
     meta_parsed = dict()
     try:
@@ -551,71 +693,17 @@ def parse_raw_meta(meta: bytes):
             tag = _meta_tags_swaped[next(meta_itr)]
             tag_size = next(meta_itr)
             if tag_size == 0:
+                warnings.warn('Somehow the tag size for {0} was calculated as 0. Skip.'.format(tag))
                 return None
             if tag_size < 0:
                 raise ValueError(
                     'Metadata size can\'t be less than zero. Ou have {0}'.format(meta_size)
                 )
-            if tag == 'used_size' or tag == 'max_size':
-                if tag_size == 2:
-                    meta_parsed[tag] = (next(meta_itr) << 8) + next(meta_itr)
-                elif tag_size == 1:
-                    meta_parsed[tag] = next(meta_itr)
-                else:
-                    raise ValueError(
-                        'Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}'.format(tag_size)
-                    )
-                continue
-            if tag == 'type':
-                meta_parsed[tag] = _data_object_types_swaped[next(meta_itr)]
-                continue
-            if tag == 'algorithm':
-                meta_parsed[tag] = _algorithms_swaped[next(meta_itr)]
-                continue
-            if tag == 'key_usage':
-                key_usage_bytes = next(meta_itr)
-                tag_data = list()
-                if key_usage_bytes & _key_usages['authentication']:
-                    tag_data.append('authentication')
-                if key_usage_bytes & _key_usages['encryption']:
-                    tag_data.append('encryption')
-                if key_usage_bytes & _key_usages['signature']:
-                    tag_data.append('signature')
-                if key_usage_bytes & _key_usages['key_agreement']:
-                    tag_data.append('key_agreement')
-                meta_parsed[tag] = tag_data
-                continue
-            tag_data = list()
-            i = 0
-            while i < tag_size:
-                _id = next(meta_itr)
-                i += 1
-                if _id in _access_conditions_ids_swaped:
-                    # Conf, Int, auto and luc have as the last two bytes a reference to the oid used for the expression
-                    # it is just another OID from the system
-                    if _id == _access_conditions_ids['conf'] \
-                            or _id == _access_conditions_ids['int'] \
-                            or _id == _access_conditions_ids['auto'] \
-                            or _id == _access_conditions_ids['luc']:
-                        tag_data.append(_access_conditions_ids_swaped[_id])
-                        tag_data.append(hex(next(meta_itr)))
-                        tag_data.append(hex(next(meta_itr)))
-                        i += 2
-                    elif _id == _access_conditions_ids['sec_sta_a'] \
-                            or _id == _access_conditions_ids['sec_sta_g']:
-                        tag_data.append(_access_conditions_ids_swaped[_id])
-                        tag_data.append(hex(next(meta_itr)))
-                        i += 1
-                    else:
-                        tag_data.append(_access_conditions_ids_swaped[_id])
-                # if we didn't meet the number, it should be in the lifecycle states
-                elif _id in lifecycle_states:
-                    tag_data.append(lifecycle_states[_id])
-                else:
-                    tag_data.append(hex(_id))
-            if tag_size == 1:
-                tag_data = ''.join(tag_data)
-            meta_parsed[tag] = tag_data
+            if tag not in _parser_map:
+                raise ValueError(
+                    'Parser for your tag [{0}] is not found'.format(tag)
+                )
+            meta_parsed[tag] = _parser_map[tag](tag_size, meta_itr)
     except StopIteration:
         return meta_parsed
 
@@ -755,8 +843,8 @@ def prepare_raw_meta(new_meta: dict):
                     "operational"
                 ],
                 "execute": "always",
-                "algorithm": "nistp384r1",
-                "key_usage": "21"
+                "algorithm": "secp384r1",
+                "key_usage": "0x21"
             }
 
     :raises:
