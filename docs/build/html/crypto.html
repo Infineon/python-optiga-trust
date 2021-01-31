@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>2. Crypto Operations &mdash; optigatrust 1.1 documentation</title>
+  <title>4. Crypto Operations &mdash; optigatrust 1.1 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="3. Object and Metadata Management" href="metadata.html" />
-    <link rel="prev" title="1. Get Started" href="get_started.html" /> 
+    <link rel="next" title="5. Export Chip Data and Metadata" href="transfer.html" />
+    <link rel="prev" title="3. X.509 Certificates and Certificate Signing Requests" href="cert.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,10 +85,13 @@
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="get_started.html">1. Get Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Crypto Operations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="metadata.html">3. Object and Metadata Management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="export.html">4. Export Chip Data and Metadata</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">5. API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata Management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cert.html">3. X.509 Certificates and Certificate Signing Requests</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">4. Crypto Operations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.asymmetric">4.1. optigatrust.asymmetric module API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="transfer.html">5. Export Chip Data and Metadata</a></li>
 </ul>
 
             
@@ -135,7 +138,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li><span class="section-number">2. </span>Crypto Operations</li>
+      <li><span class="section-number">4. </span>Crypto Operations</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,7 +158,174 @@
            <div itemprop="articleBody">
             
   <div class="section" id="crypto-operations">
-<h1><span class="section-number">2. </span>Crypto Operations<a class="headerlink" href="#crypto-operations" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">4. </span>Crypto Operations<a class="headerlink" href="#crypto-operations" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-optigatrust.asymmetric">
+<span id="optigatrust-asymmetric-module-api"></span><h2><span class="section-number">4.1. </span>optigatrust.asymmetric module API<a class="headerlink" href="#module-optigatrust.asymmetric" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="optigatrust.asymmetric.EccKey">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">EccKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">'secp256r1'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EccKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="metadata.html#optigatrust.core.Object" title="optigatrust.core.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.core.Object</span></code></a></p>
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.curve">
+<em class="property">property </em><code class="sig-name descname">curve</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.curve" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.ecdsa_sign">
+<code class="sig-name descname">ecdsa_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EccKey.ecdsa_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function signs given data based on the provided EccKey object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – Data to sign, the data will be hashed based on the used curve.
+If secp256r1 then sha256, secp384r1 sha384 etc.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>EcdsaSignature object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">'secp256r1'</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EccKey.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates an ECC keypair, the private part is stored on the core based on the provided slot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>curve</strong> – Curve name, should be one of supported by the chip curves. For instance m3 has
+the widest range of supported algorithms: nistp256r1, nistp384r1, nistp521r1, bra</p></li>
+<li><p><strong>key_usage</strong> – Key usage defined per string. Can be selected as following:
+[‘key_agreement’, ‘authentication’, ‘encryption’, ‘signature’]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>EccKey object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.hash_alg">
+<em class="property">property </em><code class="sig-name descname">hash_alg</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.hash_alg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.key_id">
+<em class="property">property </em><code class="sig-name descname">key_id</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.key_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.key_usage">
+<em class="property">property </em><code class="sig-name descname">key_usage</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.key_usage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.pkey">
+<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.pkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.EccKey.signature">
+<em class="property">property </em><code class="sig-name descname">signature</code><a class="headerlink" href="#optigatrust.asymmetric.EccKey.signature" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.asymmetric.EcdsaSignature">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">EcdsaSignature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_alg</span></em>, <em class="sig-param"><span class="n">key_id</span></em>, <em class="sig-param"><span class="n">signature</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.EcdsaSignature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.asymmetric._Signature</span></code></p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.asymmetric.RsaKey">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">RsaKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="metadata.html#optigatrust.core.Object" title="optigatrust.core.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.core.Object</span></code></a></p>
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_size</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates an RSA keypair, the private part is stored on the core based on the provided slot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_size</strong> – Size of the key, can be 1024 or 2048</p></li>
+<li><p><strong>key_usage</strong> – Key usage defined per string. Can be selected as following:
+[‘key_agreement’, ‘authentication’, ‘encryption’, ‘signature’]</p></li>
+<li><p><strong>key_usage</strong> – A key usage indicator. The value should be the KeyUsage Enumeration. By default
+[KEY_AGR, AUTH, ENCRYPT]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RsaKey object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.key_size">
+<em class="property">property </em><code class="sig-name descname">key_size</code><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.key_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.key_usage">
+<em class="property">property </em><code class="sig-name descname">key_usage</code><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.key_usage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.pkcs1v15_sign">
+<code class="sig-name descname">pkcs1v15_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">bytes</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.pkcs1v15_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function signs given data based on the provided RsaKey object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Data to sign</p></li>
+<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. SHA256 by default</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>RsaPkcs1v15Signature object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.asymmetric.RsaKey.pkey">
+<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.asymmetric.RsaKey.pkey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.asymmetric.RsaPkcs1v15Signature">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.asymmetric.</code><code class="sig-name descname">RsaPkcs1v15Signature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_alg</span></em>, <em class="sig-param"><span class="n">keyid</span></em>, <em class="sig-param"><span class="n">signature</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.asymmetric.RsaPkcs1v15Signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.asymmetric._Signature</span></code></p>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -166,10 +336,10 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="metadata.html" class="btn btn-neutral float-right" title="3. Object and Metadata Management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="transfer.html" class="btn btn-neutral float-right" title="5. Export Chip Data and Metadata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="get_started.html" class="btn btn-neutral float-left" title="1. Get Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="cert.html" class="btn btn-neutral float-left" title="3. X.509 Certificates and Certificate Signing Requests" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

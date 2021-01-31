@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3. X.509 Certificates and Certificate Signing Requests &mdash; optigatrust 1.1 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="4. Crypto Operations" href="crypto.html" />
+    <link rel="prev" title="2. Object and Metadata Management" href="metadata.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> optigatrust
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="get_started.html">1. Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata Management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. X.509 Certificates and Certificate Signing Requests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.cert">3.1. optigatrust.cert module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">4. Crypto Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transfer.html">5. Export Chip Data and Metadata</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">optigatrust</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">3. </span>X.509 Certificates and Certificate Signing Requests</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/cert.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="x-509-certificates-and-certificate-signing-requests">
+<h1><span class="section-number">3. </span>X.509 Certificates and Certificate Signing Requests<a class="headerlink" href="#x-509-certificates-and-certificate-signing-requests" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-optigatrust.cert">
+<span id="optigatrust-cert-module"></span><h2><span class="section-number">3.1. </span>optigatrust.cert module<a class="headerlink" href="#module-optigatrust.cert" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="optigatrust.cert.Builder">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.cert.</code><code class="sig-name descname">Builder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">subject</span></em>, <em class="sig-param"><span class="n">subject_public_key</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.build">
+<code class="sig-name descname">build</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">signing_key</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Builder.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates the certificate information, constructs an X.509 certificate and then signs it
+:param signing_key: An asn1crypto.keys.PrivateKeyInfo or oscrypto.asymmetric.PrivateKey object for the private
+key to sign the request with. This should be the private key that matches the public key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An asn1crypto.csr.CertificationRequest object of the request</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.ca">
+<em class="property">property </em><code class="sig-name descname">ca</code><a class="headerlink" href="#optigatrust.cert.Builder.ca" title="Permalink to this definition">¶</a></dt>
+<dd><p>None or a bool - if the request is for a CA cert. None indicates no
+basic constraints extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.extended_key_usage">
+<em class="property">property </em><code class="sig-name descname">extended_key_usage</code><a class="headerlink" href="#optigatrust.cert.Builder.extended_key_usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of unicode strings representing the allowed usage of the key from
+the extended key usage extension. Empty set indicates no extended key
+usage extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.hash_algo">
+<em class="property">property </em><code class="sig-name descname">hash_algo</code><a class="headerlink" href="#optigatrust.cert.Builder.hash_algo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.key_usage">
+<em class="property">property </em><code class="sig-name descname">key_usage</code><a class="headerlink" href="#optigatrust.cert.Builder.key_usage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of unicode strings representing the allowed usage of the key.
+Empty set indicates no key usage extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.set_extension">
+<code class="sig-name descname">set_extension</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Builder.set_extension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the value for an extension using a fully constructed Asn1Value object from asn1crypto. Normally this should
+not be needed, and the convenience attributes should be sufficient. See the definition of
+asn1crypto.x509.Extension to determine the appropriate object type for a given extension. Extensions are marked
+as critical when RFC5280 or RFC6960 indicate so. If an extension is validly marked as critical or not
+(such as certificate policies and extended key usage), this class will mark it as non-critical.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – A unicode string of an extension id name from asn1crypto.x509.ExtensionId</p></li>
+<li><p><strong>value</strong> – A value object per the specs defined by asn1crypto.x509.Extension</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject">
+<em class="property">property </em><code class="sig-name descname">subject</code><a class="headerlink" href="#optigatrust.cert.Builder.subject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject_alt_domains">
+<em class="property">property </em><code class="sig-name descname">subject_alt_domains</code><a class="headerlink" href="#optigatrust.cert.Builder.subject_alt_domains" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of unicode strings of all domains in the subject alt name
+extension request. Empty list indicates no subject alt name extension
+request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject_alt_ips">
+<em class="property">property </em><code class="sig-name descname">subject_alt_ips</code><a class="headerlink" href="#optigatrust.cert.Builder.subject_alt_ips" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of unicode strings of all IPs in the subject alt name extension
+request. Empty list indicates no subject alt name extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Builder.subject_public_key">
+<em class="property">property </em><code class="sig-name descname">subject_public_key</code><a class="headerlink" href="#optigatrust.cert.Builder.subject_public_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.cert.Certificate">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.cert.</code><code class="sig-name descname">Certificate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cert_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.Certificate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="metadata.html#optigatrust.core.Object" title="optigatrust.core.Object"><code class="xref py py-class docutils literal notranslate"><span class="pre">optigatrust.core.Object</span></code></a></p>
+<p>A class used to represent a certificate of the OPTIGA Trust Chip</p>
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.der">
+<em class="property">property </em><code class="sig-name descname">der</code><a class="headerlink" href="#optigatrust.cert.Certificate.der" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get or set the certificate in der form.
+Input should be a valid DER encoded certificate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.pem">
+<em class="property">property </em><code class="sig-name descname">pem</code><a class="headerlink" href="#optigatrust.cert.Certificate.pem" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get or set the certificate in PEM form.
+Input should be a valid PEM formatted certificate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.pkey">
+<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.cert.Certificate.pkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get the public key assigned for certificate. In case the certificate can’t be parsed an
+exception will be generated</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.cert.Certificate.signature">
+<em class="property">property </em><code class="sig-name descname">signature</code><a class="headerlink" href="#optigatrust.cert.Certificate.signature" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get the signature of the certificate lcoated in the Certificate’s object.
+In case the certificate can’t be parsed an exception will be generated</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.cert.pem_armor_csr">
+<code class="sig-prename descclassname">optigatrust.cert.</code><code class="sig-name descname">pem_armor_csr</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">certification_request</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.cert.pem_armor_csr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes a CSR into PEM format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>certification_request</strong> – An asn1crypto.csr.CertificationRequest object of the CSR to armor. Typically this</p>
+</dd>
+</dl>
+<p>is obtained from Builder.build().</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A byte string of the PEM-encoded CSR</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="crypto.html" class="btn btn-neutral float-right" title="4. Crypto Operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="metadata.html" class="btn btn-neutral float-left" title="2. Object and Metadata Management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Infineon Technologies AG
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

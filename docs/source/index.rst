@@ -25,7 +25,7 @@ optigatrust Python library Documentation
    :numbered:
 
    get_started
-   crypto
    metadata
-   export
-   api
+   cert
+   crypto
+   transfer

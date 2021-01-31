@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>3. Object and Metadata Management &mdash; optigatrust 1.1 documentation</title>
+  <title>2. Object and Metadata Management &mdash; optigatrust 1.1 documentation</title>
   
 
   
@@ -36,8 +36,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="4. Export Chip Data and Metadata" href="export.html" />
-    <link rel="prev" title="2. Crypto Operations" href="crypto.html" /> 
+    <link rel="next" title="3. X.509 Certificates and Certificate Signing Requests" href="cert.html" />
+    <link rel="prev" title="1. Get Started" href="get_started.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -85,27 +85,28 @@
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="get_started.html">1. Get Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crypto.html">2. Crypto Operations</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Object and Metadata Management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#objects">3.1. Objects</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#a-certificate-object">3.1.1. A Certificate object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reading-a-key-object">3.1.2. Reading a key object</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Object and Metadata Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objects">2.1. Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#a-certificate-object">2.1.1. A Certificate object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#reading-a-key-object">2.1.2. Reading a key object</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#metadata">3.2. Metadata</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#options">3.2.1. Options</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#metadata-tags">3.2.1.1. Metadata Tags</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#access-conditions">3.2.1.2. Access Conditions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#metadata">2.2. Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#options">2.2.1. Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metadata-tags">2.2.1.1. Metadata Tags</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#access-conditions">2.2.1.2. Access Conditions</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#printing-all-metadata-in-human-readable-form">3.2.2. Printing All metadata in human readable form</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#updating-metadata-of-the-certificate-object">3.2.3. Updating Metadata of the Certificate Object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#printing-all-metadata-in-human-readable-form">2.2.2. Printing All metadata in human readable form</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-metadata-of-the-certificate-object">2.2.3. Updating Metadata of the Certificate Object</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.core">2.3. optigatrust.core module API</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="export.html">4. Export Chip Data and Metadata</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">5. API Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cert.html">3. X.509 Certificates and Certificate Signing Requests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">4. Crypto Operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="transfer.html">5. Export Chip Data and Metadata</a></li>
 </ul>
 
             
@@ -152,7 +153,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li><span class="section-number">3. </span>Object and Metadata Management</li>
+      <li><span class="section-number">2. </span>Object and Metadata Management</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -172,50 +173,99 @@
            <div itemprop="articleBody">
             
   <div class="section" id="object-and-metadata-management">
-<h1><span class="section-number">3. </span>Object and Metadata Management<a class="headerlink" href="#object-and-metadata-management" title="Permalink to this headline">¶</a></h1>
+<h1><span class="section-number">2. </span>Object and Metadata Management<a class="headerlink" href="#object-and-metadata-management" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="objects">
-<h2><span class="section-number">3.1. </span>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.1. </span>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
 <p>An object within this library is a generic class, which represents basic functionality and features valid for all
-OIDs (Object IDs) located on one chip.
-Here are basic features what you can do with a generic Object instance (if access condition allows):</p>
-<blockquote>
-<div><ul class="simple">
+OIDs (Object IDs) located on one chip.</p>
+<p>Here are basic features what you can do with a generic Object instance (if access condition allows):</p>
+<ul class="simple">
 <li><p>Read/write data from/to the object</p></li>
 <li><p>Read/write metadata from/to the object</p></li>
 </ul>
-</div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">core</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.core</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="c1"># Create an instance of object.</span>
 <span class="nb">object</span> <span class="o">=</span> <span class="n">Object</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
 
 <span class="c1"># Read data</span>
+<span class="nb">object</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;01020304 ... 898a8b8c&#39;</span>
 </pre></div>
 </div>
 <div class="section" id="a-certificate-object">
-<h3><span class="section-number">3.1.1. </span>A Certificate object<a class="headerlink" href="#a-certificate-object" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.1.1. </span>A Certificate object<a class="headerlink" href="#a-certificate-object" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.cert</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">cert_object</span> <span class="o">=</span> <span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
+
+<span class="c1"># Output the certificate content</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==================</span> <span class="n">Certificate</span> <span class="n">Object</span> <span class="p">[</span><span class="mh">0xe0e0</span><span class="p">]</span> <span class="o">==================</span>
+<span class="n">Lifecycle</span> <span class="n">State</span>               <span class="p">:</span><span class="n">creation</span>
+<span class="n">Size</span>                          <span class="p">:</span><span class="mi">514</span>
+<span class="n">Access</span> <span class="n">Condition</span><span class="p">:</span> <span class="n">Read</span>        <span class="p">:</span><span class="n">always</span>
+<span class="n">Access</span> <span class="n">Conditions</span><span class="p">:</span> <span class="n">Change</span>     <span class="p">:</span><span class="n">never</span>
+<span class="n">PEM</span>                           <span class="p">:</span>
+<span class="sa">b</span><span class="s1">&#39;-----BEGIN CERTIFICATE-----</span>
+<span class="n">MIIB9TCCAXygAwIBAgIEcoMKdTAKBggqhkjOPQQDAzByMQswCQYDVQQGEwJERTEh</span>
+<span class="n">MB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRMwEQYDVQQLDApPUFRJ</span>
+<span class="n">R0EoVE0pMSswKQYDVQQDDCJJbmZpbmVvbiBPUFRJR0EoVE0pIFRydXN0IE0gQ0Eg</span>
+<span class="n">MzAwMB4XDTIwMDkxMDExNDAyNFoXDTQwMDkxMDExNDAyNFowGjEYMBYGA1UEAwwP</span>
+<span class="n">SW5maW5lb25Jb1ROb2RlMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIWaWiiWP</span>
+<span class="n">xWts8JdGXH819hVKg3IHVIvhrC5WWJhR2tyxVP3LuqRXjHJCVwDQHJfQ3z5hm1UA</span>
+<span class="n">PTDk5I</span><span class="o">/</span><span class="n">zlwbEWaNYMFYwDgYDVR0PAQH</span><span class="o">/</span><span class="n">BAQDAgCAMAwGA1UdEwEB</span><span class="o">/</span><span class="n">wQCMAAwFQYD</span>
+<span class="n">VR0gBA4wDDAKBggqghQARAEUATAfBgNVHSMEGDAWgBSzg</span><span class="o">+</span><span class="n">GsVpQGWa</span><span class="o">/</span><span class="n">Yr1cheEV0</span>
+<span class="n">jgxJmTAKBggqhkjOPQQDAwNnADBkAjA9YBGLJmvpUdyQ8WiviQPg9pTyIFzBNpUb</span>
+<span class="n">ZdLarO1Gu44zvMhFoeR</span><span class="o">/</span><span class="n">dtnjahgv59UCMHBNfeU</span><span class="o">+</span><span class="n">ZFfbk7B</span><span class="o">+</span><span class="n">fRHrrotyBSt63GcE</span>
+<span class="n">efqXeARctwDp9bStWx8d9JOw9B0h4mnfTA</span><span class="o">==</span>
+<span class="o">-----</span><span class="n">END</span> <span class="n">CERTIFICATE</span><span class="o">-----</span><span class="s1">&#39;</span>
+<span class="n">Issuer</span><span class="p">:</span> <span class="n">Common</span> <span class="n">Name</span>           <span class="p">:</span><span class="n">Infineon</span> <span class="n">OPTIGA</span><span class="p">(</span><span class="n">TM</span><span class="p">)</span> <span class="n">Trust</span> <span class="n">M</span> <span class="n">CA</span> <span class="mi">300</span>
+<span class="n">Subject</span><span class="p">:</span> <span class="n">Common</span> <span class="n">Name</span>          <span class="p">:</span><span class="n">InfineonIoTNode</span>
+<span class="n">Public</span> <span class="n">Key</span>                    <span class="p">:</span><span class="mi">042166968</span><span class="n">a258fc56b6cf097465c7f35f6154a837</span> <span class="o">...</span> <span class="mi">01</span><span class="n">c97d0df3e619b55003d30e4e48ff39706c459</span>
+<span class="n">Signature</span>                     <span class="p">:</span><span class="mi">306402303</span><span class="n">d60118b266be951dc90f168af8903e0f</span> <span class="o">...</span> <span class="n">cb700e9f5b4ad5b1f1df493b0f41d21e269df4c</span>
+<span class="o">============================================================</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="reading-a-key-object">
-<h3><span class="section-number">3.1.2. </span>Reading a key object<a class="headerlink" href="#reading-a-key-object" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.1.2. </span>Reading a key object<a class="headerlink" href="#reading-a-key-object" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.asymmetric</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
-<span class="n">key_object</span> <span class="o">=</span> <span class="n">EccKey</span><span class="p">(</span><span class="mh">0xe0f0</span><span class="p">)</span>
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">EccKey</span><span class="p">(</span><span class="mh">0xe0f1</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">key_object</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;lcso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;operational&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp256r1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;authentication&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;signature&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
 </pre></div>
 </div>
 </div>
 </div>
 <div class="section" id="metadata">
-<h2><span class="section-number">3.2. </span>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
+<h2><span class="section-number">2.2. </span>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="options">
-<h3><span class="section-number">3.2.1. </span>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.2.1. </span>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
 <p>Users can work with metadata directly in human-readable form.
 Metadata should be contructed in the following manner:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;&lt;metadata_tag&gt;&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;metadata_value&gt;&#39;</span><span class="p">}</span>
@@ -223,8 +273,9 @@ Metadata should be contructed in the following manner:</p>
 </div>
 <p>Where metadata can take the following values:</p>
 <div class="section" id="metadata-tags">
-<h4><span class="section-number">3.2.1.1. </span>Metadata Tags<a class="headerlink" href="#metadata-tags" title="Permalink to this headline">¶</a></h4>
-<p>All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle state of the object is either ‘creation’ or ‘initialisation’</p>
+<h4><span class="section-number">2.2.1.1. </span>Metadata Tags<a class="headerlink" href="#metadata-tags" title="Permalink to this headline">¶</a></h4>
+<p>All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle state of the object is either
+‘creation’ or ‘initialisation’</p>
 <table class="colwidths-given docutils align-default" id="id1">
 <caption><span class="caption-text">Metadata Tags Table</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
 <colgroup>
@@ -241,7 +292,8 @@ Metadata should be contructed in the following manner:</p>
 <tbody>
 <tr class="row-even"><td><p>‘execute’</p></td>
 <td><p>Values are defined in the Access Conditions Table below</p></td>
-<td><p>Define Execute Access Condition for the object. In other words under which conditions the chip can make use of the object <strong>internally</strong>; e.g. signature generation using object 0xe0f1.</p></td>
+<td><p>Define Execute Access Condition for the object. In other words under which conditions the chip can make use of
+the object <strong>internally</strong>; e.g. signature generation using object 0xe0f1.</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘change’</p></td>
 <td><p>Values are defined in the Access Conditions Table below</p></td>
@@ -265,11 +317,13 @@ Metadata should be contructed in the following manner:</p>
 </tr>
 <tr class="row-even"><td><p>‘algorithm’</p></td>
 <td><p>Automatically set by the chip, can’t be defined by a user</p></td>
-<td><p>This tag is applicable only for Key Objects. The chip selects automatically the value for this tag based on the keypair generation parameters.</p></td>
+<td><p>This tag is applicable only for Key Objects. The chip selects automatically the value for this tag based on
+the keypair generation parameters.</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘key_usage’</p></td>
 <td><p>[ ‘authentication’, ‘encryption’, ‘sign’, ‘key_agreement’]</p></td>
-<td><p>This tag is applicable only for Key Objects. It can be defined in a list to reflect multiple options; e.g. {‘key_usage’: [[ ‘authentication’, ‘sign’, ‘key_agreement’]]}</p></td>
+<td><p>This tag is applicable only for Key Objects. It can be defined in a list to reflect multiple options;
+e.g. {‘key_usage’: [[ ‘authentication’, ‘sign’, ‘key_agreement’]]}</p></td>
 </tr>
 <tr class="row-even"><td><p>‘type’</p></td>
 <td><p>Refer to the types Table below</p></td>
@@ -283,7 +337,7 @@ Metadata should be contructed in the following manner:</p>
 </table>
 </div>
 <div class="section" id="access-conditions">
-<h4><span class="section-number">3.2.1.2. </span>Access Conditions<a class="headerlink" href="#access-conditions" title="Permalink to this headline">¶</a></h4>
+<h4><span class="section-number">2.2.1.2. </span>Access Conditions<a class="headerlink" href="#access-conditions" title="Permalink to this headline">¶</a></h4>
 <p>The ‘&lt;metadata_value&gt;’ should be defined either as a list of values; e.g.</p>
 <blockquote>
 <div><ul class="simple">
@@ -297,8 +351,9 @@ Metadata should be contructed in the following manner:</p>
 </li>
 <li><dl class="simple">
 <dt>a more complex constructed value</dt><dd><ul>
-<li><p>{‘read’: [‘lcso’, ‘&lt;’, ‘operational’, ‘&amp;&amp;’, ‘conf’, ‘e1’, ‘40’]}</p></li>
-<li><p>Read is allowed only if the lifecycle state of the object is less than operation and under shielded connection (using e140 OID as a binding secret)</p></li>
+<li><p>{‘read’: [‘lcso’, ‘&lt;’, ‘operational’, ‘&amp;&amp;’, ‘conf’, ‘0xe1’, ‘0x40’]}</p></li>
+<li><p>Read is allowed only if the lifecycle state of the object is less than operation and under shielded connection
+(using e140 OID as a binding secret)</p></li>
 </ul>
 </dd>
 </dl>
@@ -308,8 +363,8 @@ Metadata should be contructed in the following manner:</p>
 <table class="colwidths-given docutils align-default" id="id2">
 <caption><span class="caption-text">Access Conditions Table (SRM M V3 - Table 69)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
+<col style="width: 33%" />
+<col style="width: 67%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Tag</p></th>
@@ -324,27 +379,40 @@ Metadata should be contructed in the following manner:</p>
 <td><p>an action (for instance ‘read’) is forbidden</p></td>
 </tr>
 <tr class="row-even"><td><p>‘lcsg’</p></td>
-<td><p>Global Lifecycle State (Object ID 0xe0c0) this tag is used as a first argument for a complex expressions; e.g. [‘lcsg’, ‘&lt;’, ‘operational’]</p></td>
+<td><p>Global Lifecycle State (Object ID 0xe0c0) this tag is used as a first argument for a complex
+expressions; e.g. [‘lcsg’, ‘&lt;’, ‘operational’]</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘lcsa’</p></td>
-<td><p>Application Lifecycle State (Object ID 0xf1c0) this tag is used as a first argument for a complex expressions; e.g. [‘lcsa’, ‘&lt;’, ‘operational’]</p></td>
+<td><p>Application Lifecycle State (Object ID 0xf1c0) this tag is used as a first argument for
+a complex expressions; e.g. [‘lcsa’, ‘&lt;’, ‘operational’]</p></td>
 </tr>
 <tr class="row-even"><td><p>‘lcso’</p></td>
-<td><p>Object Lifecycle State (it is part of the metadata, see the section above) this tag is used as a first argument for a complex expressions; e.g. [‘lcso’, ‘&lt;’, ‘operational’]</p></td>
+<td><p>Object Lifecycle State (it is part of the metadata, see the section above) this tag is
+used as a first argument for a complex expressions; e.g. [‘lcso’, ‘&lt;’, ‘operational’]</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘conf’</p></td>
 <td><ul class="simple">
-<li><p>An action is permitted only if the host establishes the shielded connection with the chip using the specified Binding secret (e.g. 0xE140) and the response is requested with protection (encrypted).</p></li>
-<li><p>Typical values are [‘conf’, ‘e1’, ‘40’] and [‘conf’, ‘f1’, ‘d0’], where instead of ‘f1’, ‘d0’ can be used any properly configured Application Data Object</p></li>
-<li><p>In the latter case (Secret in Application Data Object) it is recomended to use as well the ‘int’ (descrebed below) Access Condition</p></li>
+<li><p>An action is permitted only if the host establishes the shielded connection with the
+chip using the specified
+Binding secret (e.g. 0xE140) and the response is requested with protection (encrypted).</p></li>
+<li><p>Typical values are [‘conf’, ‘0xe1’, ‘0x40’] and [‘conf’, ‘0xf1’, ‘0xd0’],
+where instead of ‘0xf1’, ‘0xd0’ can be used any properly configured
+Application Data Object</p></li>
+<li><p>In the latter case (Secret in Application Data Object) it is recommended to use
+as well the ‘int’ (descrebed below) Access Condition</p></li>
 </ul>
 </td>
 </tr>
 <tr class="row-even"><td><p>‘int’</p></td>
 <td><ul>
-<li><p>An action is permitted only if the host establishes the shielded connection with the chip using the specified Binding secret (e.g. 0xE140) and the response is requested with protection (MAC).</p></li>
-<li><p>Typical values are [‘int’, ‘e1’, ‘40’] and [‘int’, ‘e0’, ‘ef’], where instead of ‘e0’, ‘ef’ can be used any properly configured Data Object of {‘type’: ‘trust_anchor’}</p></li>
-<li><p>In the latter case (Secret in Application Data Object) it is recomended to use as well the ‘int’ (descrebed below) Access Condition</p></li>
+<li><p>An action is permitted only if the host establishes the shielded connection with
+the chip using the specified
+Binding secret (e.g. 0xE140) and the response is requested with protection (MAC).</p></li>
+<li><p>Typical values are [‘int’, ‘0xe1’, ‘0x40’] and [‘int’, ‘0xe0’, ‘0xef’], where instead
+of ‘0xe0’, ‘0xef’ can be used any properly configured Data Object of
+{‘type’: ‘trust_anchor’}</p></li>
+<li><p>In the latter case (Secret in Application Data Object) it is recommended to use
+as well the ‘int’ (described below) Access Condition</p></li>
 <li><p>Example</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ta_obj</span> <span class="o">=</span> <span class="n">Object</span><span class="p">(</span><span class="mh">0xe0ef</span><span class="p">)</span>
 <span class="n">ta_obj</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;trust_anchor&#39;</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">]}</span>
@@ -352,11 +420,11 @@ Metadata should be contructed in the following manner:</p>
 <span class="c1"># This action is one-way and can&#39;t be reverted, for demo can be skipped</span>
 <span class="c1"># ta_obj.meta = {&#39;lcso&#39;: &#39;operational&#39;}</span>
 <span class="n">protected_obj</span> <span class="o">=</span> <span class="n">Object</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
-<span class="n">protected_obj</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;change&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">,</span> <span class="s1">&#39;&amp;&amp;&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;e0&#39;</span><span class="p">,</span> <span class="s1">&#39;ef&#39;</span><span class="p">]}</span>
+<span class="n">protected_obj</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;change&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">,</span> <span class="s1">&#39;&amp;&amp;&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;0xe0&#39;</span><span class="p">,</span> <span class="s1">&#39;0xef&#39;</span><span class="p">]}</span>
 <span class="c1"># This action is one-way and can&#39;t be reverted, for demo can be skipped</span>
 <span class="c1"># protected_obj.meta = {&#39;lcso&#39;: &#39;operational&#39;}</span>
-<span class="c1"># The above means: in case of writing the f1d0 Application Data Object, the signature associated with the metadata</span>
-<span class="c1"># in the manifest must be verified with the addressed trust anchor e0ef.</span>
+<span class="c1"># The above means: in case of writing the f1d0 Application Data Object, the signature associated with the</span>
+<span class="c1"># metadata in the manifest must be verified with the addressed trust anchor e0ef.</span>
 </pre></div>
 </div>
 </li>
@@ -365,8 +433,9 @@ Metadata should be contructed in the following manner:</p>
 </tr>
 <tr class="row-odd"><td><p>‘auto’</p></td>
 <td><ul class="simple">
-<li><p>An authorization reference Object ID. The action (for instance ‘execute’) is allowed only if the given object reached the AUTO (Authorised)</p></li>
-<li><p>Typical values are [‘auto’, ‘f1’, ‘d0’]</p></li>
+<li><p>An authorization reference Object ID. The action (for instance ‘execute’) is allowed
+only if the given object reached the AUTO (Authorised)</p></li>
+<li><p>Typical values are [‘auto’, ‘0xf1’, ‘0xd0’]</p></li>
 </ul>
 </td>
 </tr>
@@ -380,26 +449,26 @@ Metadata should be contructed in the following manner:</p>
 <td><p>x</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘==’</p></td>
-<td><p>“If equal”. Typical values [‘lcso’, <strong>‘==’</strong>, ‘initialiastion’]</p></td>
+<td><p>“If equal”. Typical values [‘lcso’, <strong>‘==’</strong>, ‘initialization’]</p></td>
 </tr>
 <tr class="row-even"><td><p>‘&gt;’</p></td>
-<td><p>“If more”. Typical values [‘lcso’, <strong>‘&gt;’</strong>, ‘initialiastion’]</p></td>
+<td><p>“If more”. Typical values [‘lcso’, <strong>‘&gt;’</strong>, ‘initialization’]</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘&lt;’</p></td>
-<td><p>“If less”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialiastion’]</p></td>
+<td><p>“If less”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialization’]</p></td>
 </tr>
 <tr class="row-even"><td><p>‘&amp;&amp;’</p></td>
-<td><p>“And”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialiastion’, <strong>‘&amp;&amp;’</strong>, ‘conf’, ‘e1’, ‘40’]</p></td>
+<td><p>“And”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialization’, <strong>‘&amp;&amp;’</strong>, ‘conf’, ‘0xe1’, ‘0x40’]</p></td>
 </tr>
 <tr class="row-odd"><td><p>‘||’</p></td>
-<td><p>“or”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialiastion’, <strong>‘&amp;&amp;’</strong>, ‘conf’, ‘e1’, ‘40’]</p></td>
+<td><p>“or”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialization’, <strong>‘&amp;&amp;’</strong>, ‘conf’, ‘0xe1’, ‘0x40’]</p></td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
 <div class="section" id="printing-all-metadata-in-human-readable-form">
-<h3><span class="section-number">3.2.2. </span>Printing All metadata in human readable form<a class="headerlink" href="#printing-all-metadata-in-human-readable-form" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.2.2. </span>Printing All metadata in human readable form<a class="headerlink" href="#printing-all-metadata-in-human-readable-form" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.cert</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -409,7 +478,7 @@ Metadata should be contructed in the following manner:</p>
 </div>
 </div>
 <div class="section" id="updating-metadata-of-the-certificate-object">
-<h3><span class="section-number">3.2.3. </span>Updating Metadata of the Certificate Object<a class="headerlink" href="#updating-metadata-of-the-certificate-object" title="Permalink to this headline">¶</a></h3>
+<h3><span class="section-number">2.2.3. </span>Updating Metadata of the Certificate Object<a class="headerlink" href="#updating-metadata-of-the-certificate-object" title="Permalink to this headline">¶</a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust.cert</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="n">cert_object</span> <span class="o">=</span> <span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
@@ -436,7 +505,7 @@ Metadata should be contructed in the following manner:</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Sample output</p>
+<p>Output</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">User</span>\<span class="n">git</span>\<span class="n">python</span><span class="o">-</span><span class="n">optiga</span><span class="o">-</span><span class="n">trust</span><span class="o">&gt;</span><span class="n">python</span>
 <span class="n">Python</span> <span class="mf">3.8</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="n">tags</span><span class="o">/</span><span class="n">v3</span><span class="o">.</span><span class="mf">8.1</span><span class="p">:</span><span class="mi">1</span><span class="n">b293b6</span><span class="p">,</span> <span class="n">Dec</span> <span class="mi">18</span> <span class="mi">2019</span><span class="p">,</span> <span class="mi">22</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">24</span><span class="p">)</span> <span class="p">[</span><span class="n">MSC</span> <span class="n">v</span><span class="o">.</span><span class="mi">1916</span> <span class="mi">32</span> <span class="n">bit</span> <span class="p">(</span><span class="n">Intel</span><span class="p">)]</span> <span class="n">on</span> <span class="n">win32</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
@@ -484,13 +553,13 @@ Metadata should be contructed in the following manner:</p>
 <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
   <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
   <span class="n">File</span> <span class="s2">&quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">613</span><span class="p">,</span> <span class="ow">in</span> <span class="fm">__str__</span>
-        <span class="n">pem</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0:&lt;30}</span><span class="s1">:</span><span class="se">\n</span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;PEM&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pem</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">t&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">))</span>
+    <span class="n">pem</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0:&lt;30}</span><span class="s1">:</span><span class="se">\n</span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;PEM&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pem</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">n&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">t&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">))</span>
   <span class="n">File</span> <span class="s2">&quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">642</span><span class="p">,</span> <span class="ow">in</span> <span class="n">pem</span>
-        <span class="n">pem_cert</span> <span class="o">+=</span> <span class="n">_break_apart</span><span class="p">(</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">der</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+    <span class="n">pem_cert</span> <span class="o">+=</span> <span class="n">_break_apart</span><span class="p">(</span><span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">der</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(),</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
   <span class="n">File</span> <span class="s2">&quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">632</span><span class="p">,</span> <span class="ow">in</span> <span class="n">der</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_der</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_der</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read</span><span class="p">()</span>
   <span class="n">File</span> <span class="s2">&quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">768</span><span class="p">,</span> <span class="ow">in</span> <span class="n">_read</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
 <span class="ne">ValueError</span><span class="p">:</span> <span class="n">Certificate</span> <span class="n">Slot</span> <span class="mi">57568</span> <span class="ow">is</span> <span class="n">empty</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">cert_object</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">old_meta</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
@@ -521,6 +590,275 @@ Metadata should be contructed in the following manner:</p>
 </div>
 </div>
 </div>
+<div class="section" id="module-optigatrust.core">
+<span id="optigatrust-core-module-api"></span><h2><span class="section-number">2.3. </span>optigatrust.core module API<a class="headerlink" href="#module-optigatrust.core" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="optigatrust.core.Descriptor">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">Descriptor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">api</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Descriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class used to represent the whole OPTIGA Trust Chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api</strong> (<em>ctypes.CDDL</em>) – A ctypes descriptor pointing to the right shared library used for the communication</p></li>
+<li><p><strong>name</strong> (<em>str</em>) – We can’t know for sure the right name of the chip, but we can have a good guess based on the firmware id</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.current_limit">
+<em class="property">property </em><code class="sig-name descname">current_limit</code><a class="headerlink" href="#optigatrust.core.Descriptor.current_limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get or set the current limitation of the chip. Allowed range from 6 to 15 mA</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.global_lifecycle_state">
+<em class="property">property </em><code class="sig-name descname">global_lifecycle_state</code><a class="headerlink" href="#optigatrust.core.Descriptor.global_lifecycle_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get or set the global lifecycle state for your chip.
+Should be one of core.lifecycle_states</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.security_event_counter">
+<em class="property">property </em><code class="sig-name descname">security_event_counter</code><a class="headerlink" href="#optigatrust.core.Descriptor.security_event_counter" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get the security event counter for your chip.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.security_status">
+<em class="property">property </em><code class="sig-name descname">security_status</code><a class="headerlink" href="#optigatrust.core.Descriptor.security_status" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get the security status for your chip.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.sleep_activation_delay">
+<em class="property">property </em><code class="sig-name descname">sleep_activation_delay</code><a class="headerlink" href="#optigatrust.core.Descriptor.sleep_activation_delay" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get or set the sleep activation delay for your chip
+(time the chip should wait after all operations are finished before going to sleep)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Descriptor.uid">
+<em class="property">property </em><code class="sig-name descname">uid</code><a class="headerlink" href="#optigatrust.core.Descriptor.uid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This property allows to get a Coprocessor Unique ID. It will be returned as a namedtuple class. Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UID</span><span class="p">(</span><span class="n">cim_id</span><span class="o">=</span><span class="s1">&#39;cd&#39;</span><span class="p">,</span> <span class="n">platform_id</span><span class="o">=</span><span class="s1">&#39;16&#39;</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="n">rommask_id</span><span class="o">=</span><span class="s1">&#39;9301&#39;</span><span class="p">,</span> <span class="n">chip_type</span><span class="o">=</span><span class="s1">&#39;001c00050000&#39;</span><span class="p">,</span>
+    <span class="n">batch_num</span><span class="o">=</span><span class="s1">&#39;0a09a413000a&#39;</span><span class="p">,</span> <span class="n">x_coord</span><span class="o">=</span><span class="s1">&#39;007d&#39;</span><span class="p">,</span> <span class="n">y_coord</span><span class="o">=</span><span class="s1">&#39;003b&#39;</span><span class="p">,</span> <span class="n">fw_id</span><span class="o">=</span><span class="s1">&#39;80101071&#39;</span><span class="p">,</span> <span class="n">fw_build</span><span class="o">=</span><span class="s1">&#39;2440&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="optigatrust.core.Object">
+<em class="property">class </em><code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">Object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class used to represent an Object on the OPTIGA Trust Chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>int</em>) – the id of the object; e.g. 0xe0e0</p></li>
+<li><p><strong>optiga</strong> (<a class="reference internal" href="#optigatrust.core.Descriptor" title="optigatrust.core.Descriptor"><em>core.Descriptor</em></a>) – the instance of the OPTIGA handler used internally by the Object class</p></li>
+<li><p><strong>updated</strong> (<em>bool</em>) – This boolean variable notifies whether metadata or data has been updated and this can bu used to
+notify other modules to reread data if needed</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="optigatrust.core.Object.meta">
+<em class="property">property </em><code class="sig-name descname">meta</code><a class="headerlink" href="#optigatrust.core.Object.meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>A dictionary of the metadata present right now on the chip for the given object. It is writable,
+so user can update the metadata assigning the value to it</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">force</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; bytearray<a class="headerlink" href="#optigatrust.core.Object.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to read the data stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> (<em>int</em>) – An optional parameter defining whether you want to read the data with offset</p></li>
+<li><p><strong>force</strong> (<em>bool</em>) – This is a parameter which can be used to try to read the data even if id can’t be somehow finden</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>bytearray with the data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.read_raw_meta">
+<code class="sig-name descname">read_raw_meta</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bytearray<a class="headerlink" href="#optigatrust.core.Object.read_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to read the metadata associated with the data object stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>bytearray with the data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.write">
+<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to write the data onto the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>bytes</em><em> or </em><em>bytearray</em>) – Data to write</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – An optional parameter defining whether you want to read the data with offset</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:raises</dt><dd><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="optigatrust.core.Object.write_raw_meta">
+<code class="sig-name descname">write_raw_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.Object.write_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function helps to write the metadata associated with the data object stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>bytes</em><em> or </em><em>bytearray</em>) – Data to write</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:raises</dt><dd><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.handler">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">handler</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function either initialises non-initialised communication channel between the chip and the application, or
+returns an existing communication
+ONLY ONE Optiga Instance is supported</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>OSError: If some problems occured during the initialisation of the library or the chip</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a CDLL Instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.parse_raw_meta">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">parse_raw_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">raw_meta</span><span class="p">:</span> <span class="n">bytes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.parse_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function should process the given metadata and return it in a human readable form.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>raw_meta</strong> – metadata represented in bytes</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>A dictionary of the following format:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;read&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span>
+    <span class="s1">&#39;execute&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.prepare_raw_meta">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">prepare_raw_meta</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_meta</span><span class="p">:</span> <span class="n">dict</span></em><span class="sig-paren">)</span> &#x2192; bytearray<a class="headerlink" href="#optigatrust.core.prepare_raw_meta" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes as an imput json-like formatted dictionary and translates it to the data to write into the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><p><strong>new_meta</strong> (<em>dict</em>) – <p>A dictionary (json like formatted) with new metadata; e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;lcso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;operational&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp384r1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="s2">&quot;0x21&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a bytearray with resulting metadata to write into the chip</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.core.random">
+<code class="sig-prename descclassname">optigatrust.core.</code><code class="sig-name descname">random</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">trng</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.core.random" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates a random number</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>int</em>) – how much randomness to generate. Valid values are from 8 to 256</p></li>
+<li><p><strong>trng</strong> (<em>bool</em>) – If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Bytes object with randomness</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -531,10 +869,10 @@ Metadata should be contructed in the following manner:</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="export.html" class="btn btn-neutral float-right" title="4. Export Chip Data and Metadata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="cert.html" class="btn btn-neutral float-right" title="3. X.509 Certificates and Certificate Signing Requests" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="crypto.html" class="btn btn-neutral float-left" title="2. Crypto Operations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="get_started.html" class="btn btn-neutral float-left" title="1. Get Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -17,14 +17,6 @@ optigatrust.cert module
    :undoc-members:
    :show-inheritance:
 
-optigatrust.core module
------------------------
-
-.. automodule:: optigatrust.core
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 optigatrust.export module
 -------------------------
 
