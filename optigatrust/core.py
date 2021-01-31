@@ -31,12 +31,10 @@ import warnings
 from optigatrust.const import x, m1, m3, m2id2, charge
 
 __all__ = [
-    'Settings',
     'Descriptor',
     'Object',
-    'init',
+    'handler',
     'random',
-    'get_info',
     'lifecycle_states',
     'parse_raw_meta',
     'prepare_raw_meta',
@@ -71,14 +69,18 @@ def _get_arch_os():
 
 
 def _get_lib_name(interface='libusb'):
-    arch, os = _get_arch_os()
+    arch, _os = _get_arch_os()
 
-    if os == 'win':
+    if _os == 'win':
         extension = 'dll'
-    if os == 'linux':
+    elif _os == 'linux':
         extension = 'so'
+    else:
+        raise OSError(
+            'You OS is not supported.Exit.'
+        )
 
-    return 'liboptigatrust-{interface}-{os}-{arch}.{ext}'.format(interface=interface, os=os, arch=arch, ext=extension)
+    return 'liboptigatrust-{interface}-{os}-{arch}.{ext}'.format(interface=interface, os=_os, arch=arch, ext=extension)
 
 
 def _load_lib(interface):
@@ -92,7 +94,6 @@ def _load_lib(interface):
     if os.path.exists(os.path.join(curr_path, libname)):
         api = cdll.LoadLibrary(os.path.join(curr_path, libname))
     else:
-        api = None
         os.chdir(old_path)
         raise OSError('Unable to find library in {}. Look for {}'.format(curr_path, libname))
     api.exp_optiga_init.restype = c_int
@@ -109,48 +110,103 @@ UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_
 _optiga_descriptor = None
 
 
-class Settings:
-    def __init__(self):
-        self._current_limit = int.from_bytes(Object(0xe0c4).read(), "big")
-        self._sleep_activation_delay = int.from_bytes(Object(0xe0c3).read(), "big")
-        _uid = Object(0xe0c2).read(force=True)
-        self._uid = UID(int.from_bytes(_uid[0:1], byteorder='big'),
-                        int.from_bytes(_uid[1:2], byteorder='big'),
-                        int.from_bytes(_uid[2:3], byteorder='big'),
-                        int.from_bytes(_uid[3:5], byteorder='big'),
-                        int.from_bytes(_uid[5:11], byteorder='big'),
-                        int.from_bytes(_uid[11:17], byteorder='big'),
-                        int.from_bytes(_uid[17:19], byteorder='big'),
-                        int.from_bytes(_uid[19:21], byteorder='big'),
-                        int.from_bytes(_uid[21:25], byteorder='big'),
-                        int.from_bytes(_uid[25:27], byteorder='big'))
-        self._security_status = int.from_bytes(Object(0xe0c1).read(), "big")
-        self._global_lifecycle_state = lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
-        self._security_event_counter = int.from_bytes(Object(0xe0c5).read(), "big")
+class Descriptor:
+    """
+    A class used to represent the whole OPTIGA Trust Chip
+
+    :ivar api: A ctypes descriptor pointing to the right shared library used for the communication
+    :vartype api: ctypes.CDDL
+
+    :ivar name: We can't know for sure the right name of the chip, but we can have a good guess based on the firmware id
+    :vartype name: str
+
+    """
+    def __init__(self, api):
+        """
+        This class
+
+        :ivar api: A ctypes descriptor pointing to the right shared library used for the communication
+        :vartype id: ctypes.CDDL
+
+        return:
+            self
+        """
+        self.api = api
+        consts, name = _lookup_optiga(api)
+        self.name = name
+        self._object_id = consts.ObjectId
+        self._object_id_values = set(item.value for item in self._object_id)
+        self._key_usage = consts.KeyUsage
+        self._key_usage_values = set(item.value for item in self._key_usage)
+        self._key_id = consts.KeyId
+        self._key_id_values = set(item.value for item in self._key_id)
+        self._session_id = consts.SessionId
+        self._session_id_values = set(item.value for item in self._session_id)
+        self._rng = consts.Rng
+        self._rng_values = set(item.value for item in self._rng)
+        self._curves = consts.Curves
+        self._curves_values = set(item.value for item in self._curves)
 
     @property
     def current_limit(self):
-        return self._current_limit
+        """
+        This property allows to get or set the current limitation of the chip. Allowed range from 6 to 15 mA
+        """
+        return int.from_bytes(Object(0xe0c4).read(), "big")
 
     @current_limit.setter
     def current_limit(self, val: int):
+        if val < 6 or val > 15:
+            raise ValueError(
+                'Current limitation is not supported. Should be between 6 and 15 mA, you have {0}'.format(val)
+            )
         Object(0xe0c4).write(bytes([val]))
 
     @property
     def sleep_activation_delay(self):
-        return self._sleep_activation_delay
+        """
+        This property allows to get or set the sleep activation delay for your chip
+        (time the chip should wait after all operations are finished before going to sleep)
+        """
+        return int.from_bytes(Object(0xe0c3).read(), "big")
 
     @sleep_activation_delay.setter
     def sleep_activation_delay(self, val: int):
+        if val < 1 or val > 255:
+            raise ValueError(
+                'Sleep activation value is not supported. Should be between 1 and 255 mA, you have {0}'.format(val)
+            )
         Object(0xe0c3).write(bytes([val]))
 
     @property
     def uid(self):
-        return self._uid
+        """
+        This property allows to get a Coprocessor Unique ID. It will be returned as a namedtuple class. Example ::
+
+            UID(cim_id='cd', platform_id='16', model_id='33', rommask_id='9301', chip_type='001c00050000',
+                batch_num='0a09a413000a', x_coord='007d', y_coord='003b', fw_id='80101071', fw_build='2440')
+
+        """
+        _uid = Object(0xe0c2).read(force=True)
+        uid = UID(cim_id=_uid[0:1].hex(),
+                  platform_id=_uid[1:2].hex(),
+                  model_id=_uid[2:3].hex(),
+                  rommask_id=_uid[3:5].hex(),
+                  chip_type=_uid[5:11].hex(),
+                  batch_num=_uid[11:17].hex(),
+                  x_coord=_uid[17:19].hex(),
+                  y_coord=_uid[19:21].hex(),
+                  fw_id=_uid[21:25].hex(),
+                  fw_build=_uid[25:27].hex())
+        return uid
 
     @property
     def global_lifecycle_state(self):
-        return self._global_lifecycle_state
+        """
+        This property allows to get or set the global lifecycle state for your chip.
+        Should be one of core.lifecycle_states
+        """
+        return lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
 
     @global_lifecycle_state.setter
     def global_lifecycle_state(self, val: str):
@@ -164,49 +220,38 @@ class Settings:
 
     @property
     def security_status(self):
-        return self._security_status
+        """
+        This property allows to get the security status for your chip.
+        """
+        return int.from_bytes(Object(0xe0c1).read(), "big")
 
     @property
     def security_event_counter(self):
-        self._security_event_counter = int.from_bytes(Object(0xe0c5).read(), "big")
-        return self._security_event_counter
+        """
+        This property allows to get the security event counter for your chip.
+        """
+        return int.from_bytes(Object(0xe0c5).read(), "big")
+
+    def __str__(self):
+        top = "Guessed chip name: {0}\n".format(self.name)
+        fw_id = '{0:<30}{1:^10}:{2}\n'.format("Firmware Identifier", "[dwFirmwareIdentifier]", self.uid.fw_id)
+        fw_build = '{0:<30}{1:^10}:{2}\n'.format("Build Number", "[rgbESWBuild]", self.uid.fw_build)
+        current_limit = '{0:<30}{1:^10}:{2}\n'.format("Current Limitation", "[OID: 0xE0C4]", hex(self.current_limit))
+        sleep_delay = '{0:<30}{1:^10}:{2}\n'.format("Sleep Activation Delay", "[OID: 0xE0C3]",
+                                                    hex(self.sleep_activation_delay))
+        lcsg = '{0:<30}{1:^10}:{2}\n'.format("Global Lifecycle State", "[OID: 0xE0C0]", self.global_lifecycle_state)
+        sec_status = '{0:<30}{1:^10}:{2}\n'.format("Security Status", "[OID: 0xE0C1]", hex(self.security_status))
+        sec_counter = '{0:<30}{1:^10}:{2}\n'.format("Security Event Counter", "[OID: 0xE0C5]",
+                                                    hex(self.security_event_counter))
+
+        return top + fw_id + fw_build + current_limit + sleep_delay + lcsg + sec_status + sec_counter
 
 
-class Descriptor:
-    def __init__(self, api, name, object_id, key_id, session_id, rng, key_usage, curves):
-        self.api = api
-        self.name = name
-        self.object_id = object_id
-        self.object_id_values = set(item.value for item in self.object_id)
-        self.key_usage = key_usage
-        self.key_usage_values = set(item.value for item in self.key_usage)
-        self.key_id = key_id
-        self.key_id_values = set(item.value for item in self.key_id)
-        self.session_id = session_id
-        self.session_id_values = set(item.value for item in self.session_id)
-        self.rng = rng
-        self.rng_values = set(item.value for item in self.rng)
-        self.curves = curves
-        self.curves_values = set(item.value for item in self.curves)
-        self.enabled = True
-        self._settings = None
-
-    @property
-    def settings(self):
-        return self._settings
-
-    @settings.setter
-    def settings(self, data: Settings):
-        self._settings = data
-
-
-def init():
+def handler():
     """
     This function either initialises non-initialised communication channel between the chip and the application, or
     returns an existing communication
     ONLY ONE Optiga Instance is supported
-
-    :param None:
 
     :raises:
         OSError: If some problems occured during the initialisation of the library or the chip
@@ -229,35 +274,10 @@ def init():
             api = _load_lib('i2c')
             print('Loaded: {0}'.format(_get_lib_name('i2c')))
 
-        consts, name = _lookup_optiga(api)
-        _optiga_descriptor = Descriptor(
-            api=api,
-            name=name,
-            object_id=consts.ObjectId,
-            key_id=consts.KeyId,
-            session_id=consts.SessionId,
-            key_usage=consts.KeyUsage,
-            rng=consts.Rng,
-            curves=consts.Curves
-        )
-        _optiga_descriptor.settings = Settings()
-        get_info()
+        _optiga_descriptor = Descriptor(api)
+        print(_optiga_descriptor)
 
     return _optiga_descriptor
-
-
-def get_info():
-    optiga = init()
-    settings = optiga.settings
-    print("================== OPTIGA Trust Chip Info ==================")
-    print('{0:<30}{1:^10}:{2}'.format("Firmware Identifier", "[dwFirmwareIdentifier]", hex(settings.uid.fw_id)))
-    print('{0:<30}{1:^10}:{2}'.format("Build Number", "[rgbESWBuild]", hex(settings.uid.fw_build)))
-    print('{0:<30}{1:^10}:{2}'.format("Current Limitation", "[OID: 0xE0C4]", hex(settings.current_limit)))
-    print('{0:<30}{1:^10}:{2}'.format("Sleep Activation Delay", "[OID: 0xE0C3]", hex(settings.sleep_activation_delay)))
-    print('{0:<30}{1:^10}:{2}'.format("Global Lifecycle State", "[OID: 0xE0C0]", settings.global_lifecycle_state))
-    print('{0:<30}{1:^10}:{2}'.format("Security Status", "[OID: 0xE0C1]", hex(settings.security_status)))
-    print('{0:<30}{1:^10}:{2}'.format("Security Event Counter", "[OID: 0xE0C5]", hex(settings.security_event_counter)))
-    print("============================================================")
 
 
 def _lookup_optiga(api):
@@ -278,11 +298,11 @@ def _lookup_optiga(api):
 
     _fw_build = int.from_bytes(_bytes[25:27], byteorder='big')
 
-    if _fw_build in {0x809}:
+    if _fw_build in {0x501, 0x624, 0x751, 0x802, 0x809}:
         return m1, "OPTIGA™ Trust M V1 (SLS32AIA010MH/S)"
     if _fw_build in {0x2440}:
         return m3, "OPTIGA™ Trust M V3 (SLS32AIA010ML/K)"
-    else:
+    elif _fw_build in {0x510, 0x715, 0x1048, 0x1112, 0x1118}:
         return x, "OPTIGA™ Trust X (SLS32AIA020X2/4)"
 
 
@@ -290,11 +310,13 @@ def random(n, trng=True):
     """
     This function generates a random number
 
-    :param n:
+    :ivar n:
         how much randomness to generate. Valid values are from 8 to 256
+    :vartype n: int
 
-    :param trng:
+    :ivar trng:
         If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
+    :vartype trng: bool
 
     :raises:
         - TypeError - when any of the parameters are of the wrong type
@@ -303,7 +325,7 @@ def random(n, trng=True):
     :returns:
         Bytes object with randomness
     """
-    optiga = init()
+    optiga = handler()
     api = optiga.api
 
     api.exp_optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
@@ -311,9 +333,9 @@ def random(n, trng=True):
     p = (c_ubyte * n)()
 
     if trng is True:
-        ret = api.exp_optiga_crypt_random(optiga.rng.TRNG.value, p, len(p))
+        ret = api.exp_optiga_crypt_random(optiga._rng.TRNG.value, p, len(p))
     else:
-        ret = api.exp_optiga_crypt_random(optiga.rng.DRNG.value, p, len(p))
+        ret = api.exp_optiga_crypt_random(optiga._rng.DRNG.value, p, len(p))
 
     if ret == 0:
         return bytes(p)
@@ -489,7 +511,6 @@ _data_object_types = {
 
 _data_object_types_swaped = {y: x for x, y in _data_object_types.items()}
 
-
 _reset_types = {
     # Setting the LcsO of either a key or data object.
     'lcso_to_creation': 0x01,
@@ -639,11 +660,11 @@ _parser_map = {
 }
 
 
-def parse_raw_meta(meta: bytes):
+def parse_raw_meta(raw_meta: bytes or bytearray):
     """
     This function should process the given metadata and return it in a human readable form.
 
-    :param meta:
+    :ivar raw_meta:
         metadata represented in bytes
 
     :raises:
@@ -660,11 +681,11 @@ def parse_raw_meta(meta: bytes):
             }
 
     """
-    if not isinstance(meta, bytes) and not isinstance(meta, bytearray):
+    if not isinstance(raw_meta, bytes) and not isinstance(raw_meta, bytearray):
         raise TypeError(
-            'Metadata (meta) should be in bytes form, you provided {0}'.format(type(meta))
+            'Metadata (meta) should be in bytes form, you provided {0}'.format(type(raw_meta))
         )
-    meta_tuple = tuple(meta)
+    meta_tuple = tuple(raw_meta)
     meta_itr = iter(meta_tuple)
     # First byte is always 20
     # For instance
@@ -760,8 +781,8 @@ def _prepare_key_usage(key, value) -> int and list:
 
     meta = [
         _meta_tags[key],  # key
-        1,                # size
-        key_usage         # value
+        1,  # size
+        key_usage  # value
     ]
 
     return meta
@@ -774,8 +795,8 @@ def _prepare_algorithm(key, value) -> list:
             'Accepted values {0}, you provided {1}'.format(_algorithms.keys(), value)
         )
     meta = [
-        _meta_tags[key],    # key
-        1,                  # size
+        _meta_tags[key],  # key
+        1,  # size
         _algorithms[value]  # value
     ]
 
@@ -789,8 +810,8 @@ def _prepare_type(key, value) -> list:
             'Accepted values {0}, you provided {1}'.format(_data_object_types.keys(), value)
         )
     meta = [
-        _meta_tags[key],           # key
-        1,                         # size
+        _meta_tags[key],  # key
+        1,  # size
         _data_object_types[value]  # value
     ]
 
@@ -821,18 +842,18 @@ def _prepare_meta_and_size(key, value) -> list:
             )
         # typical for 'always', 'never'
         meta = [
-            _meta_tags[key],               # key
-            1,                             # size
+            _meta_tags[key],  # key
+            1,  # size
             _access_conditions_ids[value]  # value
         ]
     return meta
 
 
-def prepare_raw_meta(new_meta: dict):
+def prepare_raw_meta(new_meta: dict) -> bytearray:
     """
     This function takes as an imput json-like formatted dictionary and translates it to the data to write into the chip
 
-    :param new_meta:
+    :ivar new_meta:
         A dictionary (json like formatted) with new metadata; e.g.::
 
             {
@@ -847,10 +868,13 @@ def prepare_raw_meta(new_meta: dict):
                 "key_usage": "0x21"
             }
 
+    :vartype new_meta: dict
+
     :raises:
         - ValueError - when any of the parameters contain an invalid value
         - TypeError - when any of the parameters are of the wrong type
         - OSError - when an error is returned by the chip initialisation library
+
     :returns:
         a bytearray with resulting metadata to write into the chip
     """
@@ -873,7 +897,7 @@ def prepare_raw_meta(new_meta: dict):
         meta += _meta
         # Update the size of the metadata based on the returned value
         meta[1] += len(_meta)
-    print(meta)
+
     return bytearray(meta)
 
 
@@ -888,7 +912,7 @@ class Object:
     :vartype optiga: core.Descriptor
 
     :ivar updated: This boolean variable notifies whether metadata or data has been updated and this can bu used to
-    notify other modules to reread data if needed
+                   notify other modules to reread data if needed
     :vartype updated: bool
     """
 
@@ -896,14 +920,15 @@ class Object:
         """
         This class
 
-        :param _id:
+        :ivar _id:
             an Object ID which you would like to initialise; e.g. 0xe0e0
+        :vartype id: int
 
         return:
             self
         """
         self.id = _id
-        self.optiga = init()
+        self.optiga = handler()
         # A flag to understand whether the object was recently updated
         self.updated = False
 
@@ -920,15 +945,17 @@ class Object:
         meta = prepare_raw_meta(new_meta)
         self.write_raw_meta(meta)
 
-    def read(self, offset=0, force=False):
+    def read(self, offset=0, force=False) -> bytearray:
         """
         This function helps to read the data stored on the chip
 
-        :param offset:
+        :ivar offset:
             An optional parameter defining whether you want to read the data with offset
+        :vartype offset: int
 
-        :param force:
+        :ivar force:
             This is a parameter which can be used to try to read the data even if id can't be somehow finden
+        :vartype force: bool
 
         :raises:
             - ValueError - when any of the parameters contain an invalid value
@@ -944,10 +971,10 @@ class Object:
             raise ValueError("offset should be less than the limit of 1700 bytes")
 
         if force is False:
-            if self.id not in self.optiga.object_id_values:
+            if self.id not in self.optiga._object_id_values:
                 raise TypeError(
                     "object_id not found. \n\r Supported = {0},\n\r  "
-                    "Provided = {1}".format(list(hex(self.optiga.object_id)), self.id))
+                    "Provided = {1}".format(list(hex(self.optiga._object_id)), self.id))
 
         api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
         api.exp_optiga_util_read_data.restype = c_int
@@ -970,11 +997,13 @@ class Object:
         """
         This function helps to write the data onto the chip
 
-        :param data:
-            Data to write, should be either bytes of bytearray
+        :ivar data:
+            Data to write
+        :vartype data: bytes or bytearray
 
-        :param offset:
+        :ivar offset:
             An optional parameter defining whether you want to read the data with offset
+        :vartype offset: int
 
         :raises
             - ValueError - when any of the parameters contain an invalid value
@@ -986,10 +1015,10 @@ class Object:
         if not isinstance(data, bytes) and not isinstance(data, bytearray):
             raise TypeError("data should be bytes type")
 
-        if self.id not in self.optiga.object_id_values:
+        if self.id not in self.optiga._object_id_values:
             raise TypeError(
                 "object_id not found. \n\r Supported = {0},\n\r  "
-                "Provided = {1}".format(list(hex(self.optiga.object_id)), self.id))
+                "Provided = {1}".format(list(hex(self.optiga._object_id)), self.id))
 
         if len(data) > 1700:
             raise ValueError("length of data exceeds the limit of 1700")
@@ -1023,11 +1052,11 @@ class Object:
         """
         api = self.optiga.api
 
-        if (self.id not in self.optiga.object_id_values) and (self.id not in self.optiga.key_id_values):
+        if (self.id not in self.optiga._object_id_values) and (self.id not in self.optiga._key_id_values):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
-                    list(hex(self.optiga.object_id)),
-                    list(hex(self.optiga.key_id)),
+                    list(hex(self.optiga._object_id)),
+                    list(hex(self.optiga._key_id)),
                     self.id)
             )
 
@@ -1052,8 +1081,9 @@ class Object:
         """
         This function helps to write the metadata associated with the data object stored on the chip
 
-        :param data:
-            Data to write, should be bytearray
+        :ivar data:
+            Data to write
+        :vartype data: bytes or bytearray
 
         :raises
             - ValueError - when any of the parameters contain an invalid value
@@ -1065,11 +1095,11 @@ class Object:
         if not isinstance(data, bytes) and not isinstance(data, bytearray):
             raise TypeError("data should be bytes type")
 
-        if (self.id not in self.optiga.object_id_values) and (self.id not in self.optiga.key_id_values):
+        if (self.id not in self.optiga._object_id_values) and (self.id not in self.optiga._key_id_values):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
-                    list(hex(self.optiga.object_id)),
-                    list(hex(self.optiga.key_id)),
+                    list(hex(self.optiga._object_id)),
+                    list(hex(self.optiga._key_id)),
                     self.id)
             )
 
