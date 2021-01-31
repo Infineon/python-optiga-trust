@@ -73,7 +73,7 @@ def to_json():
             }
 
     """
-    optiga = init()
+    optiga = handler()
     output = dict()
     # Read metadata from available keys
     for oid in optiga.key_id_values:
@@ -192,7 +192,7 @@ def _to_xml(meta):
     :returns:
         an xml string
     """
-    optiga = init()
+    optiga = handler()
     path = os.path.dirname(os.path.abspath(__file__))
     template_env = Environment(
         autoescape=False,
