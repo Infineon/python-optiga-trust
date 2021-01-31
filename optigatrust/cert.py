@@ -599,9 +599,21 @@ access_conditions = {
 
 
 class Certificate(core.Object):
-    def __init__(self, id: int, is_trust_anchor=False):
-        super(Certificate, self).__init__(id)
-        self._pkey = None
+    """
+    A class used to represent a certificate of the OPTIGA Trust Chip
+
+    """
+    def __init__(self, cert_id: int):
+        """
+        This class
+
+        :ivar cert_id: One of supported object Ids assigned for certificates
+        :vartype cert_id: int
+
+        return:
+            self
+        """
+        super(Certificate, self).__init__(cert_id)
         self._der = self._read()
 
     def __str__(self):
@@ -623,25 +635,26 @@ class Certificate(core.Object):
         return header + lcso + size + read + change + pem + issuer_cn + subject_cn + pkey + signature + footer
 
     @property
-    def pkey(self):
-        return self._pkey
-
-    @property
     def der(self):
+        """
+        This property allows to get or set the certificate in der form.
+        Input should be a valid DER encoded certificate.
+        """
         if self.updated:
             self._der = self._read()
         return self._der
 
     @der.setter
     def der(self, data: str or bytes or bytearray):
-        final_cert = self._update(data)
+        self._update(data)
 
     @property
     def pem(self):
-        pem_cert = "-----BEGIN CERTIFICATE-----\n"
-        pem_cert += _break_apart(base64.b64encode(self.der).decode(), '\n', 64)
-        pem_cert += "\n-----END CERTIFICATE-----"
-        return pem_cert.encode()
+        """
+        This property allows to get or set the certificate in PEM form.
+        Input should be a valid PEM formatted certificate.
+        """
+        return pem.armor('CERTIFICATE', self.der)
 
     @pem.setter
     def pem(self, data: str):
@@ -653,16 +666,32 @@ class Certificate(core.Object):
 
     @property
     def pkey(self):
-        cert = x509.Certificate.load(self.der)
-        tbs_certificate = cert['tbs_certificate']
-        subject_public_key_info = tbs_certificate['subject_public_key_info']
-        subject_public_key = subject_public_key_info['public_key'].native.hex()
-        return subject_public_key
+        """
+        This property allows to get the public key assigned for certificate. In case the certificate can't be parsed an
+        exception will be generated
+        """
+        try:
+            cert = x509.Certificate.load(self.der)
+            tbs_certificate = cert['tbs_certificate']
+            subject_public_key_info = tbs_certificate['subject_public_key_info']
+            subject_public_key = subject_public_key_info['public_key'].native.hex()
+        except TypeError:
+            print('Failed to parse the certificate. It\'s either empty or not supported.')
+        else:
+            return subject_public_key
 
     @property
     def signature(self):
-        cert = x509.Certificate.load(self.der)
-        return cert['signature_value'].native.hex()
+        """
+        This property allows to get the signature of the certificate lcoated in the Certificate's object.
+        In case the certificate can't be parsed an exception will be generated
+        """
+        try:
+            cert = x509.Certificate.load(self.der)
+        except TypeError:
+            print('Failed to parse the certificate. It\'s either empty or not supported.')
+        else:
+            return cert['signature_value'].native.hex()
 
     def _update(self, cert: str or bytes or bytearray):
         """
