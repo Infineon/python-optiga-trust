@@ -8,3 +8,7 @@ __pycache__/
 .vs/
 dist/
 venv/
+Release/
+Build/
+x64/
+x86/
