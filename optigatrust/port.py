@@ -25,11 +25,12 @@ import os
 import re
 import json
 from jinja2 import Environment, FileSystemLoader
-from optigatrust.core import *
+import optigatrust as optiga
 
 
 __all__ = [
     'to_json',
+    'from_json',
     'to_otc',
 ]
 
@@ -73,11 +74,11 @@ def to_json():
             }
 
     """
-    optiga = handler()
+    opt = optiga.Chip()
     output = dict()
     # Read metadata from available keys
-    for oid in optiga.key_id_values:
-        key = Object(oid)
+    for oid in opt.key_id_values:
+        key = optiga.Object(oid)
         raw_meta = key.read_raw_meta().hex()
         if len(raw_meta) == 0:
             continue
@@ -87,8 +88,8 @@ def to_json():
         }
         del key
 
-    for oid in optiga.object_id_values:
-        key = Object(oid)
+    for oid in opt.object_id_values:
+        key = optiga.Object(oid)
         raw_meta = key.read_raw_meta().hex()
         try:
             data = key.read().hex()
@@ -109,9 +110,12 @@ def to_json():
 
 def from_json(path: str):
     """
-    This function will take as an inout your data and populate the chip with it, whatever is possible
+    This function will take as an input your data and populate the chip with it, whatever is possible
 
-    :param: path to the json file. The content should be formed like the following  ::
+    :param: path to the json file. The content should be formed like the following
+
+    .. highlight:: python
+    .. code-block:: python
 
         {
             "e0f1":
@@ -143,10 +147,6 @@ def from_json(path: str):
         - ValueError - when any of the parameters contain an invalid value
         - TypeError - when any of the parameters are of the wrong type
         - OSError - when an error is returned by the chip initialisation library
-
-    :returns:
-
-
     """
     abs_path = os.path.abspath(path)
     with open(abs_path, 'r', encoding='utf8') as f:
@@ -154,12 +154,12 @@ def from_json(path: str):
 
     # Iterate through the dictionary and check all keys and values one by one
     for oid, content in supermeta.iteritems():
-        # A flag whic we use to identify whether metadata should be reverted for data population
+        # A flag which we use to identify whether metadata should be reverted for data population
         metadata_changed = False
         old_meta = {}
         try:
             # Initialize the object with the object ID in the config
-            obj = Object(int(oid))
+            obj = optiga.Object(int(oid))
 
             # try at first to write down the data, otherwise it wont be possible to do this later (maybe)
             if 'data' in content:
@@ -192,11 +192,11 @@ def _to_xml(meta):
     :returns:
         an xml string
     """
-    optiga = handler()
+    opt = optiga.Chip()
     path = os.path.dirname(os.path.abspath(__file__))
     template_env = Environment(
         autoescape=False,
-        loader=FileSystemLoader(os.path.join(path, 'const')),
+        loader=FileSystemLoader(os.path.join(path, 'enums')),
         trim_blocks=False)
     fname = "conf_template.xml"
     new_meta_list = list()
@@ -214,7 +214,7 @@ def _to_xml(meta):
                 entry['data'] = value['data']
         new_meta_list.append(entry)
     context = {
-        'name': optiga.name,
+        'name': opt.name,
         'param': new_meta_list
     }
     output = template_env.get_template(fname).render(context)
@@ -226,7 +226,7 @@ def to_otc(path):
     """
     This function exports the whole available dump of the chip in the format compatible with
     the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
-    an xml file with metadata stored. The function uses :doc:`const/conf_template.xml` and add seqentially all objects
+    an xml file with metadata stored. The function uses :doc:`enums/conf_template.xml` and add seqentially all objects
     found on the chip. There are exceptions, objects ["f1c1", "e0c2", "e0c0", "e0c1", "e0c5", "e0c6"] are excluded and
     Objects which don't have 'used_size' metatag defined are excluded
 
@@ -236,22 +236,25 @@ def to_otc(path):
         - ValueError - when any of the parameters contain an invalid value
         - TypeError - when any of the parameters are of the wrong type
         - OSError - when an error is returned by the chip initialisation library
-    :returns:
-        an xml string according to the template :doc:`const/conf_template.xml` ::
 
-            <objects>
-            <!--OPTIGA Objects Metadata and Data-->
-                <oid id="E0F0">
-                    <metadata value="Updated_Tags">C00101D001FFD30100E00103E10101</metadata>
-                    <data
-                        data_from="Infineon"
-                        value="Default"
-                        type="Plain"
-                        chip_individual="false">
-                    </data>
-                </oid>
-                ...
-            </objects>
+    :returns: an xml string according to the template :doc:`enums/conf_template.xml`
+
+    .. highlight:: xml
+    .. code-block:: xml
+
+        <objects>
+        <!--OPTIGA Objects Metadata and Data-->
+            <oid id="E0F0">
+                <metadata value="Updated_Tags">C00101D001FFD30100E00103E10101</metadata>
+                <data
+                    data_from="Infineon"
+                    value="Default"
+                    type="Plain"
+                    chip_individual="false">
+                </data>
+            </oid>
+            ...
+        </objects>
 
     """
     meta = to_json()
