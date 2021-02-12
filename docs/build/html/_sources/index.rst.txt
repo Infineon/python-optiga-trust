@@ -25,7 +25,8 @@ optigatrust Python library Documentation
    :numbered:
 
    get_started
+   chip
    metadata
-   cert
+   x509
    crypto
-   transfer
+   port

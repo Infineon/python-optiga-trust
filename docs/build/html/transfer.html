@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cert.html">3. X.509 Certificates and Certificate Signing Requests</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crypto.html">4. Crypto Operations</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">5. Export Chip Data and Metadata</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.transfer">5.1. optigatrust.transfer module API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optigatrust-transfer-module-api">5.1. optigatrust.transfer module API</a></li>
 </ul>
 </li>
 </ul>
@@ -158,95 +158,8 @@
             
   <div class="section" id="export-chip-data-and-metadata">
 <h1><span class="section-number">5. </span>Export Chip Data and Metadata<a class="headerlink" href="#export-chip-data-and-metadata" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-optigatrust.transfer">
-<span id="optigatrust-transfer-module-api"></span><h2><span class="section-number">5.1. </span>optigatrust.transfer module API<a class="headerlink" href="#module-optigatrust.transfer" title="Permalink to this headline">¶</a></h2>
-<dl class="py function">
-<dt id="optigatrust.transfer.to_json">
-<code class="sig-prename descclassname">optigatrust.transfer.</code><code class="sig-name descname">to_json</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.transfer.to_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function will secentially read all metadata from all available OIDs and return a dictionary with all entrie</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p>a dictionary will all available metadata per object; e.g.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
-    <span class="s2">&quot;e0f1&quot;</span><span class="p">:</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;200fc00101d001ffd30100e00103e10101&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;nistp256r1&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="s2">&quot;01&quot;</span>
-        <span class="p">}</span>
-    <span class="p">},</span>
-    <span class="s2">&quot;e0c2&quot;</span><span class="p">:</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;2009c4011bd001ffd10100&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
-        <span class="p">{</span>
-            <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
-            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span>
-        <span class="p">}</span>
-        <span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="s2">&quot;cd16338201001c000500000a091b5c0007006200ad801010710809&quot;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</pre></div>
-</div>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="optigatrust.transfer.to_otc">
-<code class="sig-prename descclassname">optigatrust.transfer.</code><code class="sig-name descname">to_otc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.transfer.to_otc" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function exports the whole available dump of the chip in the format compatible with
-the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
-an xml file with metadata stored. The function uses <span class="xref std std-doc">const/conf_template.xml</span> and add seqentially all objects
-found on the chip. There are exceptions, objects [“f1c1”, “e0c2”, “e0c0”, “e0c1”, “e0c5”, “e0c6”] are excluded and
-Objects which don’t have ‘used_size’ metatag defined are excluded</p>
-<dl class="field-list simple">
-<dt class="field-odd">Param</dt>
-<dd class="field-odd"><p>path Path to the folder where to store the resulting data.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p>an xml string according to the template <span class="xref std std-doc">const/conf_template.xml</span></p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>&lt;objects&gt;
-&lt;!--OPTIGA Objects Metadata and Data--&gt;
-    &lt;oid id=&quot;E0F0&quot;&gt;
-        &lt;metadata value=&quot;Updated_Tags&quot;&gt;C00101D001FFD30100E00103E10101&lt;/metadata&gt;
-        &lt;data
-            data_from=&quot;Infineon&quot;
-            value=&quot;Default&quot;
-            type=&quot;Plain&quot;
-            chip_individual=&quot;false&quot;&gt;
-        &lt;/data&gt;
-    &lt;/oid&gt;
-    ...
-&lt;/objects&gt;
-</pre></div>
-</div>
-</p>
-</dd>
-</dl>
-</dd></dl>
-
+<div class="section" id="optigatrust-transfer-module-api">
+<h2><span class="section-number">5.1. </span>optigatrust.transfer module API<a class="headerlink" href="#optigatrust-transfer-module-api" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

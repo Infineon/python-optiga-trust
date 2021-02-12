@@ -3,7 +3,7 @@ Object and Metadata Management
 
 
 Objects
-^^^^^^^
+-------
 
 An object within this library is a generic class, which represents basic functionality and features valid for all
 OIDs (Object IDs) located on one chip.
@@ -15,10 +15,10 @@ Here are basic features what you can do with a generic Object instance (if acces
 
 ::
 
-    from optigatrust.core import *
+    import optigatrust
 
     # Create an instance of object.
-    object = Object(0xf1d0)
+    object = optigatrust.Object(0xf1d0)
 
     # Read data
     object.read().hex()
@@ -27,14 +27,14 @@ Output ::
 
     '01020304 ... 898a8b8c'
 
-A Certificate object
-----------------------------
+Certificate object
+^^^^^^^^^^^^^^^^^^
 
 ::
 
-    from optigatrust.cert import *
+    from optigatrust import x509
 
-    cert_object = Certificate(0xe0e0)
+    cert_object = x509.Certificate(0xe0e0)
 
     # Output the certificate content
     print(cert_object)
@@ -66,15 +66,15 @@ Output ::
     Signature                     :306402303d60118b266be951dc90f168af8903e0f ... cb700e9f5b4ad5b1f1df493b0f41d21e269df4c
     ============================================================
 
-Reading a key object
---------------------
+Key object
+^^^^^^^^^^
 
 ::
 
-    from optigatrust.asymmetric import *
+    from optigatrust import crypto
     import json
 
-    key_object = EccKey(0xe0f1)
+    key_object = crypto.ECCKey(0xe0f1)
     print(json.dumps(key_object.meta, indent=4))
 
 Output ::
@@ -94,11 +94,14 @@ Output ::
         ]
     }
 
-Metadata
-^^^^^^^^
+Metadata of Objects
+^^^^^^^^^^^^^^^^^^^
+
+Every Object (except for Session Objects) have a special service area called - metadata. It is a structured data which
+can significantly influence many aspects of the object itself, for example a lifecycle state.
 
 Options
--------
+"""""""
 Users can work with metadata directly in human-readable form.
 Metadata should be contructed in the following manner::
 
@@ -107,7 +110,7 @@ Metadata should be contructed in the following manner::
 Where metadata can take the following values:
 
 Metadata Tags
-+++++++++++++
+"""""""""""""
 
 All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle state of the object is either
 'creation' or 'initialisation'
@@ -150,11 +153,11 @@ All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle
      - Refer to the types Table below
      - Type of the object. Some functions; e.g. hmac, do work only if a specific type is defined
    * - 'reset_type'
-     -
+     - either one of ['creation', 'initialisation', 'operational', 'termination'], or 'flushing', or 'random_data'
      - It defines what happens with the object data in case of updating the metadata
 
 Access Conditions
-+++++++++++++++++
+"""""""""""""""""
 
 The '<metadata_value>' should be defined either as a list of values; e.g.
 
@@ -240,25 +243,25 @@ The '<metadata_value>' should be defined either as a list of values; e.g.
 
 
 Printing All metadata in human readable form
---------------------------------------------
+""""""""""""""""""""""""""""""""""""""""""""
 
 ::
 
-    from optigatrust.cert import *
+    from optigatrust import x509
     import json
 
-    cert_object = Certificate(0xe0e0)
+    cert_object = x509.Certificate(0xe0e0)
     print(json.dumps(cert_object.meta, indent=4))
 
 
 Updating Metadata of the Certificate Object
---------------------------------------------
+"""""""""""""""""""""""""""""""""""""""""""
 
 ::
 
-    from optigatrust.cert import *
+    from optigatrust import x509
 
-    cert_object = Certificate(0xe0e0)
+    cert_object = x509.Certificate(0xe0e0)
 
     # Print out certificate sucessfully
     print(cert_object)
@@ -286,8 +289,8 @@ Output ::
     C:\Users\User\git\python-optiga-trust>python
     Python 3.8.1 (tags/v3.8.1:1b293b6, Dec 18 2019, 22:39:24) [MSC v.1916 32 bit (Intel)] on win32
     Type "help", "copyright", "credits" or "license" for more information.
-    >>> from optigatrust.cert import *
-    >>> cert_object = Certificate(0xe0e0)
+    >>> from optigatrust import x509
+    >>> cert_object = x509.Certificate(0xe0e0)
     Loaded: liboptigatrust-libusb-win-i686.dll
     ================== OPTIGA Trust Chip Info ==================
     Firmware Identifier           [dwFirmwareIdentifier]:0x80101071
@@ -365,11 +368,7 @@ Output ::
     ============================================================
 
 
-optigatrust.core module API
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
-.. automodule:: optigatrust.core
-    :members:
-    :undoc-members:
-    :show-inheritance:
+.. autoclass:: optigatrust.Object
+   :members: meta, read, write
