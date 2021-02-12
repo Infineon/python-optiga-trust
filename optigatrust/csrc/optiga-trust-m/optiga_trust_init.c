@@ -404,6 +404,41 @@ optiga_lib_status_t exp_optiga_crypt_rsa_decrypt_and_store(optiga_rsa_encryption
 	CHECK_RESULT(optiga_crypt_rsa_decrypt_and_store(p_local_crypt, encryption_scheme, encrypted_message, encrypted_message_length, label, label_length, private_key));
 }
 
+optiga_lib_status_t exp_optiga_crypt_symmetric_encrypt(optiga_symmetric_encryption_mode_t encryption_mode, optiga_key_id_t symmetric_key_oid, const uint8_t * plain_data, uint32_t plain_data_length, const uint8_t * iv, uint16_t iv_length, const uint8_t * associated_data, uint16_t associated_data_length, uint8_t * encrypted_data, uint32_t * encrypted_data_length)
+{
+	CHECK_RESULT(optiga_crypt_symmetric_encrypt(p_local_crypt, encryption_mode, symmetric_key_oid, plain_data, plain_data_length, iv, iv_length, associated_data, associated_data_length, encrypted_data, encrypted_data_length));
+}
+
+optiga_lib_status_t exp_optiga_crypt_symmetric_decrypt(optiga_symmetric_encryption_mode_t encryption_mode, optiga_key_id_t symmetric_key_oid, const uint8_t * encrypted_data, uint32_t encrypted_data_length, const uint8_t * iv, uint16_t iv_length, const uint8_t * associated_data, uint16_t associated_data_length, uint8_t * plain_data, uint32_t * plain_data_length)
+{
+	CHECK_RESULT(optiga_crypt_symmetric_encrypt(p_local_crypt, encryption_mode, symmetric_key_oid, encrypted_data, encrypted_data_length, iv, iv_length, associated_data, associated_data_length, plain_data, plain_data_length));
+}
+
+optiga_lib_status_t exp_optiga_crypt_hmac(optiga_hmac_type_t type, uint16_t secret, const uint8_t * input_data, uint32_t input_data_length, uint8_t * mac, uint32_t * mac_length)
+{
+	CHECK_RESULT(optiga_crypt_hmac(p_local_crypt, type, secret, input_data, input_data_length, mac, mac_length));
+}
+
+optiga_lib_status_t exp_optiga_crypt_symmetric_generate_key(optiga_symmetric_key_type_t key_type, uint8_t key_usage, bool_t export_symmetric_key, void * symmetric_key)
+{
+	CHECK_RESULT(optiga_crypt_symmetric_generate_key(p_local_crypt, key_type, key_usage, export_symmetric_key, symmetric_key));
+}
+
+optiga_lib_status_t exp_optiga_crypt_generate_auth_code(optiga_rng_type_t rng_type, const uint8_t * optional_data, uint16_t optional_data_length, uint8_t * random_data, uint16_t random_data_length)
+{
+	CHECK_RESULT(optiga_crypt_generate_auth_code(p_local_crypt, rng_type, optional_data, optional_data_length, random_data, random_data_length));
+}
+
+optiga_lib_status_t exp_optiga_crypt_hmac_verify(optiga_hmac_type_t type, uint16_t secret, const uint8_t * input_data, uint32_t input_data_length, const uint8_t * hmac, uint32_t hmac_length)
+{
+	CHECK_RESULT(optiga_crypt_hmac_verify(p_local_crypt, type, secret, input_data, input_data_length, hmac, hmac_length));
+}
+
+optiga_lib_status_t exp_optiga_crypt_clear_auto_state(uint16_t secret)
+{
+	CHECK_RESULT(optiga_crypt_clear_auto_state(p_local_crypt, secret));
+}
+
 #ifdef OPTIGA_COMMS_SHIELDED_CONNECTION
 void EXP_OPTIGA_CRYPT_SET_COMMS_PROTECTION_LEVEL(protection_level)
 {

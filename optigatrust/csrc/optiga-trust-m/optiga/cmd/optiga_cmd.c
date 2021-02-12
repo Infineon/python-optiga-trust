@@ -36,6 +36,8 @@
 * @{
 */
 
+#include "stdlib.h"
+#include "stdio.h"
 
 #include "optiga/cmd/optiga_cmd.h"
 #include "optiga/common/optiga_lib_common_internal.h"
@@ -1201,7 +1203,6 @@ _STATIC_H void optiga_cmd_execute_comms_open(optiga_cmd_t * me, uint8_t * exit_l
         {
             case OPTIGA_CMD_EXEC_COMMS_OPEN_ACQUIRE_LOCK:
             {
-
                 // add to queue and exit
                 me->exit_status = optiga_cmd_request_lock(me, OPTIGA_CMD_QUEUE_REQUEST_LOCK);
                 if (OPTIGA_LIB_SUCCESS != me->exit_status)
@@ -1223,8 +1224,12 @@ _STATIC_H void optiga_cmd_execute_comms_open(optiga_cmd_t * me, uint8_t * exit_l
 
                 (void)optiga_comms_set_callback_context(me->p_optiga->p_optiga_comms, me);
                 me->exit_status = optiga_comms_open(me->p_optiga->p_optiga_comms);
-
-                if (OPTIGA_LIB_SUCCESS != me->exit_status)
+#ifdef OPTIGA_SYNC_COMMS
+				pal_os_event_register_callback_oneshot(me->p_optiga->p_pal_os_event_ctx,
+														(register_callback)optiga_cmd_event_trigger_execute,
+														me, OPTIGA_CMD_SCHEDULER_RUNNING_TIME_MS);
+#endif
+				if (OPTIGA_LIB_SUCCESS != me->exit_status)
                 {
                     EXIT_STATE_WITH_ERROR(me,*exit_loop);
                     break;
@@ -1404,6 +1409,11 @@ _STATIC_H void optiga_cmd_execute_prepare_command(optiga_cmd_t * me, uint8_t * e
                     EXIT_STATE_WITH_ERROR(me,*exit_loop);
                     break;
                 }
+#ifdef OPTIGA_SYNC_COMMS
+				pal_os_event_register_callback_oneshot(me->p_optiga->p_pal_os_event_ctx,
+					(register_callback)optiga_cmd_event_trigger_execute,
+					me, OPTIGA_CMD_SCHEDULER_IDLING_TIME_MS);
+#endif
 
                 me->cmd_next_execution_state = OPTIGA_CMD_EXEC_PROCESS_RESPONSE;
                 me->cmd_sub_execution_state = OPTIGA_CMD_EXEC_PROCESS_OPTIGA_RESPONSE;
@@ -1609,7 +1619,7 @@ _STATIC_H void optiga_cmd_execute_handler(void * p_ctx, optiga_lib_status_t even
             case OPTIGA_CMD_EXEC_COMMS_CLOSE:
             {
                 optiga_cmd_execute_comms_close(me, &exit_loop);
-                break;
+				break;
             }
             case OPTIGA_CMD_EXEC_PREPARE_COMMAND:
             {
@@ -1760,6 +1770,11 @@ _STATIC_H optiga_lib_status_t optiga_cmd_get_error_code_handler(optiga_cmd_t * m
                                                     p_optiga->comms_tx_size,
                                                     p_optiga->optiga_comms_buffer,
                                                     &p_optiga->comms_rx_size);
+#ifdef OPTIGA_SYNC_COMMS
+			pal_os_event_register_callback_oneshot(me->p_optiga->p_pal_os_event_ctx,
+				(register_callback)optiga_cmd_event_trigger_execute,
+				me, OPTIGA_CMD_SCHEDULER_IDLING_TIME_MS);
+#endif
             if (OPTIGA_COMMS_SUCCESS != return_status)
             {
                 return_status = OPTIGA_CMD_ERROR;

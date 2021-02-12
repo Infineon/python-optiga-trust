@@ -80,6 +80,7 @@ typedef struct optiga_comms
 #endif
     /// Pointer to the pal os event instance/context
     void * p_pal_os_event_ctx;
+	char path[1000];
 } optiga_comms_t;
 
 /** @brief optiga communication structure */
