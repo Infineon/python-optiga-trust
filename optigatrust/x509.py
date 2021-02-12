@@ -30,17 +30,17 @@ import textwrap
 import base64
 import warnings
 
-from asn1crypto import x509, keys, csr, pem
-from asn1crypto import core as c
-from optigatrust import core, asymmetric
+from asn1crypto import x509 as asn1_x509
+from asn1crypto import core, keys, csr, pem
+import optigatrust as optiga
 
 int_types = (int,)
 str_cls = str
 
 __all__ = [
-    'Builder',
+    'Certificate',
+    'CSRBuilder',
     'pem_armor_csr',
-    'Certificate'
 ]
 
 
@@ -79,7 +79,7 @@ def pem_armor_csr(certification_request):
     )
 
 
-class Builder(object):
+class CSRBuilder(object):
     _subject = None
     _subject_public_key = None
     _hash_algo = None
@@ -143,7 +143,7 @@ class Builder(object):
         """
 
         is_dict = isinstance(value, dict)
-        if not isinstance(value, x509.Name) and not is_dict:
+        if not isinstance(value, asn1_x509.Name) and not is_dict:
             raise TypeError(_pretty_message(
                 '''
                 subject must be an instance of asn1crypto.x509.Name or a dict,
@@ -153,23 +153,23 @@ class Builder(object):
             ))
 
         if is_dict:
-            value = x509.Name.build(value)
+            value = asn1_x509.Name.build(value)
 
         self._subject = value
 
     @_writer
     def subject_public_key(self, _value):
-        if isinstance(_value, asymmetric.EccKey):
+        if isinstance(_value, optiga.crypto.ECCKey):
             pubkey_alg = keys.PublicKeyAlgorithm({
                 'algorithm': 'ec',
                 'parameters': keys.ECDomainParameters('named', _value.curve)
             })
-            pubkey_asn1 = c.BitString.load(_value.pkey)
+            pubkey_asn1 = core.BitString.load(_value.pkey)
             pubkey_info = keys.PublicKeyInfo({
                 'algorithm': pubkey_alg,
                 'public_key': pubkey_asn1.cast(keys.ECPointBitString)
             })
-        elif isinstance(_value, asymmetric.RsaKey):
+        elif isinstance(_value, optiga.crypto.RSAKey):
             pubkey_info = keys.PublicKeyInfo.load(_value.pkey)
         else:
             raise TypeError(_pretty_message(
@@ -218,14 +218,14 @@ class Builder(object):
             self._basic_constraints = None
             return
 
-        self._basic_constraints = x509.BasicConstraints({'ca': bool(value)})
+        self._basic_constraints = asn1_x509.BasicConstraints({'ca': bool(value)})
 
         if value:
-            self._key_usage = x509.KeyUsage({'key_cert_sign', 'crl_sign'})
-            self._extended_key_usage = x509.ExtKeyUsageSyntax(['ocsp_signing'])
+            self._key_usage = asn1_x509.KeyUsage({'key_cert_sign', 'crl_sign'})
+            self._extended_key_usage = asn1_x509.ExtKeyUsageSyntax(['ocsp_signing'])
         else:
-            self._key_usage = x509.KeyUsage({'digital_signature', 'key_encipherment'})
-            self._extended_key_usage = x509.ExtKeyUsageSyntax(['server_auth', 'client_auth'])
+            self._key_usage = asn1_x509.KeyUsage({'digital_signature', 'key_encipherment'})
+            self._extended_key_usage = asn1_x509.ExtKeyUsageSyntax(['server_auth', 'client_auth'])
 
     @property
     def subject_alt_domains(self):
@@ -292,13 +292,13 @@ class Builder(object):
             for general_name in self._subject_alt_name:
                 if general_name.name != name:
                     filtered_general_names.append(general_name)
-            self._subject_alt_name = x509.GeneralNames(filtered_general_names)
+            self._subject_alt_name = asn1_x509.GeneralNames(filtered_general_names)
         else:
-            self._subject_alt_name = x509.GeneralNames()
+            self._subject_alt_name = asn1_x509.GeneralNames()
 
         if values is not None:
             for value in values:
-                new_general_name = x509.GeneralName(name=name, value=value)
+                new_general_name = asn1_x509.GeneralName(name=name, value=value)
                 self._subject_alt_name.append(new_general_name)
 
         if len(self._subject_alt_name) == 0:
@@ -329,7 +329,7 @@ class Builder(object):
         if value == set() or value is None:
             self._key_usage = None
         else:
-            self._key_usage = x509.KeyUsage(value)
+            self._key_usage = asn1_x509.KeyUsage(value)
 
     @property
     def extended_key_usage(self):
@@ -357,7 +357,7 @@ class Builder(object):
         if value == set() or value is None:
             self._extended_key_usage = None
         else:
-            self._extended_key_usage = x509.ExtKeyUsageSyntax(list(value))
+            self._extended_key_usage = asn1_x509.ExtKeyUsageSyntax(list(value))
 
     def set_extension(self, name, value):
         """
@@ -373,7 +373,7 @@ class Builder(object):
             A value object per the specs defined by asn1crypto.x509.Extension
         """
 
-        extension = x509.Extension({
+        extension = asn1_x509.Extension({
             'extn_id': name
         })
         # We use native here to convert OIDs to meaningful names
@@ -441,7 +441,8 @@ class Builder(object):
             An asn1crypto.csr.CertificationRequest object of the request
         """
 
-        if not isinstance(signing_key, asymmetric.EccKey) and not isinstance(signing_key, asymmetric.RsaKey):
+        if not isinstance(signing_key, optiga.crypto.ECCKey) and \
+                not isinstance(signing_key, optiga.crypto.RSAKey):
             raise TypeError(_pretty_message(
                 '''
                 signing_private_key must be an instance of
@@ -450,20 +451,20 @@ class Builder(object):
                 _type_name(signing_key)
             ))
 
-        if isinstance(signing_key, asymmetric.EccKey):
+        if isinstance(signing_key, optiga.crypto.ECCKey):
             signature_algo = 'ecdsa'
-        elif isinstance(signing_key, asymmetric.RsaKey):
+        elif isinstance(signing_key, optiga.crypto.RSAKey):
             signature_algo = 'rsa'
         else:
             signature_algo = 'undefined'
 
         signature_algorithm_id = '%s_%s' % (self._hash_algo, signature_algo)
 
-        def _make_extension(name, value):
+        def _make_extension(_name, _value):
             return {
-                'extn_id': name,
-                'critical': self._determine_critical(name),
-                'extn_value': value
+                'extn_id': _name,
+                'critical': self._determine_critical(_name),
+                'extn_value': _value
             }
 
         extensions = []
@@ -489,9 +490,9 @@ class Builder(object):
             'attributes': attributes
         })
 
-        if isinstance(signing_key, asymmetric.EccKey):
+        if isinstance(signing_key, optiga.crypto.ECCKey):
             sign_func = signing_key.ecdsa_sign
-        elif isinstance(signing_key, asymmetric.RsaKey):
+        elif isinstance(signing_key, optiga.crypto.RSAKey):
             sign_func = signing_key.pkcs1v15_sign
         else:
             raise ValueError(
@@ -598,7 +599,7 @@ access_conditions = {
 }
 
 
-class Certificate(core.Object):
+class Certificate(optiga.Object):
     """
     A class used to represent a certificate of the OPTIGA Trust Chip
 
@@ -622,8 +623,8 @@ class Certificate(core.Object):
         size = '{0:<30}:{1}\n'.format("Size", self.meta['used_size'])
         read = '{0:<30}:{1}\n'.format("Access Condition: Read", self.meta['read'])
         change = '{0:<30}:{1}\n'.format("Access Conditions: Change", self.meta['change'])
-        pem = '{0:<30}:\n{1}\n'.format("PEM", str(self.pem).replace('\\n', '\n').replace('\\t', '\t'))
-        cert = x509.Certificate.load(self.der)
+        _pem = '{0:<30}:\n{1}\n'.format("PEM", str(self.pem).replace('\\n', '\n').replace('\\t', '\t'))
+        cert = asn1_x509.Certificate.load(self.der)
         tbs_certificate = cert['tbs_certificate']
         issuer_cn = '{0:<30}:{1}\n'.format("Issuer: Common Name",
                                            tbs_certificate['issuer'].native['common_name'])
@@ -632,7 +633,7 @@ class Certificate(core.Object):
         pkey = '{0:<30}:{1}\n'.format("Public Key", self.pkey)
         signature = '{0:<30}:{1}\n'.format("Signature", self.signature)
         footer = "============================================================"
-        return header + lcso + size + read + change + pem + issuer_cn + subject_cn + pkey + signature + footer
+        return header + lcso + size + read + change + _pem + issuer_cn + subject_cn + pkey + signature + footer
 
     @property
     def der(self):
@@ -658,11 +659,7 @@ class Certificate(core.Object):
 
     @pem.setter
     def pem(self, data: str):
-        final_cert = self._update(data)
-        pem_cert = "-----BEGIN CERTIFICATE-----\n"
-        pem_cert += _break_apart(base64.b64encode(final_cert).decode(), '\n', 64)
-        pem_cert += "\n-----END CERTIFICATE-----"
-        return pem_cert.encode()
+        self._update(data)
 
     @property
     def pkey(self):
@@ -671,7 +668,7 @@ class Certificate(core.Object):
         exception will be generated
         """
         try:
-            cert = x509.Certificate.load(self.der)
+            cert = asn1_x509.Certificate.load(self.der)
             tbs_certificate = cert['tbs_certificate']
             subject_public_key_info = tbs_certificate['subject_public_key_info']
             subject_public_key = subject_public_key_info['public_key'].native.hex()
@@ -687,7 +684,7 @@ class Certificate(core.Object):
         In case the certificate can't be parsed an exception will be generated
         """
         try:
-            cert = x509.Certificate.load(self.der)
+            cert = asn1_x509.Certificate.load(self.der)
         except TypeError:
             print('Failed to parse the certificate. It\'s either empty or not supported.')
         else:
@@ -705,7 +702,7 @@ class Certificate(core.Object):
             - TypeError - when any of the parameters are of the wrong type
             - OSError - when an error is returned by the core initialisation library
         """
-        oids = self.optiga.object_id
+        oids = self._optiga.object_id
 
         if self.id not in {oids.IFX_CERT.value, oids.USER_CERT_1.value, oids.USER_CERT_2.value, oids.USER_CERT_3.value,
                            oids.TRUST_ANCHOR_1.value, oids.TRUST_ANCHOR_2.value,
@@ -773,12 +770,12 @@ class Certificate(core.Object):
         :returns:
             A byte string with a PEM certificate or DER encoded byte string
         """
-        oid = self.optiga.object_id
+        oid = self._optiga.object_id
 
-        if self.id not in self.optiga.object_id_values:
+        if self.id not in self._optiga.object_id_values:
             raise ValueError(
                 'Certificate Slot is not correct. '
-                'Supported values are {0} class you used {1}'.format(self.optiga.object_id_values, self.id)
+                'Supported values are {0} class you used {1}'.format(self._optiga.object_id_values, self.id)
             )
         if self.id not in {oid.IFX_CERT.value, oid.USER_CERT_1.value, oid.USER_CERT_2.value, oid.USER_CERT_3.value,
                            oid.TRUST_ANCHOR_1.value, oid.TRUST_ANCHOR_2.value,
