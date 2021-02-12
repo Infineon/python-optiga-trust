@@ -1,8 +1,6 @@
 import pytest
-from optigatrust.asymmetric import *
-from optigatrust.core import *
-from optigatrust.cert import *
-from optigatrust.transfer import *
+from optigatrust import Object, x509, crypto, port
+
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -10,15 +8,15 @@ LOGGER = logging.getLogger(__name__)
 
 def test_meta_read_certificate():
     LOGGER.info('Read metatadata of a certificate object')
-    obj = Certificate(0xe0e0)
+    obj = x509.Certificate(0xe0e0)
     print(obj.meta)
 
 
 def test_meta_read_key_meta():
     LOGGER.info('Read metatadata of a key object')
-    obj = EccKey(0xe0f0)
+    obj = crypto.ECCKey(0xe0f0)
     print(obj.meta)
-    obj = RsaKey(0xe0fc)
+    obj = crypto.RSAKey(0xe0fc)
     print(obj.meta)
 
 
@@ -30,7 +28,7 @@ def test_meta_read_appdata():
 
 def test_meta_read_all_oids():
     LOGGER.info('Read metatadata of all possible objects')
-    print(to_json())
+    print(port.to_json())
 
 
 _meta_tags = {
@@ -73,7 +71,7 @@ def test_meta_assign_change_ac():
 
 def test_meta_assign_execute_ac():
     LOGGER.info('Assign execute never access conditions to an object and try to sign data')
-    obj = EccKey(0xe0f0)
+    obj = crypto.ECCKey(0xe0f0)
     old_meta = {'execute': obj.meta['execute']}
     obj.meta = {'execute': 'never'}
     with pytest.raises(IOError):
@@ -118,7 +116,7 @@ def test_meta_assign_used_size():
 ))
 def test_meta_check_algorithm_ecc(curve):
     LOGGER.info('Check Algorithm Tag is one of listed. ECC.')
-    obj = EccKey(0xe0f1)
+    obj = crypto.ECCKey(0xe0f1)
     obj.generate(curve=curve)
     assert curve == obj.meta['algorithm']
 
@@ -129,14 +127,14 @@ def test_meta_check_algorithm_ecc(curve):
 ))
 def test_meta_check_algorithm_rsa(key_size):
     LOGGER.info('Check Algorithm Tag is one of listed. RSA.')
-    obj = RsaKey(0xe0fc)
+    obj = crypto.RSAKey(0xe0fc)
     obj.generate(key_size=key_size)
     assert ('rsa' + str(key_size)) == obj.meta['algorithm']
 
 
 def test_meta_check_key_usage_ecc():
     LOGGER.info('Check Proper Key Usage Selection. ECC.')
-    obj = EccKey(0xe0f1)
+    obj = crypto.ECCKey(0xe0f1)
     obj.generate(key_usage=['signature', 'authentication'])
     assert ['signature', 'authentication'] == obj.meta['key_usage'] or \
            ['authentication', 'signature'] == obj.meta['key_usage']
@@ -144,7 +142,7 @@ def test_meta_check_key_usage_ecc():
 
 def test_meta_check_key_usage_rsa():
     LOGGER.info('Check Proper Key Usage Selection. RSA.')
-    obj = RsaKey(0xe0fc)
+    obj = crypto.RSAKey(0xe0fc)
     obj.generate(key_usage=['key_agreement', 'encryption'])
     assert ['key_agreement', 'encryption'] == obj.meta['key_usage'] or \
            ['encryption', 'key_agreement'] == obj.meta['key_usage']

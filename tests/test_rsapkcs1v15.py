@@ -1,9 +1,9 @@
 import pytest
 from oscrypto.asymmetric import rsa_pkcs1v15_verify, load_public_key
 from oscrypto.errors import SignatureError
-from asn1crypto import keys, core
+from asn1crypto import keys
 
-from optigatrust.asymmetric import *
+from optigatrust.crypto import RSAKey
 
 import logging
 
@@ -15,13 +15,13 @@ pytest.tbs_str_fail = b'FAILED Test String to Sign'
 
 
 def setup_keys_1k():
-	pytest.onek = RsaKey(0xe0fc).generate(key_size=1024)
-	pytest.onek_fail = RsaKey(0xe0fd).generate(key_size=1024)
+	pytest.onek = RSAKey(0xe0fc).generate(key_size=1024)
+	pytest.onek_fail = RSAKey(0xe0fd).generate(key_size=1024)
 
 
 def setup_keys_2k():
-	pytest.twok = RsaKey(0xe0fc).generate(key_size=2048)
-	pytest.twok_fail = RsaKey(0xe0fd).generate(key_size=1024)
+	pytest.twok = RSAKey(0xe0fc).generate(key_size=2048)
+	pytest.twok_fail = RSAKey(0xe0fd).generate(key_size=1024)
 
 
 def test_rsassa_checkcopy():

@@ -1,15 +1,16 @@
 import pytest
 import logging
-from optigatrust.core import random
+from optigatrust import crypto
 
 LOGGER = logging.getLogger(__name__)
+
 
 @pytest.mark.parametrize("n", [
 	0, 1, 2, 3, 4, 5, 6, 7
 ])
 def test_rand_undervalue(n):
 	LOGGER.info('Generate Random - {0} bytes.\t Should: FAIL'.format(n))
-	_random = random(n)
+	_random = crypto.random(n)
 	assert isinstance(_random, bytes) and len(_random) == 0
 
 
@@ -18,7 +19,7 @@ def test_rand_undervalue(n):
 ])
 def test_rand_normalrange(n):
 	LOGGER.info('Generate Random - {0} bytes.\t Should: PASS'.format(n))
-	_random = random(n)
+	_random = crypto.random(n)
 	assert isinstance(_random, bytes) and len(_random) == n
 
 
@@ -27,5 +28,5 @@ def test_rand_normalrange(n):
 ])
 def test_rand_overflow(n):
 	LOGGER.info('Generate Random - {0} bytes.\t Should: FAIL'.format(n))
-	_random = random(n)
+	_random = crypto.random(n)
 	assert isinstance(_random, bytes) and len(_random) == 0

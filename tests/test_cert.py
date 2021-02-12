@@ -1,7 +1,8 @@
 import pytest
 import os
-from optigatrust.cert import *
-from asn1crypto import pem, x509
+import optigatrust.x509 as optiga_x509
+import asn1crypto.x509 as asn1_x509
+import asn1crypto.pem as asn1_pem
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -10,13 +11,13 @@ pytest.test_dir = os.path.dirname(__file__)
 
 def test_read_existing():
     LOGGER.info('Read Certificate')
-    c = Certificate(0xe0e0)
+    c = optiga_x509.Certificate(0xe0e0)
     assert isinstance(c.der, bytes)
 
 
 def test_read_existing_multiple_times():
     LOGGER.info('Read Certificate multiple times')
-    c = Certificate(0xe0e0)
+    c = optiga_x509.Certificate(0xe0e0)
     _ = c.pem
     _ = c.pem
     _ = c.pem
@@ -26,19 +27,19 @@ def test_read_existing_multiple_times():
 
 def test_read_existing_verify_result():
     LOGGER.info('Read certificate and make sanity/format check')
-    c = Certificate(0xe0e0)
+    c = optiga_x509.Certificate(0xe0e0)
     pem_str = c.pem
-    if pem.detect(pem_str):
-        type_name, headers, pem_str = pem.unarmor(pem_str)
-    x509.Certificate.load(pem_str)
+    if asn1_pem.detect(pem_str):
+        type_name, headers, pem_str = asn1_pem.unarmor(pem_str)
+    asn1_x509.Certificate.load(pem_str)
     der_bytes = c.der
-    x509.Certificate.load(der_bytes)
+    asn1_x509.Certificate.load(der_bytes)
 
 
 def test_read_existing_faulty_objid():
     LOGGER.info('Try to read a incorrect Object ID')
     with pytest.raises(ValueError):
-        Certificate(0xe0e7)
+        optiga_x509.Certificate(0xe0e7)
 
 
 def test_write_new_default():
@@ -46,17 +47,17 @@ def test_write_new_default():
     with pytest.raises(IOError):
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
             der_bytes = f.read()
-        Certificate(0xe0e0).der = der_bytes
+        optiga_x509.Certificate(0xe0e0).der = der_bytes
 
 
 def test_write_new_specific():
     LOGGER.info('Write new certificate in a specific slot')
     with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
         der_bytes = f.read()
-    obj = Certificate(0xe0e1)
+    obj = optiga_x509.Certificate(0xe0e1)
     old_meta = {'change': obj.meta['change']}
     obj.meta = {'change': 'always'}
-    Certificate(0xe0e1).der = der_bytes
+    optiga_x509.Certificate(0xe0e1).der = der_bytes
     obj.meta = old_meta
 
 
@@ -66,7 +67,7 @@ def test_write_new_faulty_objid():
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
             wr_bytes = f.read()
 
-        Certificate(0xe0ec).der = wr_bytes
+        optiga_x509.Certificate(0xe0ec).der = wr_bytes
 
 
 def test_write_new_faulty_cert():
@@ -75,12 +76,12 @@ def test_write_new_faulty_cert():
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-faulty-cert.pem'), 'rb') as f:
             wr_bytes = f.read()
 
-        Certificate(0xe0e1).pem = wr_bytes
+        optiga_x509.Certificate(0xe0e1).pem = wr_bytes
 
 
 def test_write_new_locked_object():
     LOGGER.info('Try to write a certificate into a locked object')
-    c = Certificate(0xe0e1)
+    c = optiga_x509.Certificate(0xe0e1)
     old_meta = c.meta['change']
     with pytest.raises(IOError):
         with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
@@ -90,17 +91,3 @@ def test_write_new_locked_object():
         c.der = wr_bytes
 
     c.meta = {'change': old_meta}
-
-
-'''
-This Test somehow crashes the python
-def test_write_new_then_read():
-	rd_bytes = cert.read_existing(certid=ObjectId.USER_CERT_1)
-
-	with open(os.path.join(pytest.test_dir, 'fixtures/test-ec-ecdsa-cert.pem'), 'rb') as f:
-		wr_bytes = f.read()
-
-	cert.write_new(wr_bytes, certid=ObjectId.USER_CERT_1)
-
-	assert rd_bytes == wr_bytes
-'''

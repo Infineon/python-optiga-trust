@@ -9,7 +9,7 @@ from oscrypto.asymmetric import ecdsa_verify, load_public_key
 from oscrypto.errors import SignatureError
 from asn1crypto import keys, core
 
-from optigatrust.asymmetric import *
+from optigatrust.crypto import ECCKey
 
 import logging
 
@@ -50,7 +50,7 @@ tbs_str_fail = b'FAILED Test String to Sign'
 ])
 def test_ecdsa(oid, curve, max_sign_size, hashname):
     LOGGER.info('Sign data on slot {0} with {1} using {2}'.format(hex(oid), curve, hashname))
-    key = EccKey(oid).generate(curve=curve)
+    key = ECCKey(oid).generate(curve=curve)
     s = key.ecdsa_sign(tbs_str)
     assert isinstance(s.signature, bytes)
     assert len(s.signature) > 0
@@ -66,8 +66,8 @@ def test_ecdsa(oid, curve, max_sign_size, hashname):
 ])
 def test_ecdsa_signverify(curve, hashname):
     LOGGER.info('Sign data with {0} using {1} and verify the result'.format(curve, hashname))
-    ecc_key = EccKey(0xE100).generate(curve=curve)
-    ecc_fail_key = EccKey(0xE101).generate(curve=curve)
+    ecc_key = ECCKey(0xE100).generate(curve=curve)
+    ecc_fail_key = ECCKey(0xE101).generate(curve=curve)
     ha = hashname
     s = ecc_key.ecdsa_sign(tbs_str)
     print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
@@ -113,13 +113,13 @@ def test_ecdsa_signverify(curve, hashname):
 
 def test_ecdsa_nonkey():
     LOGGER.info('Sign data with empty key')
-    ecc_key = EccKey(0xE100).generate()
+    ecc_key = ECCKey(0xE100).generate()
     with pytest.raises(TypeError):
         ecc_key.ecdsa_sign(bytearray(35), tbs_str)
 
 
 def test_ecdsa_nonkey_2():
     LOGGER.info('Sign faulty data with a correct key')
-    ecc_key = EccKey(0xE100).generate()
+    ecc_key = ECCKey(0xE100).generate()
     with pytest.raises(TypeError):
         ecc_key.ecdsa_sign(int(19273917398739829))

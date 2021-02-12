@@ -1,5 +1,5 @@
 import pytest
-from optigatrust.asymmetric import *
+from optigatrust.crypto import ECCKey
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -7,7 +7,7 @@ LOGGER = logging.getLogger(__name__)
 
 def test_keypair_default():
     LOGGER.info('Generate a keypair using default parameters')
-    k = EccKey(0xe0f1).generate()
+    k = ECCKey(0xe0f1).generate()
     assert isinstance(k.pkey, bytes)
     assert len(k.pkey) > 0
     assert len(k.pkey) == 68
@@ -32,7 +32,7 @@ def test_keypair_default():
 ])
 def test_keypair_x_y(oid, curve, pub_key_size):
     LOGGER.info('Generate a keypair on {0} slot using {1} curve'.format(hex(oid), curve))
-    k = EccKey(oid).generate(curve=curve)
+    k = ECCKey(oid).generate(curve=curve)
     assert isinstance(k.pkey, bytes)
     assert len(k.pkey) > 0
     assert len(k.pkey) == pub_key_size
@@ -43,7 +43,7 @@ def test_keypair_x_y(oid, curve, pub_key_size):
 def test_keypair_faulty():
     LOGGER.info('Try to use faulty curves and keyid')
     with pytest.raises(ValueError):
-        EccKey(0xe0f1).generate(curve='secp384')
+        ECCKey(0xe0f1).generate(curve='secp384')
 
     with pytest.raises(ValueError):
-        EccKey(0xe0fc).generate(curve='secp384r1')
+        ECCKey(0xe0fc).generate(curve='secp384r1')
