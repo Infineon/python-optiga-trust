@@ -105,12 +105,12 @@ __version = ".".join([str(x) for x in __version_tuple__])
 # Parameters for setup
 __packages = [
 	'optigatrust',
-	'optigatrust.const',
+	'optigatrust.enums',
 	'optigatrust.csrc.lib'
 ]
 
 __package_data = {
-	'optigatrust.csrc.lib': ['*.dll', '*.so'],
+	'optigatrust.csrc.lib': ['*.dll', '*.so', '*.ini'],
 	'optigatrust.rules': [
 		'csrc/optiga-trust-x/pal/libusb/include/90-optigatrust.rules'
 	]
