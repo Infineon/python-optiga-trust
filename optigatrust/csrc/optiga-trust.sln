@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "optiga-trust-x", "optiga-trust-x\optiga-trust-x.vcxproj", "{6856AD58-BECA-4DF5-9EF0-3DDF9061D168}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "optiga-trust-m-tc", "optiga-trust-m\optiga-trust-m-tc.vcxproj", "{6856AD58-BECA-4DF5-9EF0-3DDF9061D168}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "optiga-trust-m", "optiga-trust-m\optiga-trust-m.vcxproj", "{CEB6A765-7E44-4734-BCB8-8777FC636E77}"
 EndProject
