@@ -91,6 +91,12 @@ def random(n, trng=True):
         return bytes(0)
 
 
+class PublicKeyFromHost(Structure):
+    _fields_ = [("public_key", POINTER(c_ubyte)),
+                ("length", c_ushort),
+                ("key_type", c_ubyte)]
+
+
 class _Signature:
     def __init__(self, hash_alg: str, key_id: int, signature: bytes, algorithm: str):
         self.hash_alg = hash_alg
@@ -160,7 +166,7 @@ class ECCKey(optiga.Object, _Key):
     def hash_alg(self):
         return self._hash_alg
 
-    def generate(self, curve='secp256r1', key_usage=None, export=False):
+    def generate_pair(self, curve='secp256r1', key_usage=None, export=False):
         """
         This function generates an ECC keypair, the private part is stored on the core based on the provided slot
 
@@ -306,6 +312,77 @@ class ECCKey(optiga.Object, _Key):
         else:
             raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
+    def ecdh(self, external_pkey, export=False):
+        """
+        This function derives a shared secret using Diffie-Hellman  Key-Exchange. This function assumes the instance
+        of the key from which this method will be called represents the private key on the system used for ECDH
+
+        :ivar external_pkey:
+            a bytearray with a public key YOu can submit public keys with parameters as per openssl output in DER format
+            ::
+
+                from asn1crypto import pem
+                # Option 1
+                pem_string = '-----BEGIN PUBLIC KEY-----\n' + \
+                             'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP\n' + \
+                             'fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==\n' + \
+                             '-----END PUBLIC KEY-----'
+                if pem.detect(pem_string):
+                    type_name, headers, der_bytes = pem.unarmor(pem_string)
+
+                # Option 2
+                hex_string ='3059301306072a8648ce3d020106082a' + \
+                            '8648ce3d0301070342000486a3c1caaf' + \
+                            'f62395efd63a9265b0734bc7e9b6474f' + \
+                            '7c0aecdbe97a499f087ce22e9247ffc0' + \
+                            '78b0c34155fa3c5e86b572cd6f9ccbdf' + \
+                            '8a7ed0686da970de25cdd8'
+                der_bytes = bytes().from_hex(hex_string)
+
+        :vartype: bytes or bytearray
+
+        :ivar export:
+            defines whether the resulting secret should be exported or not
+        :vartype: bool
+
+        :raises:
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the core initialisation library
+
+        :returns:
+            in case `export` set to True returns a shared secret
+        """
+        if not isinstance(external_pkey, bytes) and not isinstance(external_pkey, bytearray):
+            raise TypeError(
+                'Public Key should be either bytes or '
+                'bytearray type, you gave {0}'.format(type(external_pkey))
+            )
+        # OPTIGA doesn't understand the asn.1 encoded parameters field
+        external_pkey = external_pkey[23:]
+
+        self._optiga.api.exp_optiga_crypt_ecdh.argtypes = c_ushort, POINTER(PublicKeyFromHost), c_ubyte, POINTER(c_ubyte)
+        self._optiga.api.exp_optiga_crypt_ecdsa_sign.restype = c_int
+
+        pkey = PublicKeyFromHost()
+        pkey.public_key = (c_ubyte * len(external_pkey))()
+        memmove(pkey.public_key, external_pkey, len(external_pkey))
+        pkey.length = len(external_pkey)
+        pkey.key_type = _str2curve(self.curve, return_value=True)
+
+        if export:
+            # Pubkey comprises 4 bytes of asn.1 tags and two coordinates, each of key size
+            shared_secret = (c_ubyte * ((len(external_pkey) - 4) >> 1))()
+        else:
+            shared_secret = None
+
+        ret = self._optiga.api.exp_optiga_crypt_ecdh( self.id, byref(pkey), int(export), shared_secret)
+
+        if ret == 0:
+            if export:
+                return bytes(shared_secret)
+        else:
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
 
 class RSAKey(optiga.Object, _Key):
     def __init__(self, key_id: int):
@@ -321,7 +398,7 @@ class RSAKey(optiga.Object, _Key):
     def key_size(self):
         return self._key_size
 
-    def generate(self, key_size=1024, key_usage=None, export=False):
+    def generate_pair(self, key_size=1024, key_usage=None, export=False):
         """
         This function generates an RSA keypair, the private part is stored on the core based on the provided slot
 
@@ -372,8 +449,7 @@ class RSAKey(optiga.Object, _Key):
                              format(key_size, type(key_size)))
 
         api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
-            c_ubyte), POINTER(
-            c_ushort)
+            c_ubyte), POINTER(c_ushort)
         api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int
 
         if key_size == 1024:
