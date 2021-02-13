@@ -15,13 +15,13 @@ pytest.tbs_str_fail = b'FAILED Test String to Sign'
 
 
 def setup_keys_1k():
-	pytest.onek = RSAKey(0xe0fc).generate(key_size=1024)
-	pytest.onek_fail = RSAKey(0xe0fd).generate(key_size=1024)
+	pytest.onek = RSAKey(0xe0fc).generate_pair(key_size=1024)
+	pytest.onek_fail = RSAKey(0xe0fd).generate_pair(key_size=1024)
 
 
 def setup_keys_2k():
-	pytest.twok = RSAKey(0xe0fc).generate(key_size=2048)
-	pytest.twok_fail = RSAKey(0xe0fd).generate(key_size=1024)
+	pytest.twok = RSAKey(0xe0fc).generate_pair(key_size=2048)
+	pytest.twok_fail = RSAKey(0xe0fd).generate_pair(key_size=1024)
 
 
 def test_rsassa_checkcopy():

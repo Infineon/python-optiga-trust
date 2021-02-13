@@ -117,7 +117,7 @@ def test_meta_assign_used_size():
 def test_meta_check_algorithm_ecc(curve):
     LOGGER.info('Check Algorithm Tag is one of listed. ECC.')
     obj = crypto.ECCKey(0xe0f1)
-    obj.generate(curve=curve)
+    obj.generate_pair(curve=curve)
     assert curve == obj.meta['algorithm']
 
 
@@ -128,14 +128,14 @@ def test_meta_check_algorithm_ecc(curve):
 def test_meta_check_algorithm_rsa(key_size):
     LOGGER.info('Check Algorithm Tag is one of listed. RSA.')
     obj = crypto.RSAKey(0xe0fc)
-    obj.generate(key_size=key_size)
+    obj.generate_pair(key_size=key_size)
     assert ('rsa' + str(key_size)) == obj.meta['algorithm']
 
 
 def test_meta_check_key_usage_ecc():
     LOGGER.info('Check Proper Key Usage Selection. ECC.')
     obj = crypto.ECCKey(0xe0f1)
-    obj.generate(key_usage=['signature', 'authentication'])
+    obj.generate_pair(key_usage=['signature', 'authentication'])
     assert ['signature', 'authentication'] == obj.meta['key_usage'] or \
            ['authentication', 'signature'] == obj.meta['key_usage']
 
@@ -143,7 +143,7 @@ def test_meta_check_key_usage_ecc():
 def test_meta_check_key_usage_rsa():
     LOGGER.info('Check Proper Key Usage Selection. RSA.')
     obj = crypto.RSAKey(0xe0fc)
-    obj.generate(key_usage=['key_agreement', 'encryption'])
+    obj.generate_pair(key_usage=['key_agreement', 'encryption'])
     assert ['key_agreement', 'encryption'] == obj.meta['key_usage'] or \
            ['encryption', 'key_agreement'] == obj.meta['key_usage']
 

@@ -11,7 +11,7 @@ LOGGER = logging.getLogger(__name__)
 ])
 def test_csr_ecc(ki):
 	LOGGER.info('Build a Certificate Signing Request {0}'.format(ki))
-	csr_key = ECCKey(0xe0f3).generate(curve=ki)
+	csr_key = ECCKey(0xe0f3).generate_pair(curve=ki)
 
 	builder = CSRBuilder(
 		{
@@ -31,7 +31,7 @@ def test_csr_ecc(ki):
 ])
 def test_csr_ok_rsa(ki):
 	LOGGER.info('Build a Certificate Signing Request RSA {0}'.format(ki))
-	csr_key = RSAKey(0xe0fc).generate(key_size=ki)
+	csr_key = RSAKey(0xe0fc).generate_pair(key_size=ki)
 
 	builder = CSRBuilder(
 		{
