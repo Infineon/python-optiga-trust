@@ -1,6 +1,6 @@
 import pytest
-from optigatrust.crypto import ECCKey, RSAKey
-from optigatrust.x509 import CSRBuilder
+from optigatrust import objects, crypto
+from optigatrust.csr import CSRBuilder
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -10,8 +10,8 @@ LOGGER = logging.getLogger(__name__)
 	'secp256r1', 'secp384r1', 'secp521r1',	'brainpoolp256r1', 'brainpoolp384r1', 'brainpoolp512r1'
 ])
 def test_csr_ecc(ki):
-	LOGGER.info('Build a Certificate Signing Request {0}'.format(ki))
-	csr_key = ECCKey(0xe0f3).generate_pair(curve=ki)
+	csr_key_obj = objects.ECCKey(0xe0f3)
+	pkey, _ = crypto.generate_pair(key_object=csr_key_obj, curve=ki)
 
 	builder = CSRBuilder(
 		{
@@ -20,18 +20,19 @@ def test_csr_ecc(ki):
 			'organization_name': 'Infineon Technologies AG',
 			'common_name': 'OPTIGA(TM) Trust IoT',
 		},
-		csr_key
+		pkey
 	)
 
-	builder.build(csr_key)
+	builder.build(csr_key_obj)
 
 
 @pytest.mark.parametrize("ki", [
 	1024, 2048
 ])
 def test_csr_ok_rsa(ki):
-	LOGGER.info('Build a Certificate Signing Request RSA {0}'.format(ki))
-	csr_key = RSAKey(0xe0fc).generate_pair(key_size=ki)
+	csr_key_obj = objects.RSAKey(0xe0fc)
+	print(csr_key_obj)
+	pkey, _ = crypto.generate_pair(key_object=csr_key_obj, key_size=ki)
 
 	builder = CSRBuilder(
 		{
@@ -40,7 +41,7 @@ def test_csr_ok_rsa(ki):
 			'organization_name': 'Infineon Technologies AG',
 			'common_name': 'OPTIGA(TM) Trust IoT',
 		},
-		csr_key
+		pkey
 	)
 
-	builder.build(csr_key)
+	builder.build(csr_key_obj)

@@ -9,11 +9,8 @@ from oscrypto.asymmetric import ecdsa_verify, load_public_key
 from oscrypto.errors import SignatureError
 from asn1crypto import keys, core
 
-from optigatrust.crypto import ECCKey
-
-import logging
-
-LOGGER = logging.getLogger(__name__)
+from optigatrust import objects
+from optigatrust import crypto
 
 tbs_str = b'Test String to Sign'
 tbs_str_fail = b'FAILED Test String to Sign'
@@ -49,9 +46,9 @@ tbs_str_fail = b'FAILED Test String to Sign'
     (0xE103, 'brainpoolp512r1', 137, 'sha512')
 ])
 def test_ecdsa(oid, curve, max_sign_size, hashname):
-    LOGGER.info('Sign data on slot {0} with {1} using {2}'.format(hex(oid), curve, hashname))
-    key = ECCKey(oid).generate_pair(curve=curve)
-    s = key.ecdsa_sign(tbs_str)
+    key_object = objects.ECCKey(oid)
+    _, _ = crypto.generate_pair(key_object, curve=curve)
+    s = crypto.ecdsa_sign(key_object, tbs_str)
     assert isinstance(s.signature, bytes)
     assert len(s.signature) > 0
     assert len(s.signature) <= max_sign_size
@@ -65,28 +62,16 @@ def test_ecdsa(oid, curve, max_sign_size, hashname):
     ('secp521r1', 'sha512'), ('brainpoolp512r1', 'sha512'),
 ])
 def test_ecdsa_signverify(curve, hashname):
-    LOGGER.info('Sign data with {0} using {1} and verify the result'.format(curve, hashname))
-    ecc_key = ECCKey(0xE100).generate_pair(curve=curve)
-    ecc_fail_key = ECCKey(0xE101).generate_pair(curve=curve)
+    key_object = objects.ECCKey(0xE100)
+    pkey, _ = crypto.generate_pair(key_object, curve=curve)
+    key_object_fail = objects.ECCKey(0xE101)
+    pkey_fail, _ = crypto.generate_pair(key_object_fail, curve=curve)
     ha = hashname
-    s = ecc_key.ecdsa_sign(tbs_str)
+    s = crypto.ecdsa_sign(key_object, tbs_str)
     print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
 
-    # Preparing an algoroithm
-    pubkey_alg = keys.PublicKeyAlgorithm({
-        'algorithm': keys.PublicKeyAlgorithmId('ec'),
-        'parameters': keys.ECDomainParameters(
-            name='named',
-            value=curve
-        )
-    })
-
     # Preparing a PublicKeyInfo
-    pubkey_asn1 = core.BitString.load(ecc_key.pkey)
-    pubkey_info = keys.PublicKeyInfo({
-        'algorithm': pubkey_alg,
-        'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-    })
+    pubkey_info = keys.PublicKeyInfo.load(pkey)
 
     # Load a public key into the oscrypto engine to using it in the verify function
     public = load_public_key(pubkey_info)
@@ -100,11 +85,7 @@ def test_ecdsa_signverify(curve, hashname):
     # Assert wrong key
     with pytest.raises(SignatureError):
         # Preparing a PublicKeyInfo
-        pubkey_asn1 = core.BitString.load(ecc_fail_key.pkey)
-        pubkey_info = keys.PublicKeyInfo({
-            'algorithm': pubkey_alg,
-            'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-        })
+        pubkey_info = keys.PublicKeyInfo.load(pkey_fail)
 
         # Load a public key into the oscrypto engine to using it in the verify function
         public = load_public_key(pubkey_info)
@@ -112,14 +93,11 @@ def test_ecdsa_signverify(curve, hashname):
 
 
 def test_ecdsa_nonkey():
-    LOGGER.info('Sign data with empty key')
-    ecc_key = ECCKey(0xE100).generate_pair()
+    ecc_key = bytes(35)
     with pytest.raises(TypeError):
-        ecc_key.ecdsa_sign(bytearray(35), tbs_str)
+        crypto.ecdsa_sign(ecc_key, tbs_str)
 
 
 def test_ecdsa_nonkey_2():
-    LOGGER.info('Sign faulty data with a correct key')
-    ecc_key = ECCKey(0xE100).generate_pair()
     with pytest.raises(TypeError):
-        ecc_key.ecdsa_sign(int(19273917398739829))
+        crypto.ecdsa_sign(int(19273917398739829))
