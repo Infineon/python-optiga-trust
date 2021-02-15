@@ -26,10 +26,18 @@ import warnings
 import hashlib
 
 import optigatrust as optiga
+import optigatrust.objects as objects
+# Optiga doesn't produce the whole public key, to which other platforms used to.
+# We use an asn1 engine to append this info
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import serialization
 
 __all__  = [
     'random',
-    'ECCKey',
+    'generate_pair',
+    'ecdsa_sign',
+    'ecdh',
     'RSAKey',
     'ECDSASignature',
     'PKCS1v15Signature',
@@ -91,6 +99,112 @@ def random(n, trng=True):
         return bytes(0)
 
 
+def native_to_pkcs(pkey, key=None, algorithm=None):
+    """
+    OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
+    or strip for input
+
+    :param pkey:
+        a bytestring with the public key from OPTIGA
+
+    :param key:
+        A bytestring with key value from OPTIGA
+
+    :param algorithm:
+        A unicode string for an algorithm.
+
+    :raises:
+        - ValueError - when any of the parameters are not expected
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        A tuple of keys (public_key, private_key)
+    """
+    _algorithms_map = {
+        'secp256r1':
+            ('ec', b'0Y0\x13\x06\x07*\x86H\xce=\x02\x01\x06\x08*\x86H\xce=\x03\x01\x07', ec.SECP256R1()),
+        'secp384r1':
+            ('ec', b'0v0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00"', ec.SECP384R1()),
+        'secp521r1':
+            ('ec', b'0\x81\x9b0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00#', ec.SECP521R1()),
+        'brainpoolp256r1':
+            ('ec', b'0Z0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\x07', ec.BrainpoolP256R1()),
+        'brainpoolp384r1':
+            ('ec', b'0z0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\x0b', ec.BrainpoolP384R1()),
+        'brainpoolp512r1':
+            ('ec', b'0\x81\x9b0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\r', ec.BrainpoolP512R1())
+    }
+    if algorithm not in _algorithms_map:
+        raise ValueError(
+            '{0} isn\'t supported. Use one of {1}'.format(algorithm, _algorithms_map.keys())
+        )
+    if not isinstance(pkey, (bytes, bytearray)):
+        raise TypeError(
+            'pkey is of unsupported types (pkey type = {0}), '
+            'should be either bytes or bytearray'.format(type(pkey))
+        )
+    if key is not None and not isinstance(key, (bytes, bytearray)):
+        raise TypeError(
+            'key is of unsupported types (key type = {0}), '
+            'should be either bytes or bytearray'.format(type(key))
+        )
+    _type = _algorithms_map[algorithm][0]
+    if _type == 'ec':
+        prefix = _algorithms_map[algorithm][1]
+        pyca_curve = _algorithms_map[algorithm][2]
+        public_key = prefix + pkey
+        if key is not None:
+            private_key = ec.derive_private_key(int.from_bytes(key[2:], 'big'), pyca_curve, default_backend())
+            private_key = private_key.private_bytes(encoding=serialization.Encoding.DER,
+                                                    format=serialization.PrivateFormat.PKCS8,
+                                                    encryption_algorithm=serialization.NoEncryption())
+        else:
+            private_key = None
+        return public_key, private_key
+
+
+def pkcs_to_native(pkey, algorithm=None):
+    """
+    OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
+    or strip for input
+
+    :param pkey:
+        a bytestring with the public key aimed to OPTIGA
+
+    :param algorithm:
+        A unicode string for an algorithm.
+
+    :raises:
+        - ValueError - when any of the parameters are not expected
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        Public key as two DER Octet Strings
+    """
+    _algorithms_map = {
+        'secp256r1': 23,
+        'secp384r1': 20,
+        'secp521r1': 21,
+        'brainpoolp256r1': 24,
+        'brainpoolp384r1': 24,
+        'brainpoolp512r1': 25
+    }
+    if algorithm not in _algorithms_map:
+        raise ValueError(
+            '{0} isn\'t supported. Use one of {1}'.format(algorithm, _algorithms_map.keys())
+        )
+    if not isinstance(pkey, (bytes, bytearray)):
+        raise TypeError(
+            'pkey is of unsupported types (pkey type = {0}), '
+            'should be either bytes or bytearray'.format(type(pkey))
+        )
+    prefix_length = _algorithms_map[algorithm]
+
+    return pkey[prefix_length:]
+
+
 class PublicKeyFromHost(Structure):
     _fields_ = [("public_key", POINTER(c_ubyte)),
                 ("length", c_ushort),
@@ -100,7 +214,7 @@ class PublicKeyFromHost(Structure):
 class _Signature:
     def __init__(self, hash_alg: str, key_id: int, signature: bytes, algorithm: str):
         self.hash_alg = hash_alg
-        self.id = key_id
+        self.key_id = key_id
         self.signature = signature
         self.algorithm = algorithm
 
@@ -117,431 +231,410 @@ class PKCS1v15Signature(_Signature):
         super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
 
 
-class _Key:
-    def __init__(self):
-        self._key_usage = None
-        self._pkey = None
-        self._signature = None
-        self._key = None
+def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
+    opt = optiga.Chip()
+    _allowed_key_usage = {
+        'key_agreement': opt.key_usage.KEY_AGR,
+        'authentication': opt.key_usage.AUTH,
+        'signature': opt.key_usage.SIGN
+    }
+    _key_usage = list()
+    priv_key = None
+    if key_usage is None:
+        _key_usage = [opt.key_usage.KEY_AGR, opt.key_usage.SIGN]
+    else:
+        for entry in key_usage:
+            if entry not in _allowed_key_usage:
+                raise ValueError(
+                    'Wrong Key Usage value {0}, supported are {1}'.format(entry, _allowed_key_usage.keys())
+                )
+            _key_usage.append(_allowed_key_usage[entry])
 
-    @property
-    def pkey(self):
-        return self._pkey
+    c = _str2curve(curve, return_value=True)
+    if c not in opt.curves_values:
+        raise TypeError(
+            "object_id not found. \n\r Supported = {0},\n\r  "
+            "Provided = {1}".format(list(opt.curves_values), c))
 
-    @property
-    def key(self):
-        """
-        In case a private key was requested during key pair generation
-        """
-        return self._key
+    opt.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
+        c_ubyte), POINTER(
+        c_ushort)
+    opt.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
 
-    @property
-    def key_usage(self):
-        return self._key_usage
+    c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
+    pkey = (c_ubyte * 150)()
+    c_plen = c_ushort(len(pkey))
 
-    @property
-    def signature(self):
-        return self._signature
+    if export:
+        # https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Private-Key
+        key = (c_ubyte * (100 + 4))()
+    else:
+        key = byref(c_ushort(key_object.id))
 
+    ret = opt.api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, int(export), key, pkey, byref(c_plen))
 
-class ECCKey(optiga.Object, _Key):
-    def __init__(self, key_id: int, curve='secp256r1'):
-        super(ECCKey, self).__init__(key_id)
-        _Key.__init__(self)
+    if export:
+        priv_key = (c_ubyte * (100 + 4))()
+        memmove(priv_key, key, 100 + 4)
+        pub_key = (c_ubyte * c_plen.value)()
+        memmove(pub_key, pkey, c_plen.value)
+    else:
+        pub_key = (c_ubyte * c_plen.value)()
+        memmove(pub_key, pkey, c_plen.value)
 
-        self._curve = curve
-        id_ref = self._optiga.key_id
-        if key_id not in (id_ref.ECC_KEY_E0F0.value, id_ref.ECC_KEY_E0F1.value, id_ref.ECC_KEY_E0F2.value,
-                          id_ref.ECC_KEY_E0F3.value) and key_id not in self._optiga.session_id_values:
-            raise ValueError(
-                'Your key_id {0} can\'t be sued to generate an ECC Key'.format(hex(key_id))
-            )
-        self._hash_alg = None
-
-    @property
-    def curve(self):
-        return self._curve
-
-    @property
-    def hash_alg(self):
-        return self._hash_alg
-
-    def generate_pair(self, curve='secp256r1', key_usage=None, export=False):
-        """
-        This function generates an ECC keypair, the private part is stored on the core based on the provided slot
-
-        :ivar curve:
-            Curve name, should be one of supported by the chip curves. For instance m3 has
-            the widest range of supported algorithms: secp256r1, secp384r1, secp521r1, brainpoolp256r1,
-            brainpoolp384r1, brainpoolp512r1
-        :vartype curve: str
-
-        :ivar key_usage:
-            Key usage defined per string. Can be selected as following:
-            ['key_agreement', 'authentication', 'encryption', 'signature']
-        :vartype key_usage: str
-
-        :ivar export:
-            Indicates whether the private key should be exported
-        :vartype export: bool
-
-        :raises:
-            - TypeError - when any of the parameters are of the wrong type
-            - OSError - when an error is returned by the core initialisation library
-
-        :returns:
-            EccKey object or None
-        """
-        _allowed_key_usage = {
-            'key_agreement': self._optiga.key_usage.KEY_AGR,
-            'authentication': self._optiga.key_usage.AUTH,
-            'signature': self._optiga.key_usage.SIGN
-        }
-        _key_usage = list()
-        priv_key = None
-        if key_usage is None:
-            _key_usage = [self._optiga.key_usage.KEY_AGR, self._optiga.key_usage.SIGN]
-        else:
-            for entry in key_usage:
-                if entry not in _allowed_key_usage:
-                    raise ValueError(
-                        'Wrong Key Usage value {0}, supported are {1}'.format(entry, _allowed_key_usage.keys())
-                    )
-                _key_usage.append(_allowed_key_usage[entry])
-
-        c = _str2curve(curve, return_value=True)
-        if c not in self._optiga.curves_values:
-            raise TypeError(
-                "object_id not found. \n\r Supported = {0},\n\r  "
-                "Provided = {1}".format(list(self._optiga.curves_values), c))
-
-        self._optiga.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
-            c_ubyte), POINTER(
-            c_ushort)
-        self._optiga.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
-
-        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
-        pkey = (c_ubyte * 150)()
-        c_plen = c_ushort(len(pkey))
-
+    if ret == 0:
+        key_object.curve = curve
         if export:
-            # https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Private-Key
-            key = (c_ubyte * (100 + 4))()
+            public_key, private_key = native_to_pkcs(key=bytes(priv_key), pkey=bytes(pub_key), algorithm=curve)
+            return public_key, private_key
         else:
-            key = byref(c_ushort(self.id))
+            public_key, _ = native_to_pkcs(key=None, pkey=bytes(pub_key), algorithm=curve)
+            return public_key, None
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
-        ret = self._optiga.api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, int(export), key, pkey, byref(c_plen))
 
+def _generate_rsa_pair(key_object, key_size=1024, key_usage=None, export=False):
+    handle = optiga.Chip()
+    _allowed_key_usages = {
+        'key_agreement': handle.key_usage.KEY_AGR,
+        'authentication': handle.key_usage.AUTH,
+        'encryption': handle.key_usage.ENCRYPT,
+        'signature': handle.key_usage.SIGN
+    }
+    _key_usage = list()
+    priv_key = None
+    if key_usage is None:
+        _key_usage = [handle.key_usage.KEY_AGR, handle.key_usage.SIGN]
+    else:
+        for entry in key_usage:
+            if entry not in _allowed_key_usages:
+                raise ValueError(
+                    'Wrong Key Usage value {0}, supported are {1}'.format(entry, _allowed_key_usages.keys())
+                )
+            _key_usage.append(_allowed_key_usages[entry])
+
+    _bytes = None
+    api = handle.api
+
+    allowed_key_sizes = (1024, 2048)
+    if key_size not in allowed_key_sizes:
+        raise ValueError('This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]'.
+                         format(key_size, type(key_size)))
+
+    api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
+        c_ubyte), POINTER(c_ushort)
+    api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int
+
+    if key_size == 1024:
+        c_keytype = 0x41
+        rsa_header = b'0\x81\x9f0\r\x06\t*\x86H\x86\xf7\r\x01\x01\x01\x05\x00'
+    else:
+        c_keytype = 0x42
+        rsa_header = b'0\x82\x01"0\r\x06\t*\x86H\x86\xf7\r\x01\x01\x01\x05\x00'
+
+    c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
+
+    pkey = (c_ubyte * 320)()
+    if export:
+        # https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Private-Key
+        key = (c_ubyte * (100 + 4))()
+    else:
+        key = byref(c_ushort(key_object.id))
+    c_plen = c_ushort(len(pkey))
+
+    ret = api.exp_optiga_crypt_ecc_generate_keypair(c_keytype, c_keyusage, int(export), key, pkey, byref(c_plen))
+
+    if export:
+        priv_key = (c_ubyte * (100 + 4))()
+        memmove(priv_key, key, 100 + 4)
+        pub_key = (c_ubyte * c_plen.value)()
+        memmove(pub_key, pkey, c_plen.value)
+    else:
+        pub_key = (c_ubyte * c_plen.value)()
+        memmove(pub_key, pkey, c_plen.value)
+
+    if ret == 0:
+        _pkey = rsa_header + bytes(pub_key)
+        _key = None
+        key_object.key_size = key_size
         if export:
-            priv_key = (c_ubyte * (100 + 4))()
-            memmove(priv_key, key, 100 + 4)
-            pub_key = (c_ubyte * c_plen.value)()
-            memmove(pub_key, pkey, c_plen.value)
+            _key = bytes(priv_key)
+
+        return _pkey, _key
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=False):
+    """
+    This function generates a ECC/RSA keypair
+
+    :ivar key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
+    :vartype key_object: optiga.ECCKeyObject or optiga.RSAKeyObject
+
+    :ivar curve:
+        Curve name, only EC relevant, should be one of supported by the chip curves. For instance m3 has
+        the widest range of supported algorithms: secp256r1, secp384r1, secp521r1, brainpoolp256r1,
+        brainpoolp384r1, brainpoolp512r1
+    :vartype curve: str
+
+    :ivar key_usage:
+        Key usage defined per string. Can be selected as following:
+        ['key_agreement', 'authentication', 'encryption', 'signature']
+    :vartype key_usage: str
+
+    :ivar key_size:
+        Key size is only RSA relevant, possible values are 1024 and 2048
+    :vartype key_usage: int
+
+    :ivar export:
+        Indicates whether the private key should be exported
+    :vartype export: bool
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        A tuple of keys (public_key, private_key) if export isnt requested, the private part is None
+        Example (EC) ::
+
+            private_key=\
+                    '308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b02' \
+                    '0101042049d029df75e93e77c5ac39fb188079fb9062e5ff96405b161dc46ac8' \
+                    'ce472f79a1440342000468894b3c8df4c38877b52c2e965cbf28278e8bfe55cc' \
+                    'e3d3a754364505ff4ea35f48c0468588a998a8b8ba898533267477a4deb6ab7d' \
+                    '1159ddc0bfe7341e40e9'
+            public_key=\
+                    '3059301306072a8648ce3d020106082a8648ce3d0301070342000468894b3c8d' \
+                    'f4c38877b52c2e965cbf28278e8bfe55cce3d3a754364505ff4ea35f48c04685' \
+                    '88a998a8b8ba898533267477a4deb6ab7d1159ddc0bfe7341e40e9'
+
+    """
+    if isinstance(key_object, objects.ECCKey):
+        return _generate_ecc_pair(key_object=key_object, curve=curve, key_usage=key_usage, export=export)
+    elif isinstance(key_object, objects.RSAKey):
+        return _generate_rsa_pair(key_object=key_object, key_size=key_size, key_usage=key_usage, export=export)
+    else:
+        raise ValueError(
+            'key_object type isn\'t supported'
+        )
+
+
+def ecdsa_sign(key_object, data):
+    """
+    This function signs given data based on the provided EccKey object.
+    Hash algorithm is selected based on the size of the key
+
+    :ivar key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
+    :vartype key_object: optiga.ECCKeyObject
+
+    :ivar data:
+        Data to sign, the data will be hashed based on the used curve.
+        If secp256r1 then sha256, secp384r1 sha384 etc.
+    :vartype data: bytes or bytearray
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        EcdsaSignature object or None
+    """
+    if not isinstance(key_object, objects.ECCKey):
+        raise TypeError(
+            'key_object is not supported. You provided {0}, expected {1}'.format(type(key_object), objects.ECCKey)
+        )
+    api = optiga.Chip().api
+
+    if not isinstance(data, bytes) and not isinstance(data, bytearray):
+        if isinstance(data, str):
+            _d = bytes(data.encode())
+            warnings.warn("data will be converted to bytes type before signing")
         else:
-            pub_key = (c_ubyte * c_plen.value)()
-            memmove(pub_key, pkey, c_plen.value)
+            raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
+    else:
+        _d = data
 
-        if ret == 0:
-            self._pkey = bytes(pub_key)
-            if export:
-                self._key = bytes(priv_key)
-            self._key_usage = _key_usage
-            self._curve = curve
-            return self
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+    api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
+    api.exp_optiga_crypt_ecdsa_sign.restype = c_int
+    _map = {
+        'secp256r1': [hashlib.sha256, 32, 'sha256'],
+        'secp384r1': [hashlib.sha384, 48, 'sha384'],
+        'secp521r1': [hashlib.sha512, 64, 'sha512'],
+        'brainpoolp256r1': [hashlib.sha256, 32, 'sha256'],
+        'brainpoolp384r1': [hashlib.sha384, 48, 'sha384'],
+        'brainpoolp512r1': [hashlib.sha512, 64, 'sha512']
+    }
+    # The curve should be one of supported, so no need for extra check
+    param = _map[key_object.curve]
+    # This lines are evaluates as following; i.e.
+    # digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
+    # s = (c_ubyte * ((32*2 + 2) + 6))()
+    # hash_algorithm = 'sha256'
+    digest = (c_ubyte * param[1])(*param[0](_d).digest())
+    # We reserve two extra bytes for nistp512r1 curve, shich has signature r/s values longer than a hash size
+    s = (c_ubyte * ((param[1] * 2 + 2) + 6))()
+    hash_algorithm = param[2]
 
-    def ecdsa_sign(self, data):
-        """
-        This function signs given data based on the provided EccKey object
+    c_slen = c_ubyte(len(s))
 
-        :param data:
-            Data to sign, the data will be hashed based on the used curve.
-            If secp256r1 then sha256, secp384r1 sha384 etc.
+    ret = api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), key_object.id, s, byref(c_slen))
 
-        :raises:
-            - TypeError - when any of the parameters are of the wrong type
-            - OSError - when an error is returned by the core initialisation library
+    if ret == 0:
+        signature = (c_ubyte * (c_slen.value + 2))()
+        signature[0] = 0x30
+        signature[1] = c_slen.value
+        memmove(addressof(signature) + 2, s, c_slen.value)
 
-        :returns:
-            EcdsaSignature object or None
-        """
-        if not isinstance(data, bytes) and not isinstance(data, bytearray):
-            if isinstance(data, str):
-                _d = bytes(data.encode())
-                warnings.warn("data will be converted to bytes type before signing")
-            else:
-                raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
-        else:
-            _d = data
+        return ECDSASignature(hash_algorithm, key_object.id, bytes(signature))
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
-        self._optiga.api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(
-            c_ubyte), POINTER(c_ubyte)
-        self._optiga.api.exp_optiga_crypt_ecdsa_sign.restype = c_int
-        _map = {
-            'secp256r1': [hashlib.sha256, 32, 'sha256'],
-            'secp384r1': [hashlib.sha384, 48, 'sha384'],
-            'secp521r1': [hashlib.sha512, 64, 'sha512'],
-            'brainpoolp256r1': [hashlib.sha256, 32, 'sha256'],
-            'brainpoolp384r1': [hashlib.sha384, 48, 'sha384'],
-            'brainpoolp512r1': [hashlib.sha512, 64, 'sha512']
-        }
-        # The curve should be one of supported, so no need for extra check
-        param = _map[self.curve]
-        # This lines are evaluates as following; i.e.
-        # digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
-        # s = (c_ubyte * ((32*2 + 2) + 6))()
-        # hash_algorithm = 'sha256'
-        digest = (c_ubyte * param[1])(*param[0](_d).digest())
-        # We reserve two extra bytes for nistp512r1 curve, shich has signature r/s values longer than a hash size
-        s = (c_ubyte * ((param[1] * 2 + 2) + 6))()
-        hash_algorithm = param[2]
 
-        c_slen = c_ubyte(len(s))
-        self._hash_alg = hash_algorithm
+def ecdh(key_object, external_pkey, export=False):
+    """
+    This function derives a shared secret using Diffie-Hellman  Key-Exchange. This function assumes the instance
+    of the key from which this method will be called represents the private key on the system used for ECDH
 
-        ret = self._optiga.api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), self.id, s, byref(c_slen))
+    :ivar key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
+    :vartype key_object: optiga.ECCKey
 
-        if ret == 0:
-            signature = (c_ubyte * (c_slen.value + 2))()
-            signature[0] = 0x30
-            signature[1] = c_slen.value
-            memmove(addressof(signature) + 2, s, c_slen.value)
+    :ivar external_pkey:
+        a bytearray with a public key You can submit public keys with parameters as per openssl output in DER format
+        ::
 
-            return ECDSASignature(hash_algorithm, self.id, bytes(signature))
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+            from asn1crypto import pem
+            # Option 1
+            pem_string = '-----BEGIN PUBLIC KEY-----\n' + \
+                         'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP\n' + \
+                         'fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==\n' + \
+                         '-----END PUBLIC KEY-----'
+            if pem.detect(pem_string):
+                type_name, headers, der_bytes = pem.unarmor(pem_string)
 
-    def ecdh(self, external_pkey, export=False):
-        """
-        This function derives a shared secret using Diffie-Hellman  Key-Exchange. This function assumes the instance
-        of the key from which this method will be called represents the private key on the system used for ECDH
+            # Option 2
+            hex_string ='3059301306072a8648ce3d020106082a' + \
+                        '8648ce3d0301070342000486a3c1caaf' + \
+                        'f62395efd63a9265b0734bc7e9b6474f' + \
+                        '7c0aecdbe97a499f087ce22e9247ffc0' + \
+                        '78b0c34155fa3c5e86b572cd6f9ccbdf' + \
+                        '8a7ed0686da970de25cdd8'
+            der_bytes = bytes().from_hex(hex_string)
 
-        :ivar external_pkey:
-            a bytearray with a public key YOu can submit public keys with parameters as per openssl output in DER format
-            ::
+    :vartype: bytes or bytearray
 
-                from asn1crypto import pem
-                # Option 1
-                pem_string = '-----BEGIN PUBLIC KEY-----\n' + \
-                             'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP\n' + \
-                             'fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==\n' + \
-                             '-----END PUBLIC KEY-----'
-                if pem.detect(pem_string):
-                    type_name, headers, der_bytes = pem.unarmor(pem_string)
+    :ivar export:
+        defines whether the resulting secret should be exported or not
+    :vartype: bool
 
-                # Option 2
-                hex_string ='3059301306072a8648ce3d020106082a' + \
-                            '8648ce3d0301070342000486a3c1caaf' + \
-                            'f62395efd63a9265b0734bc7e9b6474f' + \
-                            '7c0aecdbe97a499f087ce22e9247ffc0' + \
-                            '78b0c34155fa3c5e86b572cd6f9ccbdf' + \
-                            '8a7ed0686da970de25cdd8'
-                der_bytes = bytes().from_hex(hex_string)
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
 
-        :vartype: bytes or bytearray
+    :returns:
+        in case `export` set to True returns a shared secret
+    """
+    if not isinstance(key_object, objects.ECCKey):
+        raise TypeError(
+            'key_object is not supported. You provided {0}, expected {1}'.format(type(key_object), objects.ECCKey)
+        )
+    if not isinstance(external_pkey, bytes) and not isinstance(external_pkey, bytearray):
+        raise TypeError(
+            'Public Key should be either bytes or '
+            'bytearray type, you gave {0}'.format(type(external_pkey))
+        )
+    api = optiga.Chip().api
+    # OPTIGA doesn't understand the asn.1 encoded parameters field
+    external_pkey = pkcs_to_native(pkey=external_pkey, algorithm=key_object.curve)
+    # Extract the curve from the object metadata
+    try:
+        curve = key_object.meta['algorithm']
+    except KeyError:
+        raise ValueError('Given object does\'t have a key populated.')
 
-        :ivar export:
-            defines whether the resulting secret should be exported or not
-        :vartype: bool
+    api.exp_optiga_crypt_ecdh.argtypes = c_ushort, POINTER(PublicKeyFromHost), c_ubyte, POINTER(c_ubyte)
+    api.exp_optiga_crypt_ecdsa_sign.restype = c_int
 
-        :raises:
-            - TypeError - when any of the parameters are of the wrong type
-            - OSError - when an error is returned by the core initialisation library
+    pkey = PublicKeyFromHost()
+    pkey.public_key = (c_ubyte * len(external_pkey))()
+    memmove(pkey.public_key, external_pkey, len(external_pkey))
+    pkey.length = len(external_pkey)
+    pkey.key_type = _str2curve(curve, return_value=True)
 
-        :returns:
-            in case `export` set to True returns a shared secret
-        """
-        if not isinstance(external_pkey, bytes) and not isinstance(external_pkey, bytearray):
-            raise TypeError(
-                'Public Key should be either bytes or '
-                'bytearray type, you gave {0}'.format(type(external_pkey))
-            )
-        # OPTIGA doesn't understand the asn.1 encoded parameters field
-        external_pkey = external_pkey[23:]
+    if export:
+        # Pubkey comprises 4 bytes of asn.1 tags and two coordinates, each of key size
+        shared_secret = (c_ubyte * ((len(external_pkey) - 4) >> 1))()
+    else:
+        shared_secret = None
 
-        self._optiga.api.exp_optiga_crypt_ecdh.argtypes = c_ushort, POINTER(PublicKeyFromHost), c_ubyte, POINTER(c_ubyte)
-        self._optiga.api.exp_optiga_crypt_ecdsa_sign.restype = c_int
+    ret = api.exp_optiga_crypt_ecdh(key_object.id, byref(pkey), int(export), shared_secret)
 
-        pkey = PublicKeyFromHost()
-        pkey.public_key = (c_ubyte * len(external_pkey))()
-        memmove(pkey.public_key, external_pkey, len(external_pkey))
-        pkey.length = len(external_pkey)
-        pkey.key_type = _str2curve(self.curve, return_value=True)
-
+    if ret == 0:
         if export:
-            # Pubkey comprises 4 bytes of asn.1 tags and two coordinates, each of key size
-            shared_secret = (c_ubyte * ((len(external_pkey) - 4) >> 1))()
+            return bytes(shared_secret)
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
+    """
+    This function signs given data based on the provided RsaKey object
+
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
+
+    :param data:
+        Data to sign
+
+    :param hash_algorithm:
+        Hash algorithm which should be used to sign data. SHA256 by default
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        RsaPkcs1v15Signature object or None
+    """
+    api = optiga.Chip().api
+
+    if not isinstance(data, bytes) and not isinstance(data, bytearray):
+        if isinstance(data, str):
+            _d = bytes(data.encode())
+            warnings.warn("data will be converted to bytes type before signing")
         else:
-            shared_secret = None
+            raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
+    else:
+        _d = data
 
-        ret = self._optiga.api.exp_optiga_crypt_ecdh( self.id, byref(pkey), int(export), shared_secret)
+    api.exp_optiga_crypt_rsa_sign.restype = c_int
 
-        if ret == 0:
-            if export:
-                return bytes(shared_secret)
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+    if hash_algorithm == 'sha256':
+        digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
+        s = (c_ubyte * 320)()
+        # Signature schemes RSA SSA PKCS1-v1.5 with SHA256 digest
+        sign_scheme = 0x01
+    elif hash_algorithm == 'sha384':
+        digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
+        s = (c_ubyte * 320)()
+        # Signature schemes RSA SSA PKCS1-v1.5 with SHA384 digest
+        sign_scheme = 0x02
+    else:
+        raise ValueError('This key isze is not supported, you typed {0} supported are [\'sha256\', \'sha384\']'
+                         .format(hash_algorithm))
+    c_slen = c_uint(len(s))
 
+    ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), key_object.id, s, byref(c_slen), 0)
 
-class RSAKey(optiga.Object, _Key):
-    def __init__(self, key_id: int):
-        if key_id != 0xe0fc and key_id != 0xe0fd:
-            raise ValueError(
-                'key_id isn\'t supported should be either 0xe0fc, or 0xe0fd, you provided {0}'.format(hex(key_id))
-            )
-        self._key_size = None
-        super(RSAKey, self).__init__(key_id)
-        _Key.__init__(self)
-
-    @property
-    def key_size(self):
-        return self._key_size
-
-    def generate_pair(self, key_size=1024, key_usage=None, export=False):
-        """
-        This function generates an RSA keypair, the private part is stored on the core based on the provided slot
-
-        :ivar key_size:
-            Size of the key, can be 1024 or 2048
-        :vartype key_size: int
-
-        :ivar key_usage:
-            Key usage defined per string. Can be selected as following:
-            ['key_agreement', 'authentication', 'encryption', 'signature']
-        :vartype key_usage: list
-
-        :ivar export:
-            Indicates whether the private key should be exported
-        :vartype export: bool
-
-        :raises:
-            - TypeError - when any of the parameters are of the wrong type
-            - OSError - when an error is returned by the core initialisation library
-
-        :returns:
-            RsaKey object or None
-        """
-        _allowed_key_usages = {
-            'key_agreement': self._optiga.key_usage.KEY_AGR,
-            'authentication': self._optiga.key_usage.AUTH,
-            'encryption': self._optiga.key_usage.ENCRYPT,
-            'signature': self._optiga.key_usage.SIGN
-        }
-        _key_usage = list()
-        priv_key = None
-        if key_usage is None:
-            _key_usage = [self._optiga.key_usage.KEY_AGR, self._optiga.key_usage.SIGN]
-        else:
-            for entry in key_usage:
-                if entry not in _allowed_key_usages:
-                    raise ValueError(
-                        'Wrong Key Usage value {0}, supported are {1}'.format(entry, _allowed_key_usages.keys())
-                    )
-                _key_usage.append(_allowed_key_usages[entry])
-
-        _bytes = None
-        api = self._optiga.api
-
-        allowed_key_sizes = {1024, 2048}
-        if key_size not in allowed_key_sizes:
-            raise ValueError('This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]'.
-                             format(key_size, type(key_size)))
-
-        api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
-            c_ubyte), POINTER(c_ushort)
-        api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int
-
-        if key_size == 1024:
-            c_keytype = 0x41
-            rsa_header = b'\x30\x81\x9F\x30\x0D\x06\x09\x2A\x86\x48\x86\xF7\x0D\x01\x01\x01\x05\x00'
-        else:
-            c_keytype = 0x42
-            rsa_header = b'\x30\x82\x01\x22\x30\x0d\x06\x09\x2a\x86\x48\x86\xf7\x0d\x01\x01\x01\x05\x00'
-
-        c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
-
-        pkey = (c_ubyte * 320)()
-        if export:
-            # https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Private-Key
-            key = (c_ubyte * (100 + 4))()
-        else:
-            key = byref(c_ushort(self.id))
-        c_plen = c_ushort(len(pkey))
-
-        ret = api.exp_optiga_crypt_ecc_generate_keypair(c_keytype, c_keyusage, int(export), key, pkey, byref(c_plen))
-
-        if export:
-            priv_key = (c_ubyte * (100 + 4))()
-            memmove(priv_key, key, 100 + 4)
-            pub_key = (c_ubyte * c_plen.value)()
-            memmove(pub_key, pkey, c_plen.value)
-        else:
-            pub_key = (c_ubyte * c_plen.value)()
-            memmove(pub_key, pkey, c_plen.value)
-
-        if ret == 0:
-            self._pkey = rsa_header + bytes(pub_key)
-            self._key_usage = _key_usage
-            self._key_size = key_size
-            if export:
-                self._key = bytes(priv_key)
-            return self
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
-
-    def pkcs1v15_sign(self, data: bytes or bytearray or str, hash_algorithm='sha256'):
-        """
-        This function signs given data based on the provided RsaKey object
-
-        :param data:
-            Data to sign
-
-        :param hash_algorithm:
-            Hash algorithm which should be used to sign data. SHA256 by default
-
-        :raises:
-            - TypeError - when any of the parameters are of the wrong type
-            - OSError - when an error is returned by the core initialisation library
-
-        :returns:
-            RsaPkcs1v15Signature object or None
-        """
-        api = self._optiga.api
-
-        if not isinstance(data, bytes) and not isinstance(data, bytearray):
-            if isinstance(data, str):
-                _d = bytes(data.encode())
-                warnings.warn("data will be converted to bytes type before signing")
-            else:
-                raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
-        else:
-            _d = data
-
-        api.optiga_crypt_rsa_sign.argtypes = POINTER(c_ubyte), c_ubyte, c_ushort, POINTER(c_ubyte), POINTER(c_ubyte)
-        api.optiga_crypt_rsa_sign.restype = c_int
-
-        if hash_algorithm == 'sha256':
-            digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
-            s = (c_ubyte * 320)()
-            # Signature schemes RSA SSA PKCS1-v1.5 with SHA256 digest
-            sign_scheme = 0x01
-        elif hash_algorithm == 'sha384':
-            digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
-            s = (c_ubyte * 320)()
-            # Signature schemes RSA SSA PKCS1-v1.5 with SHA384 digest
-            sign_scheme = 0x02
-        else:
-            raise ValueError('This key isze is not supported, you typed {0} supported are [\'sha256\', \'sha384\']'
-                             .format(hash_algorithm))
-        c_slen = c_uint(len(s))
-
-        ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), self.id, s, byref(c_slen), 0)
-
-        if ret == 0:
-            signature = (c_ubyte * c_slen.value)()
-            memmove(addressof(signature), s, c_slen.value)
-            print(bytes(signature))
-            return PKCS1v15Signature(hash_algorithm, self.id, bytes(signature))
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+    if ret == 0:
+        signature = (c_ubyte * c_slen.value)()
+        memmove(addressof(signature), s, c_slen.value)
+        print(bytes(signature))
+        return PKCS1v15Signature(hash_algorithm, key_object.id, bytes(signature))
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))

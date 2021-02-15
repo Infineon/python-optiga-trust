@@ -37,13 +37,14 @@ __all__ = [
     '__version__',
     '__version_info__',
     'enums',
+    'objects',
     'crypto',
-    'x509',
+    'csr.py',
     'port',
     'lifecycle_states',
     'set_com_port',
     'Chip',
-    'Object',
+    'Object'
 ]
 
 
@@ -100,7 +101,7 @@ def _load_lib(interface):
     os.chdir(curr_path)
 
     if interface == 'uart':
-        if not match(r"COM[0-9][0-9]", _com_port):
+        if not match(r"COM[0-9][0-9]", _com_port) and not match(r"COM[0-9]", _com_port):
             raise ValueError(
                 'opts is specified, but value parameter is given: expected COMXX, your provided {0}. '
                 'Use set_com_port(\'COM39\')'.format(_com_port)
@@ -918,7 +919,7 @@ class Object:
     :vartype updated: bool
     """
 
-    def __init__(self, id):
+    def __init__(self, object_id):
         """
         This class
 
@@ -929,7 +930,7 @@ class Object:
         return:
             self
         """
-        self.id = id
+        self.id = object_id
         self._optiga = Chip()
         # A flag to understand whether the object was recently updated
         self.updated = False

@@ -29,8 +29,9 @@ import re
 import textwrap
 
 from asn1crypto import x509 as asn1_x509
-from asn1crypto import core, keys, csr, pem
-import optigatrust as optiga
+from asn1crypto import keys, csr, pem
+from optigatrust import objects
+from optigatrust import crypto
 
 int_types = (int,)
 str_cls = str
@@ -156,29 +157,7 @@ class CSRBuilder(object):
 
     @_writer
     def subject_public_key(self, _value):
-        if isinstance(_value, optiga.crypto.ECCKey):
-            pubkey_alg = keys.PublicKeyAlgorithm({
-                'algorithm': 'ec',
-                'parameters': keys.ECDomainParameters('named', _value.curve)
-            })
-            pubkey_asn1 = core.BitString.load(_value.pkey)
-            pubkey_info = keys.PublicKeyInfo({
-                'algorithm': pubkey_alg,
-                'public_key': pubkey_asn1.cast(keys.ECPointBitString)
-            })
-        elif isinstance(_value, optiga.crypto.RSAKey):
-            pubkey_info = keys.PublicKeyInfo.load(_value.pkey)
-        else:
-            raise TypeError(_pretty_message(
-                '''
-                subject_public_key must be an instance of
-                optigatrust.pk.EccKey or optigatrust.pk.RsaKey,
-                not %s
-                ''',
-                _type_name(_value)
-            ))
-
-        self._subject_public_key = pubkey_info
+        self._subject_public_key = keys.PublicKeyInfo.load(_value)
 
     @_writer
     def hash_algo(self, value):
@@ -438,8 +417,8 @@ class CSRBuilder(object):
             An asn1crypto.csr.CertificationRequest object of the request
         """
 
-        if not isinstance(signing_key, optiga.crypto.ECCKey) and \
-                not isinstance(signing_key, optiga.crypto.RSAKey):
+        if not isinstance(signing_key, objects.ECCKey) and \
+                not isinstance(signing_key, objects.RSAKey):
             raise TypeError(_pretty_message(
                 '''
                 signing_private_key must be an instance of
@@ -448,9 +427,9 @@ class CSRBuilder(object):
                 _type_name(signing_key)
             ))
 
-        if isinstance(signing_key, optiga.crypto.ECCKey):
+        if isinstance(signing_key, objects.ECCKey):
             signature_algo = 'ecdsa'
-        elif isinstance(signing_key, optiga.crypto.RSAKey):
+        elif isinstance(signing_key, objects.RSAKey):
             signature_algo = 'rsa'
         else:
             signature_algo = 'undefined'
@@ -487,16 +466,16 @@ class CSRBuilder(object):
             'attributes': attributes
         })
 
-        if isinstance(signing_key, optiga.crypto.ECCKey):
-            sign_func = signing_key.ecdsa_sign
-        elif isinstance(signing_key, optiga.crypto.RSAKey):
-            sign_func = signing_key.pkcs1v15_sign
+        if isinstance(signing_key, objects.ECCKey):
+            sign_func = crypto.ecdsa_sign
+        elif isinstance(signing_key, objects.RSAKey):
+            sign_func = crypto.pkcs1v15_sign
         else:
             raise ValueError(
                 'Algorithm isn\'t supported, use either ecc or rsa'
             )
 
-        s = sign_func(certification_request_info.dump())
+        s = sign_func(signing_key, certification_request_info.dump())
 
         return csr.CertificationRequest({
             'certification_request_info': certification_request_info,
