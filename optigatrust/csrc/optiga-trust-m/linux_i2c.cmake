@@ -10,7 +10,8 @@ if(UNIX)
 		${TRUSTM_PATH}/pal/linux/pal_os_datastore.c
 		${TRUSTM_PATH}/pal/linux/pal_logger.c
 		${TRUSTM_PATH}/pal/linux/pal_os_lock.c
-		${TRUSTM_PATH}/pal/linux/pal_os_timer.c   
+		${TRUSTM_PATH}/pal/linux/pal_os_timer.c
+		${TRUSTM_PATH}/pal/linux/pal_os_memory.c   
 	)
 	set(TRUSTM_I2C_INC ${TRUSTM_PATH}/pal/linux)
 	add_library(${TARGET_I2C_SHLIB} SHARED ${TRUSTM_CORE_SRCS} ${TRUSTM_I2C_SRCS})

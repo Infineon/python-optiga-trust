@@ -19,7 +19,8 @@ if(UNIX)
 		${TRUSTM_PATH}/pal/libusb/pal_os_datastore.c
 		${TRUSTM_PATH}/pal/libusb/pal_os_event.c
 		${TRUSTM_PATH}/pal/libusb/pal_os_lock.c
-		${TRUSTM_PATH}/pal/libusb/pal_os_timer.c   
+		${TRUSTM_PATH}/pal/libusb/pal_os_timer.c
+		${TRUSTM_PATH}/pal/linux/pal_os_memory.c    
 	)
 	set(TRUSTM_LIBUSB_INC ${TRUSTM_PATH}/pal/libusb/include)
 	add_library(${TARGET_LIBUSB_SHLIB} SHARED ${TRUSTM_CORE_SRCS} ${TRUSTM_LIBUSB_SRCS})
