@@ -50,14 +50,14 @@ def to_json():
             {
                 "e0f1":
                 {
-                    "metadata":"200fc00101d001ffd30100e00103e10101",
+                    "metadata":'200fc00101d001ffd301ffe00103e10121',
                     "pretty_metadata":
                     {
                         "lcso": "creation",
                         "change": "never",
-                        "execute": "always",
-                        "algorithm": "nistp256r1",
-                        "key_usage": "01"
+                        "execute": "never",
+                        "algorithm": "secp256r1",
+                        "key_usage": ['authentication', 'key_agreement']
                     }
                 },
                 "e0c2":
@@ -78,6 +78,7 @@ def to_json():
     output = dict()
     # Read metadata from available keys
     for oid in opt.key_id_values:
+        print('Reading: {0}'.format(hex(oid)))
         key = optiga.Object(oid)
         raw_meta = key.read_raw_meta().hex()
         if len(raw_meta) == 0:
@@ -89,12 +90,13 @@ def to_json():
         del key
 
     for oid in opt.object_id_values:
+        print('Reading: {0}'.format(hex(oid)))
         key = optiga.Object(oid)
         raw_meta = key.read_raw_meta().hex()
         try:
             data = key.read().hex()
         except IOError:
-            print('Data in {0} is not readable - skip.'.format(oid))
+            print('Data in {0} is not readable - skip.'.format(hex(oid)))
             data = ""
         if len(raw_meta) == 0:
             continue
@@ -108,11 +110,13 @@ def to_json():
     return output
 
 
-def from_json(path: str):
+def from_json(data, path=None):
     """
     This function will take as an input your data and populate the chip with it, whatever is possible
 
-    :param: path to the json file. The content should be formed like the following
+    :param data: JSON string with the dump of the data
+
+    :param path: path to the json file. The content should be formed like the following
 
     .. highlight:: python
     .. code-block:: python
@@ -120,14 +124,14 @@ def from_json(path: str):
         {
             "e0f1":
             {
-                "metadata":"200fc00101d001ffd30100e00103e10101",
+                "metadata":'200fc00101d001ffd301ffe00103e10121',
                 "pretty_metadata":
                 {
                     "lcso": "creation",
                     "change": "never",
-                    "execute": "always",
-                    "algorithm": "nistp256r1",
-                    "key_usage": "01"
+                    "execute": "never",
+                    "algorithm": "secp256r1",
+                    "key_usage": ['authentication', 'key_agreement']
                 }
             },
             "e0c2":
@@ -148,18 +152,21 @@ def from_json(path: str):
         - TypeError - when any of the parameters are of the wrong type
         - OSError - when an error is returned by the chip initialisation library
     """
-    abs_path = os.path.abspath(path)
-    with open(abs_path, 'r', encoding='utf8') as f:
-        supermeta = json.loads(f)
+    if path is not None:
+        abs_path = os.path.abspath(path)
+        with open(abs_path, 'r', encoding='utf8') as f:
+            supermeta = json.loads(f)
+    else:
+        supermeta = data
 
     # Iterate through the dictionary and check all keys and values one by one
-    for oid, content in supermeta.iteritems():
+    for oid, content in supermeta.items():
         # A flag which we use to identify whether metadata should be reverted for data population
         metadata_changed = False
         old_meta = {}
         try:
             # Initialize the object with the object ID in the config
-            obj = optiga.Object(int(oid))
+            obj = optiga.Object(int(oid, 16))
 
             # try at first to write down the data, otherwise it wont be possible to do this later (maybe)
             if 'data' in content:
@@ -169,9 +176,9 @@ def from_json(path: str):
                 obj.write(bytes.fromhex(content['data']))
 
             # Wtite raw metadata, this would be the fastest way, don't forget to convert hexstring to bytes
-            obj.write_raw_meta(bytes.fromhex(content['metadata']))
+            obj.meta = content['pretty_metadata']
 
-        except OSError or ValueError or TypeError:
+        except (OSError, ValueError, TypeError):
             print('Warning. Failed to update {0} metadata. Skipping'.format(oid))
         else:
             if metadata_changed:

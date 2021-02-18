@@ -56,7 +56,7 @@ def pem_armor_csr(certification_request):
     Encodes a CSR into PEM format
 
     :param certification_request: An asn1crypto.csr.CertificationRequest object of the CSR to armor. Typically this
-    is obtained from Builder.build().
+        is obtained from :func:`~CSRBuilder.build()`.
 
     :return:
         A byte string of the PEM-encoded CSR

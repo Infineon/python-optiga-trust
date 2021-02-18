@@ -26,23 +26,56 @@ from asn1crypto import x509 as asn1_x509
 from asn1crypto import pem as asn1_pem
 
 __all__ = [
-    'Settings',
     'AppData',
+    'AcquiredSession',
+    'Session',
+    'AESKey',
     'RSAKey',
     'ECCKey',
     'X509',
 ]
 
 
-class Settings(optiga.Object):
-    pass
-
-
 class AppData(optiga.Object):
+    """
+    A class used to represent an Application Data object on the OPTIGA Trust Chip.
+    """
     pass
+
+
+class AcquiredSession:
+    """
+    A class used to represent a session object on the OPTIGA Trust Chip. This is a pseudo object,
+    just to indicate to OPTIGA, that we would like to use the acquired session
+    """
+    def __init__(self):
+        self.meta = None
+        self.id = 0x0000
+
+
+class Session:
+    """
+    A class used to represent a session object on the OPTIGA Trust Chip.
+    """
+    def __init__(self, key_id: int):
+        self.meta = None
+        self.id = key_id
+
+
+class AESKey(optiga.Object):
+    """
+    A class used to represent an aes key object on the OPTIGA Trust Chip
+
+    """
+    def __init__(self):
+        super(AESKey, self).__init__(0xe200)
 
 
 class ECCKey(optiga.Object):
+    """
+    A class used to represent an ecc key object on the OPTIGA Trust Chip
+
+    """
     def __init__(self, key_id: int):
         super(ECCKey, self).__init__(key_id)
 
@@ -54,11 +87,15 @@ class ECCKey(optiga.Object):
             )
         try:
             self.curve = self.meta['algorithm']
-        except KeyError:
+        except (KeyError, TypeError):
             pass
 
 
 class RSAKey(optiga.Object):
+    """
+    A class used to represent an rsa key object on the OPTIGA Trust Chip
+
+    """
     def __init__(self, key_id: int):
         if key_id != 0xe0fc and key_id != 0xe0fd:
             raise ValueError(
@@ -94,7 +131,7 @@ def _break_apart(f, sep, step):
 
 class X509(optiga.Object):
     """
-    A class used to represent a certificate of the OPTIGA Trust Chip
+    A class used to represent a certificate on the OPTIGA Trust Chip
 
     """
 

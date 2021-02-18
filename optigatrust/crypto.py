@@ -38,7 +38,6 @@ __all__  = [
     'generate_pair',
     'ecdsa_sign',
     'ecdh',
-    'RSAKey',
     'ECDSASignature',
     'PKCS1v15Signature',
 ]
@@ -60,43 +59,6 @@ def _str2curve(curve_str, return_value=False):
             return _map[curve_str]
     else:
         raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
-
-
-def random(n, trng=True):
-    """
-    This function generates a random number
-
-    :ivar n:
-        how much randomness to generate. Valid values are from 8 to 256
-    :vartype n: int
-
-    :ivar trng:
-        If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
-    :vartype trng: bool
-
-    :raises:
-        - TypeError - when any of the parameters are of the wrong type
-        - OSError - when an error is returned by the chip initialisation library
-
-    :returns:
-        Bytes object with randomness
-    """
-    ot = optiga.Chip()
-    api = ot.api
-
-    api.exp_optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
-    api.exp_optiga_crypt_random.restype = c_int
-    p = (c_ubyte * n)()
-
-    if trng is True:
-        ret = api.exp_optiga_crypt_random(ot.rng.TRNG.value, p, len(p))
-    else:
-        ret = api.exp_optiga_crypt_random(ot.rng.DRNG.value, p, len(p))
-
-    if ret == 0:
-        return bytes(p)
-    else:
-        return bytes(0)
 
 
 def native_to_pkcs(pkey, key=None, algorithm=None):
@@ -155,6 +117,7 @@ def native_to_pkcs(pkey, key=None, algorithm=None):
         pyca_curve = _algorithms_map[algorithm][2]
         public_key = prefix + pkey
         if key is not None:
+            print(int.from_bytes(key[2:], 'big'))
             private_key = ec.derive_private_key(int.from_bytes(key[2:], 'big'), pyca_curve, default_backend())
             private_key = private_key.private_bytes(encoding=serialization.Encoding.DER,
                                                     format=serialization.PrivateFormat.PKCS8,
@@ -231,12 +194,55 @@ class PKCS1v15Signature(_Signature):
         super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
 
 
+def random(n, trng=True):
+    """
+    This function generates a random number
+
+    :param n:
+        how much randomness to generate. Valid values are integers from 8 to 256
+
+    :param trng:
+        If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the chip initialisation library
+
+    :returns:
+        Bytes object with randomness
+    """
+    ot = optiga.Chip()
+    api = ot.api
+
+    api.exp_optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
+    api.exp_optiga_crypt_random.restype = c_int
+    p = (c_ubyte * n)()
+
+    if trng is True:
+        ret = api.exp_optiga_crypt_random(ot.rng.TRNG.value, p, len(p))
+    else:
+        ret = api.exp_optiga_crypt_random(ot.rng.DRNG.value, p, len(p))
+
+    if ret == 0:
+        return bytes(p)
+    else:
+        return bytes(0)
+
+
 def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     opt = optiga.Chip()
     _allowed_key_usage = {
         'key_agreement': opt.key_usage.KEY_AGR,
         'authentication': opt.key_usage.AUTH,
         'signature': opt.key_usage.SIGN
+    }
+    _key_sizes = {
+        'secp256r1': (68, 34),
+        'secp384r1': (100, 50),
+        'secp521r1': (137, 67),
+        'brainpoolp256r1': (68, 34),
+        'brainpoolp384r1': (100, 50),
+        'brainpoolp512r1': (133, 66)
     }
     _key_usage = list()
     priv_key = None
@@ -257,25 +263,24 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
             "Provided = {1}".format(list(opt.curves_values), c))
 
     opt.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
-        c_ubyte), POINTER(
-        c_ushort)
+        c_ubyte), POINTER(c_ushort)
     opt.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
 
     c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
-    pkey = (c_ubyte * 150)()
+    pkey = (c_ubyte * _key_sizes[curve][0])()
     c_plen = c_ushort(len(pkey))
 
     if export:
         # https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Private-Key
-        key = (c_ubyte * (100 + 4))()
+        key = (c_ubyte * _key_sizes[curve][1])()
     else:
         key = byref(c_ushort(key_object.id))
 
     ret = opt.api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, int(export), key, pkey, byref(c_plen))
 
     if export:
-        priv_key = (c_ubyte * (100 + 4))()
-        memmove(priv_key, key, 100 + 4)
+        priv_key = (c_ubyte * _key_sizes[curve][1])()
+        memmove(priv_key, key, _key_sizes[curve][1])
         pub_key = (c_ubyte * c_plen.value)()
         memmove(pub_key, pkey, c_plen.value)
     else:
@@ -370,28 +375,24 @@ def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=
     """
     This function generates a ECC/RSA keypair
 
-    :ivar key_object:
-        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
-    :vartype key_object: optiga.ECCKeyObject or optiga.RSAKeyObject
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage. Can be
+        :class:`~optigatrust.objects.ECCKey` or :class:`~optigatrust.objects.RSAKey`
 
-    :ivar curve:
-        Curve name, only EC relevant, should be one of supported by the chip curves. For instance m3 has
+    :param curve:
+        Curve name in string, only EC relevant, should be one of supported by the chip curves. For instance m3 has
         the widest range of supported algorithms: secp256r1, secp384r1, secp521r1, brainpoolp256r1,
         brainpoolp384r1, brainpoolp512r1
-    :vartype curve: str
 
-    :ivar key_usage:
+    :param key_usage:
         Key usage defined per string. Can be selected as following:
         ['key_agreement', 'authentication', 'encryption', 'signature']
-    :vartype key_usage: str
 
-    :ivar key_size:
+    :param key_size:
         Key size is only RSA relevant, possible values are 1024 and 2048
-    :vartype key_usage: int
 
-    :ivar export:
-        Indicates whether the private key should be exported
-    :vartype export: bool
+    :param export:
+        Bool type indicates whether the private key should be exported
 
     :raises:
         - TypeError - when any of the parameters are of the wrong type
@@ -401,16 +402,8 @@ def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=
         A tuple of keys (public_key, private_key) if export isnt requested, the private part is None
         Example (EC) ::
 
-            private_key=\
-                    '308187020100301306072a8648ce3d020106082a8648ce3d030107046d306b02' \
-                    '0101042049d029df75e93e77c5ac39fb188079fb9062e5ff96405b161dc46ac8' \
-                    'ce472f79a1440342000468894b3c8df4c38877b52c2e965cbf28278e8bfe55cc' \
-                    'e3d3a754364505ff4ea35f48c0468588a998a8b8ba898533267477a4deb6ab7d' \
-                    '1159ddc0bfe7341e40e9'
-            public_key=\
-                    '3059301306072a8648ce3d020106082a8648ce3d0301070342000468894b3c8d' \
-                    'f4c38877b52c2e965cbf28278e8bfe55cce3d3a754364505ff4ea35f48c04685' \
-                    '88a998a8b8ba898533267477a4deb6ab7d1159ddc0bfe7341e40e9'
+            private_key= '308187020100301306072a8648ce3d020106082a86....1159ddc0bfe7341e40e9'
+            public_key= '3059301306072a8648ce3d020106082a8648ce...67477a4deb6ab7d1159ddc0bfe7341e40e9'
 
     """
     if isinstance(key_object, objects.ECCKey):
@@ -428,14 +421,12 @@ def ecdsa_sign(key_object, data):
     This function signs given data based on the provided EccKey object.
     Hash algorithm is selected based on the size of the key
 
-    :ivar key_object:
-        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
-    :vartype key_object: optiga.ECCKeyObject
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage :class:`~optigatrust.objects.ECCKey`
 
-    :ivar data:
+    :param data:
         Data to sign, the data will be hashed based on the used curve.
         If secp256r1 then sha256, secp384r1 sha384 etc.
-    :vartype data: bytes or bytearray
 
     :raises:
         - TypeError - when any of the parameters are of the wrong type
@@ -500,37 +491,34 @@ def ecdh(key_object, external_pkey, export=False):
     This function derives a shared secret using Diffie-Hellman  Key-Exchange. This function assumes the instance
     of the key from which this method will be called represents the private key on the system used for ECDH
 
-    :ivar key_object:
+    :param key_object:
         Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
-    :vartype key_object: optiga.ECCKey
+        :class:`~optigatrust.objects.ECCKey`
 
-    :ivar external_pkey:
+    :param external_pkey:
         a bytearray with a public key You can submit public keys with parameters as per openssl output in DER format
         ::
 
             from asn1crypto import pem
             # Option 1
-            pem_string = '-----BEGIN PUBLIC KEY-----\n' + \
-                         'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP\n' + \
-                         'fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==\n' + \
+            pem_string = '-----BEGIN PUBLIC KEY-----\\n' + \\
+                         'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP\\n' + \\
+                         'fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==\\n' + \\
                          '-----END PUBLIC KEY-----'
             if pem.detect(pem_string):
                 type_name, headers, der_bytes = pem.unarmor(pem_string)
 
             # Option 2
-            hex_string ='3059301306072a8648ce3d020106082a' + \
-                        '8648ce3d0301070342000486a3c1caaf' + \
-                        'f62395efd63a9265b0734bc7e9b6474f' + \
-                        '7c0aecdbe97a499f087ce22e9247ffc0' + \
-                        '78b0c34155fa3c5e86b572cd6f9ccbdf' + \
+            hex_string ='3059301306072a8648ce3d020106082a' + \\
+                        '8648ce3d0301070342000486a3c1caaf' + \\
+                        'f62395efd63a9265b0734bc7e9b6474f' + \\
+                        '7c0aecdbe97a499f087ce22e9247ffc0' + \\
+                        '78b0c34155fa3c5e86b572cd6f9ccbdf' + \\
                         '8a7ed0686da970de25cdd8'
             der_bytes = bytes().from_hex(hex_string)
 
-    :vartype: bytes or bytearray
-
-    :ivar export:
+    :param export:
         defines whether the resulting secret should be exported or not
-    :vartype: bool
 
     :raises:
         - TypeError - when any of the parameters are of the wrong type
@@ -586,7 +574,8 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
     This function signs given data based on the provided RsaKey object
 
     :param key_object:
-        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+        Should be of type :class:`~optigatrust.objects.RSAKey`
 
     :param data:
         Data to sign
@@ -599,7 +588,7 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
         - OSError - when an error is returned by the core initialisation library
 
     :returns:
-        RsaPkcs1v15Signature object or None
+        :class:`~optigatrust.objects.PKCS1v15Signature` object or None
     """
     api = optiga.Chip().api
 
@@ -634,7 +623,252 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
     if ret == 0:
         signature = (c_ubyte * c_slen.value)()
         memmove(addressof(signature), s, c_slen.value)
-        print(bytes(signature))
         return PKCS1v15Signature(hash_algorithm, key_object.id, bytes(signature))
     else:
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def hmac(key_object, data, hash_algorithm='sha256'):
+    """
+    This function calculates a HMAC over a given data using the secret stored on OPTIGA
+
+    .. note:: Only OPTIGA™ Trust M3 relevant
+
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+        Can be one of the following classes
+        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.Session`,
+        or :class:`~optigatrust.objects.AcquiredSession`
+
+    :param data:
+        A byte string data
+
+    :param hash_algorithm:
+        Hash algorithm which should be used to sign data. 'sha256' by default
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the parameters not expected
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        byte string with the resulating MAC
+    """
+    api = optiga.Chip().api
+    if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
+        raise TypeError(
+            'key_object should be either {0}, or {1} types'.format(
+                type(objects.AppData), type(objects.Session), type(objects.AcquiredSession)
+            )
+        )
+    if isinstance(key_object, objects.AppData):
+        try:
+            if key_object.meta['type'] != 'pre_sh_secret':
+                raise ValueError(
+                    'Selected object doesn\'t have a proper setup.'
+                    'Should have PRESHSEC type, you have {0}'.format(key_object.meta['type'])
+                )
+        except KeyError:
+            raise ValueError(
+                'Selected object doesn\'t have a proper setup.'
+                'Should have PRESHSEC type'
+            )
+    _hash_map = {
+        'sha256': (0x20, 32),
+        'sha384': (0x21, 48),
+        'sha512': (0x22, 64)
+    }
+    if hash_algorithm not in _hash_map:
+        raise ValueError(
+            'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
+        )
+    if not isinstance(data, (bytearray, bytes)):
+        raise TypeError(
+            'Data should be byte string, {0} provided.'.format(type(data))
+        )
+    _data = (c_ubyte * len(data))(data)
+    mac = (c_ubyte * _hash_map[hash_algorithm][1])()
+    mac_len = c_uint(_hash_map[hash_algorithm][1])
+
+    ret = api.exp_optiga_crypt_hmac(_hash_map[hash_algorithm][0], key_object.id, _data, len(_data), mac, byref(mac_len))
+
+    if ret == 0:
+        return bytes(mac)
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def tls_prf(key_object, key_length, label=None, seed=None, hash_algorithm='sha256', export=False):
+    """
+    This function derives a key (TLS PRF) using the secret stored on OPTIGA
+
+    .. note:: SHA384 and SH512 are only OPTIGA™ Trust M3 relevant
+
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+        Can be one of the following classes
+        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.Session`,
+        or :class:`~optigatrust.objects.AcquiredSession`
+
+    :param key_length:
+        Size of the requested key.
+        Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
+        session reference; maximum length = 256 byte in case of returned secret
+
+    :param label:
+        Optional label, should be bytestring
+
+    :param seed:
+        Optional seed, should be bytestring
+
+    :param hash_algorithm:
+        Hash algorithm which should be used to sign data. 'sha256' by default
+
+    :param export:
+        set it to True, if you would like to export the resulting. In other case the key will e stored in the
+        :class:`~optigatrust.objects.AcquiredSession`
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the parameters not expected
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        byte string with the key if requested, otherwise None
+    """
+    api = optiga.Chip().api
+    if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
+        raise TypeError(
+            'key_object should be either {0}, or {1} types'.format(
+                type(objects.AppData), type(objects.Session), type(objects.AcquiredSession)
+            )
+        )
+    if isinstance(key_object, objects.AppData):
+        try:
+            if key_object.meta['type'] != 'pre_sh_secret':
+                raise ValueError(
+                    'Selected object doesn\'t have a proper setup.'
+                    'Should have PRESHSEC type, you have {0}'.format(key_object.meta['type'])
+                )
+        except KeyError:
+            raise ValueError(
+                'Selected object doesn\'t have a proper setup.'
+                'Should have PRESHSEC type'
+            )
+    _hash_map = {
+        'sha256': 0x01,
+        'sha384': 0x02,
+        'sha512': 0x03
+    }
+    if hash_algorithm not in _hash_map:
+        raise ValueError(
+            'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
+        )
+
+    label_len = c_ushort(len(label))
+    seed_len = c_ushort(len(seed))
+    if export:
+        derived_key = (c_ubyte * key_length)()
+    else:
+        derived_key = None
+
+    ret = api.exp_optiga_crypt_tls_prf(_hash_map[hash_algorithm], key_object.id, label, byref(label_len),
+                                       seed, byref(seed_len), key_length, int(export), derived_key)
+
+    if ret == 0:
+        if export:
+            return bytes(derived_key)
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', export=False):
+    """
+    This function derives a key (HKDF) using the secret stored on OPTIGA
+
+    .. note:: Only OPTIGA™ Trust M3 relevant
+
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+        Can be one of the following classes
+        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.Session`,
+        or :class:`~optigatrust.objects.AcquiredSession`
+
+    :param key_length:
+        Size of the requested key.
+        Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
+        session reference; maximum length = 256 byte in case of returned secret
+
+    :param salt:
+        Optional salt, should be bytestring
+
+    :param info:
+        Optional info, should be bytestring
+
+    :param hash_algorithm:
+        Hash algorithm which should be used to sign data. 'sha256' by default
+
+    :param export:
+        set it to True, if you would like to export the resulting. In other case the key will e stored in the
+        :class:`~optigatrust.objects.AcquiredSession`
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the parameters not expected
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        byte string with the key if requested, otherwise None
+    """
+    api = optiga.Chip().api
+    if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
+        raise TypeError(
+            'key_object should be either {0}, or {1} types'.format(
+                type(objects.AppData), type(objects.Session), type(objects.AcquiredSession)
+            )
+        )
+    if isinstance(key_object, objects.AppData):
+        try:
+            if key_object.meta['type'] != 'pre_sh_secret':
+                raise ValueError(
+                    'Selected object doesn\'t have a proper setup.'
+                    'Should have PRESHSEC type, you have {0}'.format(key_object.meta['type'])
+                )
+        except KeyError:
+            raise ValueError(
+                'Selected object doesn\'t have a proper setup.'
+                'Should have PRESHSEC type'
+            )
+    _hash_map = {
+        'sha256': 0x08,
+        'sha384': 0x09,
+        'sha512': 0x0a
+    }
+    if hash_algorithm not in _hash_map:
+        raise ValueError(
+            'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
+        )
+
+    salt_len = c_ushort(len(salt))
+    info_len = c_ushort(len(info))
+    if export:
+        derived_key = (c_ubyte * key_length)()
+    else:
+        derived_key = None
+
+    ret = api.exp_optiga_crypt_hkdf(_hash_map[hash_algorithm], key_object.id, salt, byref(salt_len),
+                                    info, byref(info_len), key_length, int(export), derived_key)
+
+    if ret == 0:
+        if export:
+            return bytes(derived_key)
+    else:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def encrypt():
+    pass
+
+
+def decrypt():
+    pass

@@ -39,7 +39,7 @@ __all__ = [
     'enums',
     'objects',
     'crypto',
-    'csr.py',
+    'csr',
     'port',
     'lifecycle_states',
     'set_com_port',
@@ -96,7 +96,7 @@ def _load_lib(interface):
 
     old_path = os.getcwd()
 
-    curr_path = os.path.abspath(os.path.dirname(__file__) + "/csrc/lib/")
+    curr_path = os.path.join(os.path.dirname(__file__), "csrc", "lib")
 
     os.chdir(curr_path)
 
@@ -332,6 +332,46 @@ class Chip:
         This property allows to get the security event counter for your chip.
         """
         return int.from_bytes(Object(0xe0c5).read(), "big")
+
+    @property
+    def security_monitor(self):
+        """
+        This property allows to get the security monitor configuration for your chip.
+
+        .. note:: Only OPTIGA™ Trust M3 relevant
+
+        """
+        return int.from_bytes(Object(0xe0c9).read(), "big")
+
+    def config_security_monitor(self, t_max=5, max_sec_credit=5, delayed_sec_sync=1):
+        """
+        This property allows to configure the security monitor configuration for your chip.
+
+        .. note:: Only OPTIGA™ Trust M3 relevant
+
+        .. warning:: Changing the following settings should be carefully evaluated as this might lead to security risks
+
+        :param t_max:
+            Chip allows to perform one protected operation per t_max.
+            If more perfomed, internal SECcredit and afterwards SECcounter are increased until saturation. In the end
+            the chip starts inducing delays of t_max between crypto operations
+            t_max = 0 disables Security Monitor
+
+        :param max_sec_credit:
+            The maximum SECcredit that can be achieved
+
+        :param delayed_sec_sync:
+            If there are multiple security events with in tmax due to use case demand,
+            the number of NVM write operations can be avoided by configuring this count appropriately
+
+        """
+        config = bytes()
+        config += bytes([t_max])
+        config += bytes([0])
+        config += bytes([max_sec_credit])
+        config += bytes([0])
+        config += bytes([delayed_sec_sync])
+        Object(0xe0c9).write(config)
 
     def __str__(self):
         header = "=============================================="
@@ -794,16 +834,16 @@ def _prepare_key_usage(key, value) -> int and list:
     return meta
 
 
-def _prepare_algorithm(key, value) -> list:
-    if value not in _algorithms:
+def _prepare_lcso(key, value) -> list:
+    if value not in _lifecycle_states_swaped:
         raise ValueError(
-            'Value for Algorithm meta tag isn\'t found. '
-            'Accepted values {0}, you provided {1}'.format(_algorithms.keys(), value)
+            'Value for Lifecycle State meta tag isn\'t found. '
+            'Accepted values {0}, you provided {1}'.format(_lifecycle_states_swaped.keys(), value)
         )
     meta = [
         _meta_tags[key],  # key
         1,  # size
-        _algorithms[value]  # value
+        _lifecycle_states_swaped[value]  # value
     ]
 
     return meta
@@ -828,14 +868,14 @@ def _prepare_meta_and_size(key, value) -> list:
     # This is how the result should look like
     # key  size  value
     # Used size and max size tags can't be send to the chip, so ignore them with a warning
-    if key == 'used_size' or key == 'max_size':
-        warnings.warn('The used size tag and max size tag cannot be defined by a user.Skip.')
+    if key == 'used_size' or key == 'max_size' or key == 'algorithm':
+        print('Tag \'{0}\' cannot be defined by a user. Skip.'.format(key))
         return list()
     # Parse each key, and construct a
     elif key == 'type':
         meta = _prepare_type(key, value)
-    elif key == 'algorithm':
-        meta = _prepare_algorithm(key, value)
+    elif key == 'lcso':
+        meta = _prepare_lcso(key, value)
     elif key == 'key_usage':
         meta = _prepare_key_usage(key, value)
     # otherwise the value is most likely an access condition expression
