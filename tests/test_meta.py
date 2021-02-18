@@ -72,11 +72,13 @@ def test_meta_assign_execute_ac():
 def test_meta_check_max_size():
     obj = objects.AppData(0xf1d0)
     assert 140 == obj.meta['max_size']
+    assert 140 == obj.max_size
 
 
 def test_meta_check_used_size():
     obj = objects.AppData(0xf1d0)
     assert isinstance(obj.meta['used_size'], int)
+    assert isinstance(obj.used_size, int)
 
 
 def test_meta_assign_max_size():

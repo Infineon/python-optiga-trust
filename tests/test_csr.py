@@ -1,9 +1,6 @@
 import pytest
 from optigatrust import objects, crypto
 from optigatrust.csr import CSRBuilder
-import logging
-
-LOGGER = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize("ki", [
