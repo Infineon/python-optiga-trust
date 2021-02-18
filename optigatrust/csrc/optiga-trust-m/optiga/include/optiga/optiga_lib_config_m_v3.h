@@ -121,7 +121,7 @@ extern "C" {
     /** @brief Maximum buffer size required to communicate with OPTIGA */
     #define OPTIGA_MAX_COMMS_BUFFER_SIZE                (0x615) //1557 in decimal
 
-    #define _OPTIGA_EXPORTS_DLLEXPORT_H_
+    //#define _OPTIGA_EXPORTS_DLLEXPORT_H_
 
     /** @brief Macro to enable logger \n
     * Enable macro OPTIGA_LIB_ENABLE_UTIL_LOGGING for Util Service layer logging     \n
