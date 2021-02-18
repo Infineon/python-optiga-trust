@@ -11,18 +11,19 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'optigatrust'
-copyright = '2021, Infineon Technologies AG'
+project = 'python-optiga-trust'
 author = 'Infineon Technologies AG'
+copyright = '2021, Infineon Technologies AG'
 
 # The full version, including alpha/beta/rc tags
-release = '1.1'
+release = '1.0.1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -54,5 +55,6 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_logo = '_static/infineon_logo.png'
 
 pygments_style = 'sphinx'

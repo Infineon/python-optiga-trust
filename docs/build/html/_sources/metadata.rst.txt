@@ -1,4 +1,4 @@
-Object and Metadata Management
+Object and Metadata management
 ==============================
 
 
@@ -6,19 +6,27 @@ Objects
 -------
 
 An object within this library is a generic class, which represents basic functionality and features valid for all
-OIDs (Object IDs) located on one chip.
+OIDs (Object IDs, except for Session Objects) located on the chip.
 
 Here are basic features what you can do with a generic Object instance (if access condition allows):
 
 - Read/write data from/to the object
 - Read/write metadata from/to the object
 
+Below you can find object maps for various supported products
+
+OPTIGA™ Trust M3
+
+.. image:: https://github.com/Infineon/Assets/raw/master/Pictures/trustm_keystore_dataobjects_v04.png
+
+`OPTIGA™ Trust M1`_
+
 ::
 
-    import optigatrust
+    import optigatrust as optiga
 
     # Create an instance of object.
-    object = optigatrust.Object(0xf1d0)
+    object = optiga.Object(0xf1d0)
 
     # Read data
     object.read().hex()
@@ -27,14 +35,14 @@ Output ::
 
     '01020304 ... 898a8b8c'
 
-Certificate object
-^^^^^^^^^^^^^^^^^^
+X509 object
+^^^^^^^^^^^
 
 ::
 
-    from optigatrust import x509
+    from optigatrust import objects
 
-    cert_object = x509.Certificate(0xe0e0)
+    cert_object = objects.X509(0xe0e0)
 
     # Output the certificate content
     print(cert_object)
@@ -66,15 +74,15 @@ Output ::
     Signature                     :306402303d60118b266be951dc90f168af8903e0f ... cb700e9f5b4ad5b1f1df493b0f41d21e269df4c
     ============================================================
 
-Key object
-^^^^^^^^^^
+ECC Key object
+^^^^^^^^^^^^^^
 
 ::
 
-    from optigatrust import crypto
+    from optigatrust import objects
     import json
 
-    key_object = crypto.ECCKey(0xe0f1)
+    key_object = objects.ECCKey(0xe0f1)
     print(json.dumps(key_object.meta, indent=4))
 
 Output ::
@@ -94,14 +102,58 @@ Output ::
         ]
     }
 
-Metadata of Objects
-^^^^^^^^^^^^^^^^^^^
+
+RSA Key object
+^^^^^^^^^^^^^^
+
+::
+
+    from optigatrust import objects
+    import json
+
+    key_object = objects.RSAKey(0xe0fc)
+    print(json.dumps(key_object.meta, indent=4))
+
+Output ::
+
+    {
+        "lcso": "creation",
+        "change": [
+            "lcso",
+            "<",
+            "operational"
+        ],
+        "execute": "always",
+        "algorithm": "rsa2048",
+        "key_usage": [
+            "signature",
+            "key_agreement"
+        ]
+    }
+
+AES Key object
+^^^^^^^^^^^^^^
+
+
+Session object
+^^^^^^^^^^^^^^
+
+
+AcquiredSession object
+^^^^^^^^^^^^^^^^^^^^^^
+
+
+AppData object
+^^^^^^^^^^^^^^
+
+Metadata
+--------
 
 Every Object (except for Session Objects) have a special service area called - metadata. It is a structured data which
 can significantly influence many aspects of the object itself, for example a lifecycle state.
 
 Options
-"""""""
+^^^^^^^
 Users can work with metadata directly in human-readable form.
 Metadata should be contructed in the following manner::
 
@@ -110,7 +162,7 @@ Metadata should be contructed in the following manner::
 Where metadata can take the following values:
 
 Metadata Tags
-"""""""""""""
+^^^^^^^^^^^^^
 
 All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle state of the object is either
 'creation' or 'initialisation'
@@ -157,7 +209,7 @@ All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle
      - It defines what happens with the object data in case of updating the metadata
 
 Access Conditions
-"""""""""""""""""
+^^^^^^^^^^^^^^^^^
 
 The '<metadata_value>' should be defined either as a list of values; e.g.
 
@@ -243,7 +295,7 @@ The '<metadata_value>' should be defined either as a list of values; e.g.
 
 
 Printing All metadata in human readable form
-""""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -255,7 +307,7 @@ Printing All metadata in human readable form
 
 
 Updating Metadata of the Certificate Object
-"""""""""""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -368,7 +420,15 @@ Output ::
     ============================================================
 
 
+API
+---
 
 
 .. autoclass:: optigatrust.Object
    :members: meta, read, write
+
+.. automodule:: optigatrust.objects
+   :members: AppData, AcquiredSession, Session, AESKey, ECCKey, RSAKey, X509
+
+
+.. _OPTIGA™ Trust M1: https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_m_datastore_overview_v3.jpg

@@ -1,7 +1,19 @@
-Export Chip Data and Metadata
-=============================
+Export or Import Chip (Meta)Data
+================================
 
+Example
+-------
 
+::
+
+    from optigatrust import port
+    import json
+
+    dump = port.to_json()
+    json.dumps(dump, indent=4)
+
+API
+---
 
 
 .. automodule:: optigatrust.port

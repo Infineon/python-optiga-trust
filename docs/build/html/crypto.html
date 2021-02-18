@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>5. Crypto Operations &mdash; optigatrust 1.1 documentation</title>
+  <title>3. Cryptography &mdash; python-optiga-trust 1.0.1 documentation</title>
   
 
   
@@ -36,8 +36,9 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="6. Export Chip Data and Metadata" href="port.html" />
-    <link rel="prev" title="4. X.509 Certificates and Certificate Signing Requests" href="x509.html" /> 
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="4. CRS (Certificate Signing Request)" href="csr.html" />
+    <link rel="prev" title="2. Object and Metadata management" href="metadata.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -51,9 +52,12 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> optigatrust
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> python-optiga-trust
           
 
+          
+            
+            <img src="_static/infineon_logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -84,12 +88,23 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="get_started.html">1. Get Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chip.html">2. Chip parameters management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="metadata.html">3. Object and Metadata Management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="x509.html">4. X.509 Certificates and Certificate Signing Requests</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">5. Crypto Operations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="port.html">6. Export Chip Data and Metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. Cryptography</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generate-random">3.1. Generate random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#generate-a-keypair-ecc-rsa">3.2. Generate a keypair (ECC, RSA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ecdsa-sign">3.3. ECDSA Sign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pkcs1-v1-5-sign">3.4. PKCS1 v1.5 Sign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hmac">3.5. HMAC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-dereviation-hkdf-tls-prf">3.6. Key Dereviation (HKDF, TLS PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#en-decryption-rsa-aes">3.7. En-/Decryption (RSA, AES)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.crypto">3.8. API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">7. Copyrights and Licenses</a></li>
 </ul>
 
             
@@ -105,7 +120,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">optigatrust</a>
+          <a href="index.html">python-optiga-trust</a>
         
       </nav>
 
@@ -136,7 +151,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li><span class="section-number">5. </span>Crypto Operations</li>
+      <li><span class="section-number">3. </span>Cryptography</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -155,18 +170,334 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="crypto-operations">
-<h1><span class="section-number">5. </span>Crypto Operations<a class="headerlink" href="#crypto-operations" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="cryptography">
+<h1><span class="section-number">3. </span>Cryptography<a class="headerlink" href="#cryptography" title="Permalink to this headline">¶</a></h1>
 <p>Here are some examples for what you can do with this submodule</p>
-<span class="target" id="module-optigatrust.crypto"></span><dl class="py function">
+<div class="section" id="generate-random">
+<h2><span class="section-number">3.1. </span>Generate random<a class="headerlink" href="#generate-random" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
+
+<span class="n">random_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">random_tuple</span><span class="p">:</span>
+    <span class="n">crypto</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="generate-a-keypair-ecc-rsa">
+<h2><span class="section-number">3.2. </span>Generate a keypair (ECC, RSA)<a class="headerlink" href="#generate-a-keypair-ecc-rsa" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
+<span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
+
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">ECCKey</span><span class="p">(</span><span class="mh">0xe0f1</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp256r1&#39;</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp384r1&#39;</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp521r1&#39;</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;brainpoolp256r1&#39;</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;brainpoolp384r1&#39;</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;brainpoolp512r1&#39;</span><span class="p">)</span>
+
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp384r1&#39;</span><span class="p">,</span> <span class="n">key_usage</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;signature&#39;</span><span class="p">])</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp384r1&#39;</span><span class="p">,</span> <span class="n">key_usage</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="o">.</span> <span class="s1">&#39;signature&#39;</span><span class="p">])</span>
+
+<span class="n">pkey</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="o">=</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp256r1&#39;</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="ecdsa-sign">
+<h2><span class="section-number">3.3. </span>ECDSA Sign<a class="headerlink" href="#ecdsa-sign" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
+<span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
+
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">ECCKey</span><span class="p">(</span><span class="mh">0xe0f1</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp256r1&#39;</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">ecdsa_sign</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="s1">&#39;Hello World&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="pkcs1-v1-5-sign">
+<h2><span class="section-number">3.4. </span>PKCS1 v1.5 Sign<a class="headerlink" href="#pkcs1-v1-5-sign" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
+<span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
+
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">RSAKey</span><span class="p">(</span><span class="mh">0xe0fc</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">key_size</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">pkcs1v15_sign</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="s1">&#39;Hello World&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hmac">
+<h2><span class="section-number">3.5. </span>HMAC<a class="headerlink" href="#hmac" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="key-dereviation-hkdf-tls-prf">
+<h2><span class="section-number">3.6. </span>Key Dereviation (HKDF, TLS PRF)<a class="headerlink" href="#key-dereviation-hkdf-tls-prf" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="en-decryption-rsa-aes">
+<h2><span class="section-number">3.7. </span>En-/Decryption (RSA, AES)<a class="headerlink" href="#en-decryption-rsa-aes" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-optigatrust.crypto">
+<span id="api"></span><h2><span class="section-number">3.8. </span>API<a class="headerlink" href="#module-optigatrust.crypto" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt id="optigatrust.crypto.ecdh">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">ecdh</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">external_pkey</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.ecdh" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function derives a shared secret using Diffie-Hellman  Key-Exchange. This function assumes the instance
+of the key from which this method will be called represents the private key on the system used for ECDH</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage
+<a class="reference internal" href="metadata.html#optigatrust.objects.ECCKey" title="optigatrust.objects.ECCKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ECCKey</span></code></a></p></li>
+<li><p><strong>external_pkey</strong> – <p>a bytearray with a public key You can submit public keys with parameters as per openssl output in DER format</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asn1crypto</span> <span class="kn">import</span> <span class="n">pem</span>
+<span class="c1"># Option 1</span>
+<span class="n">pem_string</span> <span class="o">=</span> <span class="s1">&#39;-----BEGIN PUBLIC KEY-----</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> \
+             <span class="s1">&#39;MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> \
+             <span class="s1">&#39;fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> \
+             <span class="s1">&#39;-----END PUBLIC KEY-----&#39;</span>
+<span class="k">if</span> <span class="n">pem</span><span class="o">.</span><span class="n">detect</span><span class="p">(</span><span class="n">pem_string</span><span class="p">):</span>
+    <span class="n">type_name</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">der_bytes</span> <span class="o">=</span> <span class="n">pem</span><span class="o">.</span><span class="n">unarmor</span><span class="p">(</span><span class="n">pem_string</span><span class="p">)</span>
+
+<span class="c1"># Option 2</span>
+<span class="n">hex_string</span> <span class="o">=</span><span class="s1">&#39;3059301306072a8648ce3d020106082a&#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;8648ce3d0301070342000486a3c1caaf&#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;f62395efd63a9265b0734bc7e9b6474f&#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;7c0aecdbe97a499f087ce22e9247ffc0&#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;78b0c34155fa3c5e86b572cd6f9ccbdf&#39;</span> <span class="o">+</span> \
+            <span class="s1">&#39;8a7ed0686da970de25cdd8&#39;</span>
+<span class="n">der_bytes</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">()</span><span class="o">.</span><span class="n">from_hex</span><span class="p">(</span><span class="n">hex_string</span><span class="p">)</span>
+</pre></div>
+</div>
+</p></li>
+<li><p><strong>export</strong> – defines whether the resulting secret should be exported or not</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>in case <cite>export</cite> set to True returns a shared secret</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.ecdsa_sign">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">ecdsa_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.ecdsa_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function signs given data based on the provided EccKey object.
+Hash algorithm is selected based on the size of the key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage <a class="reference internal" href="metadata.html#optigatrust.objects.ECCKey" title="optigatrust.objects.ECCKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ECCKey</span></code></a></p></li>
+<li><p><strong>data</strong> – Data to sign, the data will be hashed based on the used curve.
+If secp256r1 then sha256, secp384r1 sha384 etc.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>EcdsaSignature object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.generate_pair">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">generate_pair</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">key_size</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.generate_pair" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function generates a ECC/RSA keypair</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage. Can be
+<a class="reference internal" href="metadata.html#optigatrust.objects.ECCKey" title="optigatrust.objects.ECCKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ECCKey</span></code></a> or <a class="reference internal" href="metadata.html#optigatrust.objects.RSAKey" title="optigatrust.objects.RSAKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RSAKey</span></code></a></p></li>
+<li><p><strong>curve</strong> – Curve name in string, only EC relevant, should be one of supported by the chip curves. For instance m3 has
+the widest range of supported algorithms: secp256r1, secp384r1, secp521r1, brainpoolp256r1,
+brainpoolp384r1, brainpoolp512r1</p></li>
+<li><p><strong>key_usage</strong> – Key usage defined per string. Can be selected as following:
+[‘key_agreement’, ‘authentication’, ‘encryption’, ‘signature’]</p></li>
+<li><p><strong>key_size</strong> – Key size is only RSA relevant, possible values are 1024 and 2048</p></li>
+<li><p><strong>export</strong> – Bool type indicates whether the private key should be exported</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><p>A tuple of keys (public_key, private_key) if export isnt requested, the private part is None
+Example (EC)</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">private_key</span><span class="o">=</span> <span class="s1">&#39;308187020100301306072a8648ce3d020106082a86....1159ddc0bfe7341e40e9&#39;</span>
+<span class="n">public_key</span><span class="o">=</span> <span class="s1">&#39;3059301306072a8648ce3d020106082a8648ce...67477a4deb6ab7d1159ddc0bfe7341e40e9&#39;</span>
+</pre></div>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.hkdf">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">hkdf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">key_length</span></em>, <em class="sig-param"><span class="n">salt</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">info</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.hkdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function derives a key (HKDF) using the secret stored on OPTIGA</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only OPTIGA™ Trust M3 relevant</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+Can be one of the following classes
+<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.Session" title="optigatrust.objects.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>,
+or <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
+<li><p><strong>key_length</strong> – Size of the requested key.
+Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
+session reference; maximum length = 256 byte in case of returned secret</p></li>
+<li><p><strong>salt</strong> – Optional salt, should be bytestring</p></li>
+<li><p><strong>info</strong> – Optional info, should be bytestring</p></li>
+<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. ‘sha256’ by default</p></li>
+<li><p><strong>export</strong> – set it to True, if you would like to export the resulting. In other case the key will e stored in the
+<a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>ValueError - when any of the parameters not expected</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>byte string with the key if requested, otherwise None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.hmac">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">hmac</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.hmac" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculates a HMAC over a given data using the secret stored on OPTIGA</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only OPTIGA™ Trust M3 relevant</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+Can be one of the following classes
+<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.Session" title="optigatrust.objects.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>,
+or <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
+<li><p><strong>data</strong> – A byte string data</p></li>
+<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. ‘sha256’ by default</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>ValueError - when any of the parameters not expected</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>byte string with the resulating MAC</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.native_to_pkcs">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">native_to_pkcs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pkey</span></em>, <em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.native_to_pkcs" title="Permalink to this definition">¶</a></dt>
+<dd><p>OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
+or strip for input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pkey</strong> – a bytestring with the public key from OPTIGA</p></li>
+<li><p><strong>key</strong> – A bytestring with key value from OPTIGA</p></li>
+<li><p><strong>algorithm</strong> – A unicode string for an algorithm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters are not expected</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple of keys (public_key, private_key)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.pkcs1v15_sign">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">pkcs1v15_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.pkcs1v15_sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function signs given data based on the provided RsaKey object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+Should be of type <a class="reference internal" href="metadata.html#optigatrust.objects.RSAKey" title="optigatrust.objects.RSAKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">RSAKey</span></code></a></p></li>
+<li><p><strong>data</strong> – Data to sign</p></li>
+<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. SHA256 by default</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PKCS1v15Signature</span></code> object or None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.crypto.pkcs_to_native">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">pkcs_to_native</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pkey</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.pkcs_to_native" title="Permalink to this definition">¶</a></dt>
+<dd><p>OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
+or strip for input</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pkey</strong> – a bytestring with the public key aimed to OPTIGA</p></li>
+<li><p><strong>algorithm</strong> – A unicode string for an algorithm.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters are not expected</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the core initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Public key as two DER Octet Strings</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="optigatrust.crypto.random">
 <code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">random</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">n</span></em>, <em class="sig-param"><span class="n">trng</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.random" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function generates a random number</p>
 <dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>n</strong> (<em>int</em>) – how much randomness to generate. Valid values are from 8 to 256</p></li>
-<li><p><strong>trng</strong> (<em>bool</em>) – If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator</p></li>
+<li><p><strong>n</strong> – how much randomness to generate. Valid values are integers from 8 to 256</p></li>
+<li><p><strong>trng</strong> – If True the a True Random Generator will be used, otherwise Deterministic Random Number Generator</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
@@ -181,122 +512,45 @@
 </dl>
 </dd></dl>
 
-<dl class="py class">
-<dt id="optigatrust.crypto.ECCKey">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">ECCKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">'secp256r1'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.ECCKey" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="optigatrust.crypto.ECCKey.ecdsa_sign">
-<code class="sig-name descname">ecdsa_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.ECCKey.ecdsa_sign" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function signs given data based on the provided EccKey object</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> – Data to sign, the data will be hashed based on the used curve.
-If secp256r1 then sha256, secp384r1 sha384 etc.</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the core initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>EcdsaSignature object or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="optigatrust.crypto.ECCKey.generate">
-<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">curve</span><span class="o">=</span><span class="default_value">'secp256r1'</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.ECCKey.generate" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates an ECC keypair, the private part is stored on the core based on the provided slot</p>
-<dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>curve</strong> (<em>str</em>) – Curve name, should be one of supported by the chip curves. For instance m3 has
-the widest range of supported algorithms: secp256r1, secp384r1, secp521r1, brainpoolp256r1,
-brainpoolp384r1, brainpoolp512r1</p></li>
-<li><p><strong>key_usage</strong> (<em>str</em>) – Key usage defined per string. Can be selected as following:
-[‘key_agreement’, ‘authentication’, ‘encryption’, ‘signature’]</p></li>
-<li><p><strong>export</strong> (<em>bool</em>) – Indicates whether the private key should be exported</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the core initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>EccKey object or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt id="optigatrust.crypto.RSAKey">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">RSAKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.RSAKey" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="optigatrust.crypto.RSAKey.generate">
-<code class="sig-name descname">generate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_size</span><span class="o">=</span><span class="default_value">1024</span></em>, <em class="sig-param"><span class="n">key_usage</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.RSAKey.generate" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function generates an RSA keypair, the private part is stored on the core based on the provided slot</p>
-<dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>key_size</strong> (<em>int</em>) – Size of the key, can be 1024 or 2048</p></li>
-<li><p><strong>key_usage</strong> (<em>list</em>) – Key usage defined per string. Can be selected as following:
-[‘key_agreement’, ‘authentication’, ‘encryption’, ‘signature’]</p></li>
-<li><p><strong>export</strong> (<em>bool</em>) – Indicates whether the private key should be exported</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the core initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>RsaKey object or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="optigatrust.crypto.RSAKey.pkcs1v15_sign">
-<code class="sig-name descname">pkcs1v15_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">bytes</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.RSAKey.pkcs1v15_sign" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function signs given data based on the provided RsaKey object</p>
+<dl class="py function">
+<dt id="optigatrust.crypto.tls_prf">
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">tls_prf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">key_length</span></em>, <em class="sig-param"><span class="n">label</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.tls_prf" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function derives a key (TLS PRF) using the secret stored on OPTIGA</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>SHA384 and SH512 are only OPTIGA™ Trust M3 relevant</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – Data to sign</p></li>
-<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. SHA256 by default</p></li>
+<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+Can be one of the following classes
+<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.Session" title="optigatrust.objects.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>,
+or <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
+<li><p><strong>key_length</strong> – Size of the requested key.
+Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
+session reference; maximum length = 256 byte in case of returned secret</p></li>
+<li><p><strong>label</strong> – Optional label, should be bytestring</p></li>
+<li><p><strong>seed</strong> – Optional seed, should be bytestring</p></li>
+<li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. ‘sha256’ by default</p></li>
+<li><p><strong>export</strong> – set it to True, if you would like to export the resulting. In other case the key will e stored in the
+<a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
 <li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>ValueError - when any of the parameters not expected</p></li>
 <li><p>OSError - when an error is returned by the core initialisation library</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>RsaPkcs1v15Signature object or None</p>
+<dd class="field-odd"><p>byte string with the key if requested, otherwise None</p>
 </dd>
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt id="optigatrust.crypto.ECDSASignature">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">ECDSASignature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_alg</span></em>, <em class="sig-param"><span class="n">key_id</span></em>, <em class="sig-param"><span class="n">signature</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.ECDSASignature" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py class">
-<dt id="optigatrust.crypto.PKCS1v15Signature">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">PKCS1v15Signature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_alg</span></em>, <em class="sig-param"><span class="n">keyid</span></em>, <em class="sig-param"><span class="n">signature</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.PKCS1v15Signature" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+</div>
 </div>
 
 
@@ -307,10 +561,10 @@ brainpoolp384r1, brainpoolp512r1</p></li>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="port.html" class="btn btn-neutral float-right" title="6. Export Chip Data and Metadata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="csr.html" class="btn btn-neutral float-right" title="4. CRS (Certificate Signing Request)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="x509.html" class="btn btn-neutral float-left" title="4. X.509 Certificates and Certificate Signing Requests" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="metadata.html" class="btn btn-neutral float-left" title="2. Object and Metadata management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -320,7 +574,8 @@ brainpoolp384r1, brainpoolp512r1</p></li>
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2021, Infineon Technologies AG
+        
+        &copy; <a href="copyright.html">Copyright</a> 2021, Infineon Technologies AG
 
     </p>
   </div>

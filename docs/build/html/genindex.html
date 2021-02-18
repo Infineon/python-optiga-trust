@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; optigatrust 1.1 documentation</title>
+  <title>Index &mdash; python-optiga-trust 1.0.1 documentation</title>
   
 
   
@@ -35,7 +35,8 @@
 
     
     <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -49,9 +50,12 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> optigatrust
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> python-optiga-trust
           
 
+          
+            
+            <img src="_static/infineon_logo.png" class="logo" alt="Logo"/>
           
           </a>
 
@@ -82,12 +86,14 @@
             
               <p class="caption"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="get_started.html">1. Get Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="chip.html">2. Chip parameters management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="metadata.html">3. Object and Metadata Management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="x509.html">4. X.509 Certificates and Certificate Signing Requests</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crypto.html">5. Crypto Operations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="port.html">6. Export Chip Data and Metadata</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">3. Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
 </ul>
 
             
@@ -103,7 +109,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">optigatrust</a>
+          <a href="index.html">python-optiga-trust</a>
         
       </nav>
 
@@ -155,12 +161,17 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#K"><strong>K</strong></a>
  | <a href="#M"><strong>M</strong></a>
+ | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
@@ -168,16 +179,43 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
  
 </div>
-<h2 id="C">C</h2>
+<h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="x509.html#optigatrust.x509.Certificate">Certificate (class in optigatrust.x509)</a>
+      <li><a href="metadata.html#optigatrust.objects.AcquiredSession">AcquiredSession (class in optigatrust.objects)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="metadata.html#optigatrust.objects.AESKey">AESKey (class in optigatrust.objects)</a>
+</li>
+      <li><a href="metadata.html#optigatrust.objects.AppData">AppData (class in optigatrust.objects)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.build">build() (optigatrust.csr.CSRBuilder method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.ca">ca() (optigatrust.csr.CSRBuilder property)</a>
+</li>
       <li><a href="chip.html#optigatrust.Chip">Chip (class in optigatrust)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="chip.html#optigatrust.Chip.config_security_monitor">config_security_monitor() (optigatrust.Chip method)</a>
+</li>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder">CSRBuilder (class in optigatrust.csr)</a>
 </li>
       <li><a href="chip.html#optigatrust.Chip.current_limit">current_limit() (optigatrust.Chip property)</a>
 </li>
@@ -187,7 +225,7 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="x509.html#optigatrust.x509.Certificate.der">der() (optigatrust.x509.Certificate property)</a>
+      <li><a href="metadata.html#optigatrust.objects.X509.der">der() (optigatrust.objects.X509 property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -195,13 +233,15 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="crypto.html#optigatrust.crypto.ECCKey">ECCKey (class in optigatrust.crypto)</a>
+      <li><a href="metadata.html#optigatrust.objects.ECCKey">ECCKey (class in optigatrust.objects)</a>
+</li>
+      <li><a href="crypto.html#optigatrust.crypto.ecdh">ecdh() (in module optigatrust.crypto)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="crypto.html#optigatrust.crypto.ECCKey.ecdsa_sign">ecdsa_sign() (optigatrust.crypto.ECCKey method)</a>
+      <li><a href="crypto.html#optigatrust.crypto.ecdsa_sign">ecdsa_sign() (in module optigatrust.crypto)</a>
 </li>
-      <li><a href="crypto.html#optigatrust.crypto.ECDSASignature">ECDSASignature (class in optigatrust.crypto)</a>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.extended_key_usage">extended_key_usage() (optigatrust.csr.CSRBuilder property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -217,15 +257,31 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="crypto.html#optigatrust.crypto.ECCKey.generate">generate() (optigatrust.crypto.ECCKey method)</a>
-
-      <ul>
-        <li><a href="crypto.html#optigatrust.crypto.RSAKey.generate">(optigatrust.crypto.RSAKey method)</a>
+      <li><a href="crypto.html#optigatrust.crypto.generate_pair">generate_pair() (in module optigatrust.crypto)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chip.html#optigatrust.Chip.global_lifecycle_state">global_lifecycle_state() (optigatrust.Chip property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="crypto.html#optigatrust.crypto.hkdf">hkdf() (in module optigatrust.crypto)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="crypto.html#optigatrust.crypto.hmac">hmac() (in module optigatrust.crypto)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.key_usage">key_usage() (optigatrust.csr.CSRBuilder property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -241,11 +297,21 @@
       <ul>
         <li><a href="crypto.html#module-optigatrust.crypto">optigatrust.crypto</a>
 </li>
+        <li><a href="csr.html#module-optigatrust.csr">optigatrust.csr</a>
+</li>
+        <li><a href="metadata.html#module-optigatrust.objects">optigatrust.objects</a>
+</li>
         <li><a href="port.html#module-optigatrust.port">optigatrust.port</a>
 </li>
-        <li><a href="x509.html#module-optigatrust.x509">optigatrust.x509</a>
-</li>
       </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="N">N</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="crypto.html#optigatrust.crypto.native_to_pkcs">native_to_pkcs() (in module optigatrust.crypto)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -261,20 +327,27 @@
         <li><a href="crypto.html#module-optigatrust.crypto">module</a>
 </li>
       </ul></li>
+      <li>
+    optigatrust.csr
+
+      <ul>
+        <li><a href="csr.html#module-optigatrust.csr">module</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    optigatrust.objects
+
+      <ul>
+        <li><a href="metadata.html#module-optigatrust.objects">module</a>
+</li>
+      </ul></li>
       <li>
     optigatrust.port
 
       <ul>
         <li><a href="port.html#module-optigatrust.port">module</a>
-</li>
-      </ul></li>
-      <li>
-    optigatrust.x509
-
-      <ul>
-        <li><a href="x509.html#module-optigatrust.x509">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -283,17 +356,17 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="x509.html#optigatrust.x509.Certificate.pem">pem() (optigatrust.x509.Certificate property)</a>
+      <li><a href="metadata.html#optigatrust.objects.X509.pem">pem() (optigatrust.objects.X509 property)</a>
 </li>
-      <li><a href="x509.html#optigatrust.x509.pem_armor_csr">pem_armor_csr() (in module optigatrust.x509)</a>
+      <li><a href="csr.html#optigatrust.csr.pem_armor_csr">pem_armor_csr() (in module optigatrust.csr)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="crypto.html#optigatrust.crypto.RSAKey.pkcs1v15_sign">pkcs1v15_sign() (optigatrust.crypto.RSAKey method)</a>
+      <li><a href="crypto.html#optigatrust.crypto.pkcs1v15_sign">pkcs1v15_sign() (in module optigatrust.crypto)</a>
 </li>
-      <li><a href="crypto.html#optigatrust.crypto.PKCS1v15Signature">PKCS1v15Signature (class in optigatrust.crypto)</a>
+      <li><a href="crypto.html#optigatrust.crypto.pkcs_to_native">pkcs_to_native() (in module optigatrust.crypto)</a>
 </li>
-      <li><a href="x509.html#optigatrust.x509.Certificate.pkey">pkey() (optigatrust.x509.Certificate property)</a>
+      <li><a href="metadata.html#optigatrust.objects.X509.pkey">pkey() (optigatrust.objects.X509 property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -307,7 +380,7 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="metadata.html#optigatrust.Object.read">read() (optigatrust.Object method)</a>
 </li>
-      <li><a href="crypto.html#optigatrust.crypto.RSAKey">RSAKey (class in optigatrust.crypto)</a>
+      <li><a href="metadata.html#optigatrust.objects.RSAKey">RSAKey (class in optigatrust.objects)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -317,13 +390,23 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="chip.html#optigatrust.Chip.security_event_counter">security_event_counter() (optigatrust.Chip property)</a>
 </li>
+      <li><a href="chip.html#optigatrust.Chip.security_monitor">security_monitor() (optigatrust.Chip property)</a>
+</li>
       <li><a href="chip.html#optigatrust.Chip.security_status">security_status() (optigatrust.Chip property)</a>
+</li>
+      <li><a href="metadata.html#optigatrust.objects.Session">Session (class in optigatrust.objects)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="x509.html#optigatrust.x509.Certificate.signature">signature() (optigatrust.x509.Certificate property)</a>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.set_extension">set_extension() (optigatrust.csr.CSRBuilder method)</a>
+</li>
+      <li><a href="metadata.html#optigatrust.objects.X509.signature">signature() (optigatrust.objects.X509 property)</a>
 </li>
       <li><a href="chip.html#optigatrust.Chip.sleep_activation_delay">sleep_activation_delay() (optigatrust.Chip property)</a>
+</li>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.subject_alt_domains">subject_alt_domains() (optigatrust.csr.CSRBuilder property)</a>
+</li>
+      <li><a href="csr.html#optigatrust.csr.CSRBuilder.subject_alt_ips">subject_alt_ips() (optigatrust.csr.CSRBuilder property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -331,10 +414,12 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="port.html#optigatrust.port.to_json">to_json() (in module optigatrust.port)</a>
+      <li><a href="crypto.html#optigatrust.crypto.tls_prf">tls_prf() (in module optigatrust.crypto)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="port.html#optigatrust.port.to_json">to_json() (in module optigatrust.port)</a>
+</li>
       <li><a href="port.html#optigatrust.port.to_otc">to_otc() (in module optigatrust.port)</a>
 </li>
   </ul></td>
@@ -356,6 +441,14 @@
   </ul></td>
 </tr></table>
 
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="metadata.html#optigatrust.objects.X509">X509 (class in optigatrust.objects)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 
 
            </div>
@@ -369,7 +462,8 @@
   <div role="contentinfo">
     <p>
         
-        &copy; Copyright 2021, Infineon Technologies AG
+        
+        &copy; <a href="copyright.html">Copyright</a> 2021, Infineon Technologies AG
 
     </p>
   </div>
