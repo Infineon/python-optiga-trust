@@ -64,7 +64,7 @@ def test_keypair_x_y(oid, curve, pub_key_size):
 def test_keypair_x_y_private_key_import(oid, curve):
     key_object = objects.ECCKey(oid)
     _, key = optiga_ec.generate_pair(key_object, curve=curve, export=True)
-    parsed_key = serialization.load_der_private_key(key, None)
+    parsed_key = serialization.load_der_private_key(key, password=None, backend=default_backend())
     assert isinstance(parsed_key, ec.EllipticCurvePrivateKey)
 
 
@@ -87,7 +87,7 @@ def test_keypair_x_y_private_key_import(oid, curve):
 def test_keypair_x_y_public_key_import(oid, curve):
     key_object = objects.ECCKey(oid)
     pkey, _ = optiga_ec.generate_pair(key_object, curve=curve)
-    parsed_key = serialization.load_der_public_key(pkey, None)
+    parsed_key = serialization.load_der_public_key(pkey, backend=default_backend())
     assert isinstance(parsed_key, ec.EllipticCurvePublicKey)
 
 
@@ -120,7 +120,7 @@ def test_ecdh_faulty():
 def test_ecdh_internal(curve, hazmat_curve):
     key_object = objects.ECCKey(0xe0f1)
     _, _ = optiga_ec.generate_pair(key_object, curve)
-    private_key = ec.generate_private_key(hazmat_curve)
+    private_key = ec.generate_private_key(hazmat_curve, default_backend())
     peer_public_key = private_key.public_key().public_bytes(
         encoding=serialization.Encoding.DER,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -139,7 +139,7 @@ def test_ecdh_internal(curve, hazmat_curve):
 def test_ecdh_external(curve, hazmat_curve):
     key_object = objects.ECCKey(0xe0f1)
     _, _ = optiga_ec.generate_pair(key_object, curve)
-    private_key = ec.generate_private_key(hazmat_curve)
+    private_key = ec.generate_private_key(hazmat_curve, default_backend())
     peer_public_key = private_key.public_key().public_bytes(
         encoding=serialization.Encoding.DER,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
@@ -150,7 +150,7 @@ def test_ecdh_external(curve, hazmat_curve):
 def test_ecdh_verify():
     key_object = objects.ECCKey(0xe0f1)
     int_key_bytes, _ = optiga_ec.generate_pair(key_object, 'secp256r1')
-    private_key = ec.generate_private_key(ec.SECP256R1())
+    private_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
     peer_public_key = private_key.public_key().public_bytes(
         encoding=serialization.Encoding.DER,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
