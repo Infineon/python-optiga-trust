@@ -104,7 +104,8 @@
 <li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
-<li class="toctree-l1"><a class="reference internal" href="copyright.html">7. Copyrights and Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
 </ul>
 
             
@@ -197,7 +198,7 @@
 <span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;brainpoolp512r1&#39;</span><span class="p">)</span>
 
 <span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp384r1&#39;</span><span class="p">,</span> <span class="n">key_usage</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;signature&#39;</span><span class="p">])</span>
-<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp384r1&#39;</span><span class="p">,</span> <span class="n">key_usage</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="o">.</span> <span class="s1">&#39;signature&#39;</span><span class="p">])</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp384r1&#39;</span><span class="p">,</span> <span class="n">key_usage</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="p">,</span> <span class="s1">&#39;signature&#39;</span><span class="p">])</span>
 
 <span class="n">pkey</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="o">=</span><span class="n">key_object</span><span class="p">,</span> <span class="n">curve</span><span class="o">=</span><span class="s1">&#39;secp256r1&#39;</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>

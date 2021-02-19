@@ -168,12 +168,43 @@
 <blockquote>
 <div><ul class="simple">
 <li><p>Python 3.7+</p></li>
-<li><p><a class="reference external" href="https://github.com/wbond/asn1crypto">asn1crypto</a> (for CSR and X509 Handling)</p></li>
-<li><p><a class="reference external" href="https://github.com/wbond/oscrypto">oscrypto</a> (for tests only)</p></li>
-<li><p><a class="reference external" href="https://jinja.palletsprojects.com/en/2.11.x/">jinja2</a> (for xml handling in export module)</p></li>
-<li><p><a class="reference external" href="https://github.com/pyca/cryptography">cryptography</a> (for keys wrap/unwrap operations)</p></li>
+<li><p>CSR and X509 Handling - <a class="reference external" href="https://github.com/wbond/asn1crypto">asn1crypto</a></p></li>
+<li><p>For tests - <a class="reference external" href="https://github.com/wbond/oscrypto">oscrypto</a>, <a class="reference external" href="https://github.com/pyca/cryptography">cryptography</a></p></li>
+<li><p>XML handling in export module <a class="reference external" href="https://jinja.palletsprojects.com/en/2.11.x/">jinja2</a></p></li>
+<li><p>Keys wrap/unwrap operations <a class="reference external" href="https://github.com/pyca/cryptography">cryptography</a></p></li>
 </ul>
 </div></blockquote>
+</div>
+<div class="section" id="how-does-it-work">
+<h2>How does it work<a class="headerlink" href="#how-does-it-work" title="Permalink to this headline">¶</a></h2>
+<p>This python module comes with a set of shared libraries, which are precompiled for different communication interfaces.
+The shared libraries are fully based on the <a class="reference external" href="https://github.com/Infineon/optiga-trust-m/">official framework</a>. This module doesn’t simply implement bindings for the library, but add many more things on top. See Documentation.
+In the end the module supports the following combinations</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 32%" />
+<col style="width: 26%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Interface/OS</p></td>
+<td><p><strong>Windows</strong></p></td>
+<td><p><strong>Linux</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>EvalKit</strong></p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>PersoBoard</strong></p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Raw I2C</strong></p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="section" id="required-hardware">
 <h2>Required Hardware<a class="headerlink" href="#required-hardware" title="Permalink to this headline">¶</a></h2>
@@ -181,14 +212,14 @@
 <div><ul class="simple">
 <li><dl class="simple">
 <dt>Any of the following</dt><dd><ul>
-<li><p>OPTIGA™ Trust M1/M3/Charge Evaluation Kit. See <a class="reference internal" href="prov_mode.html"><span class="doc">Provisioning mode</span></a> for more details.</p></li>
+<li><p>OPTIGA™ Trust M1/M3/Charge EvalKit. See <a class="reference internal" href="prov_mode.html"><span class="doc">Provisioning mode</span></a> for details.</p></li>
 <li><p>OPTIGA™ Trust Personalisation Board, or any FTDI USB-HID/I2C Converter board</p></li>
 <li><p>Raspberry Pi + Shield2Go RPi <a class="reference external" href="https://www.infineon.com/cms/en/product/evaluation-boards/s2go-adapter-rasp-pi-iot/">Adapter</a></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><p>OPTIGA™ Trust X/M sample or a Security Shield2Go</p></li>
+<li><p>OPTIGA™ Trust X/M/Charge sample or a Security Shield2Go</p></li>
 </ul>
 </div></blockquote>
 <p>Note: If you use any of the embedded Linux as a Host, please don’t forget to enable i2c support in your kernel (RPi3: via <cite>raspi-config</cite> command), as well as add your user to the gpio group (RPi3: via <cite>sudo adduser pi gpio</cite>)
@@ -196,7 +227,7 @@
 </div>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install optigatrust asn1crypto jinja2 cryptography
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install optigatrust
 </pre></div>
 </div>
 </div>
@@ -215,9 +246,6 @@ $ pytest
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest test_rand.py
 </pre></div>
 </div>
-</div>
-<div class="section" id="layout">
-<h2>Layout<a class="headerlink" href="#layout" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">

@@ -31,7 +31,7 @@ Generate a keypair (ECC, RSA)
     pkey, _ = crypto.generate_pair(key_object, curve='brainpoolp512r1')
 
     pkey, _ = crypto.generate_pair(key_object, curve='secp384r1', key_usage=['authentication', 'signature'])
-    pkey, _ = crypto.generate_pair(key_object, curve='secp384r1', key_usage=['authentication', 'key_agreement'. 'signature'])
+    pkey, _ = crypto.generate_pair(key_object, curve='secp384r1', key_usage=['authentication', 'key_agreement', 'signature'])
 
     pkey, key = crypto.generate_pair(key_object=key_object, curve='secp256r1', export=True)
 

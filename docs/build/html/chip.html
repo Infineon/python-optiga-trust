@@ -38,7 +38,7 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
     <link rel="next" title="2. Object and Metadata management" href="metadata.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="get_started.html" /> 
+    <link rel="prev" title="Welcome to infineon/python-optiga-trust" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -94,7 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
-<li class="toctree-l1"><a class="reference internal" href="copyright.html">7. Copyrights and Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
 </ul>
 
             
@@ -191,14 +192,6 @@
 <dt id="optigatrust.Chip">
 <em class="property">class </em><code class="sig-prename descclassname">optigatrust.</code><code class="sig-name descname">Chip</code><a class="headerlink" href="#optigatrust.Chip" title="Permalink to this definition">¶</a></dt>
 <dd><p>A class used to represent the whole OPTIGA Trust Chip</p>
-<dl class="field-list simple">
-<dt class="field-odd">Variables</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>api</strong> (<em>ctypes.CDDL</em>) – A ctypes descriptor pointing to the right shared library used for the communication</p></li>
-<li><p><strong>name</strong> (<em>str</em>) – We can’t know for sure the right name of the chip, but we can have a good guess based on the firmware id</p></li>
-</ul>
-</dd>
-</dl>
 <dl class="py method">
 <dt id="optigatrust.Chip.config_security_monitor">
 <code class="sig-name descname">config_security_monitor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">t_max</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">max_sec_credit</span><span class="o">=</span><span class="default_value">5</span></em>, <em class="sig-param"><span class="n">delayed_sec_sync</span><span class="o">=</span><span class="default_value">1</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Chip.config_security_monitor" title="Permalink to this definition">¶</a></dt>
@@ -215,11 +208,11 @@
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>t_max</strong> – Chip allows to perform one protected operation per t_max.
-If more perfomed, internal SECcredit and afterwards SECcounter are increased until saturation. In the end
+If more performed, internal SECcredit and afterwards SECcounter are increased until saturation. In the end
 the chip starts inducing delays of t_max between crypto operations
 t_max = 0 disables Security Monitor</p></li>
 <li><p><strong>max_sec_credit</strong> – The maximum SECcredit that can be achieved</p></li>
-<li><p><strong>delayed_sec_sync</strong> – If there are multiple security events with in tmax due to use case demand,
+<li><p><strong>delayed_sec_sync</strong> – If there are multiple security events with in t_max due to use case demand,
 the number of NVM write operations can be avoided by configuring this count appropriately</p></li>
 </ul>
 </dd>
@@ -229,14 +222,14 @@ the number of NVM write operations can be avoided by configuring this count appr
 <dl class="py method">
 <dt id="optigatrust.Chip.current_limit">
 <em class="property">property </em><code class="sig-name descname">current_limit</code><a class="headerlink" href="#optigatrust.Chip.current_limit" title="Permalink to this definition">¶</a></dt>
-<dd><p>This property allows to get or set the current limitation of the chip. Allowed range from 6 to 15 mA</p>
+<dd><p>This property allows to get or set the current limitation of the chip. Allowed range is from 6 to 15 (mA)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="optigatrust.Chip.global_lifecycle_state">
 <em class="property">property </em><code class="sig-name descname">global_lifecycle_state</code><a class="headerlink" href="#optigatrust.Chip.global_lifecycle_state" title="Permalink to this definition">¶</a></dt>
 <dd><p>This property allows to get or set the global lifecycle state for your chip.
-Should be one of core.lifecycle_states</p>
+Should be one of <code class="xref py py-data docutils literal notranslate"><span class="pre">optigatrust.lifecycle_states</span></code></p>
 </dd></dl>
 
 <dl class="py method">
@@ -264,7 +257,7 @@ Should be one of core.lifecycle_states</p>
 <dl class="py method">
 <dt id="optigatrust.Chip.sleep_activation_delay">
 <em class="property">property </em><code class="sig-name descname">sleep_activation_delay</code><a class="headerlink" href="#optigatrust.Chip.sleep_activation_delay" title="Permalink to this definition">¶</a></dt>
-<dd><p>This property allows to get or set the sleep activation delay for your chip
+<dd><p>This property allows to get or set the sleep activation delay for your chip. Should be from 1 to 255.
 (time the chip should wait after all operations are finished before going to sleep)</p>
 </dd></dl>
 
@@ -293,7 +286,7 @@ Should be one of core.lifecycle_states</p>
         <a href="metadata.html" class="btn btn-neutral float-right" title="2. Object and Metadata management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="get_started.html" class="btn btn-neutral float-left" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to infineon/python-optiga-trust" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
