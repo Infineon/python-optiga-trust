@@ -74,4 +74,4 @@ API
 
 
 .. automodule:: optigatrust.crypto
-   :members: random, native_to_pkcs, pkcs_to_native, generate_pair, ecdsa_sign, pkcs1v15_sign, ecdh, hmac, tls_prf, hkdf, encrypt, decrypt
+   :members: random, generate_pair, ecdsa_sign, pkcs1v15_sign, ecdh, hmac, tls_prf, hkdf

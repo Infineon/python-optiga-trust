@@ -415,32 +415,6 @@ or <a class="reference internal" href="metadata.html#optigatrust.objects.Acquire
 </dd></dl>
 
 <dl class="py function">
-<dt id="optigatrust.crypto.native_to_pkcs">
-<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">native_to_pkcs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pkey</span></em>, <em class="sig-param"><span class="n">key</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.native_to_pkcs" title="Permalink to this definition">¶</a></dt>
-<dd><p>OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
-or strip for input</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pkey</strong> – a bytestring with the public key from OPTIGA</p></li>
-<li><p><strong>key</strong> – A bytestring with key value from OPTIGA</p></li>
-<li><p><strong>algorithm</strong> – A unicode string for an algorithm.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>ValueError - when any of the parameters are not expected</p></li>
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the core initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A tuple of keys (public_key, private_key)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
 <dt id="optigatrust.crypto.pkcs1v15_sign">
 <code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">pkcs1v15_sign</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.pkcs1v15_sign" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function signs given data based on the provided RsaKey object</p>
@@ -461,31 +435,6 @@ Should be of type <a class="reference internal" href="metadata.html#optigatrust.
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PKCS1v15Signature</span></code> object or None</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt id="optigatrust.crypto.pkcs_to_native">
-<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">pkcs_to_native</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pkey</span></em>, <em class="sig-param"><span class="n">algorithm</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.pkcs_to_native" title="Permalink to this definition">¶</a></dt>
-<dd><p>OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
-or strip for input</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>pkey</strong> – a bytestring with the public key aimed to OPTIGA</p></li>
-<li><p><strong>algorithm</strong> – A unicode string for an algorithm.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><ul class="simple">
-<li><p>ValueError - when any of the parameters are not expected</p></li>
-<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
-<li><p>OSError - when an error is returned by the core initialisation library</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Public key as two DER Octet Strings</p>
 </dd>
 </dl>
 </dd></dl>
@@ -515,7 +464,7 @@ or strip for input</p>
 
 <dl class="py function">
 <dt id="optigatrust.crypto.tls_prf">
-<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">tls_prf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_object</span></em>, <em class="sig-param"><span class="n">key_length</span></em>, <em class="sig-param"><span class="n">label</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">seed</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.tls_prf" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">optigatrust.crypto.</code><code class="sig-name descname">tls_prf</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">object</span></em>, <em class="sig-param"><span class="n">key_length</span></em>, <em class="sig-param"><span class="n">seed</span></em>, <em class="sig-param"><span class="n">label</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">hash_algorithm</span><span class="o">=</span><span class="default_value">'sha256'</span></em>, <em class="sig-param"><span class="n">export</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.crypto.tls_prf" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function derives a key (TLS PRF) using the secret stored on OPTIGA</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -524,15 +473,15 @@ or strip for input</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
+<li><p><strong>object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
 Can be one of the following classes
 <a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.Session" title="optigatrust.objects.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>,
 or <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
 <li><p><strong>key_length</strong> – Size of the requested key.
 Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
 session reference; maximum length = 256 byte in case of returned secret</p></li>
-<li><p><strong>label</strong> – Optional label, should be bytestring</p></li>
 <li><p><strong>seed</strong> – Optional seed, should be bytestring</p></li>
+<li><p><strong>label</strong> – Optional label, should be bytestring</p></li>
 <li><p><strong>hash_algorithm</strong> – Hash algorithm which should be used to sign data. ‘sha256’ by default</p></li>
 <li><p><strong>export</strong> – set it to True, if you would like to export the resulting. In other case the key will e stored in the
 <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>

@@ -324,7 +324,7 @@
 <code class="sig-prename descclassname">optigatrust.port.</code><code class="sig-name descname">to_otc</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.to_otc" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function exports the whole available dump of the chip in the format compatible with
 the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
-an xml file with metadata stored. The function uses <span class="xref std std-doc">enums/conf_template.xml</span> and add seqentially all objects
+an xml file with metadata stored. The function uses optigatrust/enums/conf_template.xml and add sequentially all objects
 found on the chip. There are exceptions, objects [“f1c1”, “e0c2”, “e0c0”, “e0c1”, “e0c5”, “e0c6”] are excluded and
 Objects which don’t have ‘used_size’ metatag defined are excluded</p>
 <dl class="field-list simple">
@@ -339,7 +339,7 @@ Objects which don’t have ‘used_size’ metatag defined are excluded</p>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>an xml string according to the template <span class="xref std std-doc">enums/conf_template.xml</span></p>
+<dd class="field-odd"><p>an xml string according to the template optigatrust/enums/conf_template.xml</p>
 </dd>
 </dl>
 <div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;objects&gt;</span>
