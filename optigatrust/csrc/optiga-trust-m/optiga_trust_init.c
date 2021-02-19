@@ -334,34 +334,14 @@ optiga_lib_status_t exp_optiga_crypt_ecdh(optiga_key_id_t private_key, public_ke
 	CHECK_RESULT(optiga_crypt_ecdh(p_local_crypt, private_key, public_key, export_to_host, shared_secret));
 }
 
-optiga_lib_status_t exp_optiga_crypt_tls_prf_sha256(uint16_t secret, const uint8_t * label, uint16_t label_length, const uint8_t * seed, uint16_t seed_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
+optiga_lib_status_t exp_optiga_crypt_tls_prf(optiga_tls_prf_type_t type, uint16_t secret, const uint8_t * label, uint16_t label_length, const uint8_t * seed, uint16_t seed_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
 {
-	CHECK_RESULT(optiga_crypt_tls_prf(p_local_crypt, OPTIGA_TLS12_PRF_SHA_256, secret, label, label_length, seed, seed_length, derived_key_length, export_to_host, derived_key));
+	CHECK_RESULT(optiga_crypt_tls_prf(p_local_crypt, type, secret, label, label_length, seed, seed_length, derived_key_length, export_to_host, derived_key));
 }
 
-optiga_lib_status_t exp_optiga_crypt_tls_prf_sha384(uint16_t secret, const uint8_t * label, uint16_t label_length, const uint8_t * seed, uint16_t seed_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
+optiga_lib_status_t exp_optiga_crypt_hkdf(optiga_hkdf_type_t type, uint16_t secret, const uint8_t * salt, uint16_t salt_length, const uint8_t * info, uint16_t info_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
 {
-	CHECK_RESULT(optiga_crypt_tls_prf(p_local_crypt, OPTIGA_TLS12_PRF_SHA_384, secret, label, label_length, seed, seed_length, derived_key_length, export_to_host, derived_key));
-}
-
-optiga_lib_status_t exp_optiga_crypt_tls_prf_sha512(uint16_t secret, const uint8_t * label, uint16_t label_length, const uint8_t * seed, uint16_t seed_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
-{
-	CHECK_RESULT(optiga_crypt_tls_prf(p_local_crypt, OPTIGA_TLS12_PRF_SHA_512, secret, label, label_length, seed, seed_length, derived_key_length, export_to_host, derived_key));
-}
-
-optiga_lib_status_t exp_optiga_crypt_hkdf_sha256(uint16_t secret, const uint8_t * salt, uint16_t salt_length, const uint8_t * info, uint16_t info_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
-{
-	CHECK_RESULT(optiga_crypt_hkdf(p_local_crypt, OPTIGA_HKDF_SHA_256, secret, salt, salt_length, info, info_length, derived_key_length, export_to_host, derived_key));
-}
-
-optiga_lib_status_t exp_optiga_crypt_hkdf_sha384(uint16_t secret, const uint8_t * salt, uint16_t salt_length, const uint8_t * info, uint16_t info_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
-{
-	CHECK_RESULT(optiga_crypt_hkdf(p_local_crypt, OPTIGA_HKDF_SHA_384, secret, salt, salt_length, info, info_length, derived_key_length, export_to_host, derived_key));
-}
-
-optiga_lib_status_t exp_optiga_crypt_hkdf_sha512(uint16_t secret, const uint8_t * salt, uint16_t salt_length, const uint8_t * info, uint16_t info_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key)
-{
-	CHECK_RESULT(optiga_crypt_hkdf(p_local_crypt, OPTIGA_HKDF_SHA_512, secret, salt, salt_length, info, info_length, derived_key_length, export_to_host, derived_key));
+	CHECK_RESULT(optiga_crypt_hkdf(p_local_crypt, type, secret, salt, salt_length, info, info_length, derived_key_length, export_to_host, derived_key));
 }
 
 optiga_lib_status_t exp_optiga_crypt_rsa_generate_keypair(optiga_rsa_key_type_t key_type, uint8_t key_usage, bool_t export_private_key, void * private_key, uint8_t * public_key, uint16_t * public_key_length)
