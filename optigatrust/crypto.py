@@ -61,7 +61,7 @@ def _str2curve(curve_str, return_value=False):
         raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
 
 
-def native_to_pkcs(pkey, key=None, algorithm=None):
+def _native_to_pkcs(pkey, key=None, algorithm=None):
     """
     OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
     or strip for input
@@ -127,7 +127,7 @@ def native_to_pkcs(pkey, key=None, algorithm=None):
         return public_key, private_key
 
 
-def pkcs_to_native(pkey, algorithm=None):
+def _pkcs_to_native(pkey, algorithm=None):
     """
     OPTIGA doesnt use and accept key information as part of the imput, so we need to append it after key_generation
     or strip for input
@@ -290,10 +290,10 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     if ret == 0:
         key_object.curve = curve
         if export:
-            public_key, private_key = native_to_pkcs(key=bytes(priv_key), pkey=bytes(pub_key), algorithm=curve)
+            public_key, private_key = _native_to_pkcs(key=bytes(priv_key), pkey=bytes(pub_key), algorithm=curve)
             return public_key, private_key
         else:
-            public_key, _ = native_to_pkcs(key=None, pkey=bytes(pub_key), algorithm=curve)
+            public_key, _ = _native_to_pkcs(key=None, pkey=bytes(pub_key), algorithm=curve)
             return public_key, None
     else:
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
@@ -538,7 +538,7 @@ def ecdh(key_object, external_pkey, export=False):
         )
     api = optiga.Chip().api
     # OPTIGA doesn't understand the asn.1 encoded parameters field
-    external_pkey = pkcs_to_native(pkey=external_pkey, algorithm=key_object.curve)
+    external_pkey = _pkcs_to_native(pkey=external_pkey, algorithm=key_object.curve)
     # Extract the curve from the object metadata
     try:
         curve = key_object.meta['algorithm']
@@ -657,8 +657,8 @@ def hmac(key_object, data, hash_algorithm='sha256'):
     api = optiga.Chip().api
     if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
         raise TypeError(
-            'key_object should be either {0}, or {1} types'.format(
-                type(objects.AppData), type(objects.Session), type(objects.AcquiredSession)
+            'key_object should be either {0}, {1}, or {2} types'.format(
+                objects.AppData, objects.Session, objects.AcquiredSession
             )
         )
     if isinstance(key_object, objects.AppData):
@@ -686,7 +686,7 @@ def hmac(key_object, data, hash_algorithm='sha256'):
         raise TypeError(
             'Data should be byte string, {0} provided.'.format(type(data))
         )
-    _data = (c_ubyte * len(data))(data)
+    _data = (c_ubyte * len(data))(*data)
     mac = (c_ubyte * _hash_map[hash_algorithm][1])()
     mac_len = c_uint(_hash_map[hash_algorithm][1])
 
@@ -698,13 +698,13 @@ def hmac(key_object, data, hash_algorithm='sha256'):
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
-def tls_prf(key_object, key_length, label=None, seed=None, hash_algorithm='sha256', export=False):
+def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', export=False):
     """
     This function derives a key (TLS PRF) using the secret stored on OPTIGA
 
     .. note:: SHA384 and SH512 are only OPTIGA™ Trust M3 relevant
 
-    :param key_object:
+    :param object:
         Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
         Can be one of the following classes
         :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.Session`,
@@ -715,11 +715,11 @@ def tls_prf(key_object, key_length, label=None, seed=None, hash_algorithm='sha25
         Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
         session reference; maximum length = 256 byte in case of returned secret
 
-    :param label:
-        Optional label, should be bytestring
-
     :param seed:
         Optional seed, should be bytestring
+
+    :param label:
+        Optional label, should be bytestring
 
     :param hash_algorithm:
         Hash algorithm which should be used to sign data. 'sha256' by default
@@ -737,18 +737,18 @@ def tls_prf(key_object, key_length, label=None, seed=None, hash_algorithm='sha25
         byte string with the key if requested, otherwise None
     """
     api = optiga.Chip().api
-    if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
+    if not isinstance(object, (objects.AppData, objects.Session, objects.AcquiredSession)):
         raise TypeError(
-            'key_object should be either {0}, or {1} types'.format(
-                type(objects.AppData), type(objects.Session), type(objects.AcquiredSession)
+            'key_object should be either {0}, {1}, or {2} types'.format(
+                objects.AppData, objects.Session, objects.AcquiredSession
             )
         )
-    if isinstance(key_object, objects.AppData):
+    if isinstance(object, objects.AppData):
         try:
-            if key_object.meta['type'] != 'pre_sh_secret':
+            if object.meta['type'] != 'pre_sh_secret':
                 raise ValueError(
                     'Selected object doesn\'t have a proper setup.'
-                    'Should have PRESHSEC type, you have {0}'.format(key_object.meta['type'])
+                    'Should have PRESHSEC type, you have {0}'.format(object.meta['type'])
                 )
         except KeyError:
             raise ValueError(
@@ -765,15 +765,22 @@ def tls_prf(key_object, key_length, label=None, seed=None, hash_algorithm='sha25
             'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
         )
 
-    label_len = c_ushort(len(label))
-    seed_len = c_ushort(len(seed))
+    if label is None:
+        label_len = c_ushort(0)
+    else:
+        label_len = c_ushort(len(label))
+    if seed is None:
+        seed_len = c_ushort(0)
+    else:
+        seed_len = c_ushort(len(seed))
+
     if export:
         derived_key = (c_ubyte * key_length)()
     else:
         derived_key = None
 
-    ret = api.exp_optiga_crypt_tls_prf(_hash_map[hash_algorithm], key_object.id, label, byref(label_len),
-                                       seed, byref(seed_len), key_length, int(export), derived_key)
+    ret = api.exp_optiga_crypt_tls_prf(_hash_map[hash_algorithm], object.id, label, label_len,
+                                       seed, seed_len, key_length, int(export), derived_key)
 
     if ret == 0:
         if export:
@@ -823,8 +830,8 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
     api = optiga.Chip().api
     if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
         raise TypeError(
-            'key_object should be either {0}, or {1} types'.format(
-                type(objects.AppData), type(objects.Session), type(objects.AcquiredSession)
+            'key_object should be either {0}, {1}, or {2} types'.format(
+                objects.AppData, objects.Session, objects.AcquiredSession
             )
         )
     if isinstance(key_object, objects.AppData):
@@ -849,8 +856,15 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
             'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
         )
 
-    salt_len = c_ushort(len(salt))
-    info_len = c_ushort(len(info))
+    if salt is None:
+        salt_len = c_ushort(0)
+    else:
+        salt_len = c_ushort(len(salt))
+    if info is None:
+        info_len = c_ushort(0)
+    else:
+        info_len = c_ushort(len(info))
+
     if export:
         derived_key = (c_ubyte * key_length)()
     else:
@@ -865,10 +879,3 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
     else:
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
-
-def encrypt():
-    pass
-
-
-def decrypt():
-    pass

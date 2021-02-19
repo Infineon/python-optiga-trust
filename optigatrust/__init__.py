@@ -78,20 +78,20 @@ def _lookup_optiga(api):
         ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0fc), d, byref(c_dlen))
         if ret != 0:
             # it means that we work with OPTIGA Trust Charge
-            return m1, "OPTIGA™ Trust Charge V1 (SLS32AIA020U2/3)"
+            return m1, 'OPTIGA™ Trust Charge V1 (SLS32AIA020U2/3)'
         else:
-            return m1, "OPTIGA™ Trust M V1 (SLS32AIA010MH/S)"
+            return m1, 'OPTIGA™ Trust M V1 (SLS32AIA010MH/S)'
     # Trust M2 ID2 or M3
     if _fw_build in {0x2440}:
         ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0f1), d, byref(c_dlen))
         if ret != 0:
             # it means that we work with OPTIGA Trust M2 ID2
-            return m3, "OPTIGA™ Trust M2 ID2 (SLS32AIA010I2/3)"
+            return m3, 'OPTIGA™ Trust M2 ID2 (SLS32AIA010I2/3)'
         else:
-            return m3, "OPTIGA™ Trust M V3 (SLS32AIA010ML/K)"
+            return m3, 'OPTIGA™ Trust M V3 (SLS32AIA010ML/K)'
 
     elif _fw_build in {0x510, 0x715, 0x1048, 0x1112, 0x1118}:
-        return x, "OPTIGA™ Trust X (SLS32AIA020X2/4)"
+        return x, 'OPTIGA™ Trust X (SLS32AIA020X2/4)'
 
 
 class Chip:

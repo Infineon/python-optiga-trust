@@ -225,7 +225,7 @@ def from_json_path(path):
         - OSError - when an error is returned by the chip initialisation library
     """
     with open(path, 'r', encoding='utf8') as f:
-        supermeta = json.loads(f)
+        supermeta = json.loads(f.read())
 
     from_json(supermeta)
 
@@ -278,7 +278,7 @@ def to_otc(path):
     """
     This function exports the whole available dump of the chip in the format compatible with
     the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
-    an xml file with metadata stored. The function uses :doc:`enums/conf_template.xml` and add seqentially all objects
+    an xml file with metadata stored. The function uses optigatrust/enums/conf_template.xml and add sequentially all objects
     found on the chip. There are exceptions, objects ["f1c1", "e0c2", "e0c0", "e0c1", "e0c5", "e0c6"] are excluded and
     Objects which don't have 'used_size' metatag defined are excluded
 
@@ -289,7 +289,7 @@ def to_otc(path):
         - TypeError - when any of the parameters are of the wrong type
         - OSError - when an error is returned by the chip initialisation library
 
-    :returns: an xml string according to the template :doc:`enums/conf_template.xml`
+    :returns: an xml string according to the template optigatrust/enums/conf_template.xml
 
     .. highlight:: xml
     .. code-block:: xml
@@ -310,7 +310,7 @@ def to_otc(path):
 
     """
     meta = to_json()
-    filepath = os.path.abspath(path + '/' + 'OPTIGA_Trust.xml')
+    filepath = os.path.normpath(os.path.abspath(os.path.join(path, 'OPTIGA_Trust.xml')))
     # OTC understands only UTF-8, so the file should be encoded in it
     with open(filepath, 'w+', encoding='utf8') as f:
         supermeta = _to_xml(meta)
