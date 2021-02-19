@@ -98,7 +98,8 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
-<li class="toctree-l1"><a class="reference internal" href="copyright.html">7. Copyrights and Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
 </ul>
 
             
@@ -180,14 +181,58 @@
 <span id="api"></span><h2><span class="section-number">5.2. </span>API<a class="headerlink" href="#module-optigatrust.port" title="Permalink to this headline">¶</a></h2>
 <dl class="py function">
 <dt id="optigatrust.port.from_json">
-<code class="sig-prename descclassname">optigatrust.port.</code><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">path</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.from_json" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">optigatrust.port.</code><code class="sig-name descname">from_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.from_json" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function will take as an input your data and populate the chip with it, whatever is possible</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – JSON string with the dump of the data</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;e0f1&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s1">&#39;200fc00101d001ffd301ffe00103e10121&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp256r1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;e0c2&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;2009c4011bd001ffd10100&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span>
+        <span class="p">}</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="s2">&quot;cd16338201001c000500000a091b5c0007006200ad801010710809&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>data</strong> – JSON string with the dump of the data</p></li>
-<li><p><strong>path</strong> – path to the json file. The content should be formed like the following</p></li>
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="optigatrust.port.from_json_path">
+<code class="sig-prename descclassname">optigatrust.port.</code><code class="sig-name descname">from_json_path</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.from_json_path" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function will take as an input your data and populate the chip with it, whatever is possible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> – path to the json file. The content should be formed like the following</p>
 </dd>
 </dl>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>

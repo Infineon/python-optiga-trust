@@ -17,4 +17,4 @@ API
 
 
 .. automodule:: optigatrust.port
-   :members: to_json, from_json, to_otc
+   :members: to_json, from_json, from_json_path, to_otc

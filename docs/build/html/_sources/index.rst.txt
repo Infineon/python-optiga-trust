@@ -74,6 +74,29 @@ To run only some tests, pass a regular expression as a parameter to `tests`. ::
 
 
 
+Current test coverage:
+
+::
+
+    coverage: platform win32, python 3.8.1-final-0 ----
+    Name                             Stmts   Miss  Cover
+    ----------------------------------------------------
+    optigatrust\__init__.py           380     75    80%
+    optigatrust\_backend.py            66     12    82%
+    optigatrust\crypto.py             310     98    68%
+    optigatrust\csr.py                186     81    56%
+    optigatrust\enums\__init__.py       1      0   100%
+    optigatrust\enums\charge.py         5      1    80%
+    optigatrust\enums\m1.py            60      0   100%
+    optigatrust\enums\m2id2.py          5      1    80%
+    optigatrust\enums\m3.py            67      1    99%
+    optigatrust\enums\x.py             55      0   100%
+    optigatrust\objects.py            129     41    68%
+    optigatrust\port.py                83     33    60%
+    optigatrust\version.py              2      0   100%
+    ---------------------------------------------------
+    TOTAL                            1349    343    75%
+
 .. toctree::
    :maxdepth: 3
    :caption: Contents
