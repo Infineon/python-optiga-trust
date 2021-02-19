@@ -25,13 +25,15 @@ from ctypes import *
 import os
 import platform
 import sys
+from re import match
 
 
 _optiga_cddl = None
 
 
 __all__ = [
-    'get_handler'
+    'get_handler',
+    'set_com_port_config'
 ]
 
 
@@ -102,11 +104,27 @@ def _load_lib(interface):
     return api
 
 
+def set_com_port_config(com_port):
+    """
+    A function to update globaly defined COM port which this module uses to connect, if uart is the target interface
+
+    :param com_port: A string with 'COM39' like content
+    """
+    ini_path = os.path.normpath(os.path.abspath(os.path.join(os.path.dirname(__file__), "csrc", "lib", "optiga_comms.ini")))
+    if not match(r"COM[0-9][0-9]", com_port) and not match(r"COM[0-9]", com_port):
+        raise ValueError(
+            'opts is specified, but value parameter is given: expected COMXX, your provided {0}. '
+            'Use set_com_port(\'COM39\')'.format(com_port)
+        )
+    with open(ini_path, 'w', encoding='utf-8') as f:
+        f.write(com_port)
+
+
 def get_handler():
     global _optiga_cddl
 
     if _optiga_cddl is None:
-        supported_interfaces = {'libusb', 'uart', 'i2c'}
+        supported_interfaces = ('libusb', 'uart', 'i2c')
         initialised = False
         errors = list()
         """
@@ -127,3 +145,5 @@ def get_handler():
             for err in errors:
                 print(err)
             exit()
+
+    return _optiga_cddl

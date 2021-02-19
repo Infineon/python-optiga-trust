@@ -21,7 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-from re import match
 from collections import namedtuple
 import warnings
 from ctypes import c_int, c_ushort, c_ubyte, POINTER, byref, memmove
@@ -51,18 +50,7 @@ _optiga_cddl = None
 
 
 def set_com_port(com_port):
-    """
-    A function to update globaly defined COM port which this module uses to connect, if uart is the target interface
-
-    :param com_port: A string with 'COM39' like content
-    """
-    if not match(r"COM[0-9][0-9]", com_port) and not match(r"COM[0-9]", com_port):
-        raise ValueError(
-            'opts is specified, but value parameter is given: expected COMXX, your provided {0}. '
-            'Use set_com_port(\'COM39\')'.format(com_port)
-        )
-    with open('optiga_comms.ini', 'w', encoding='utf-8') as f:
-        f.write(com_port)
+    _backend.set_com_port_config(com_port)
 
 
 def _lookup_optiga(api):
