@@ -137,13 +137,7 @@ class X509(optiga.Object):
 
     def __init__(self, cert_id: int):
         """
-        This class
-
-        :ivar cert_id: One of supported object Ids assigned for certificates
-        :vartype cert_id: int
-
-        return:
-            self
+        :param cert_id: One of supported object Ids assigned for certificates
         """
         super(X509, self).__init__(cert_id)
         self._der = self._read()
@@ -195,7 +189,7 @@ class X509(optiga.Object):
     @property
     def pkey(self):
         """
-        This property allows to get the public key assigned for certificate. In case the certificate can't be parsed an
+        This property allows to get the public key from the certificate. In case the certificate can't be parsed an
         exception will be generated
         """
         try:
@@ -211,7 +205,7 @@ class X509(optiga.Object):
     @property
     def signature(self):
         """
-        This property allows to get the signature of the certificate lcoated in the Certificate's object.
+        This property allows to get the signature of the certificate.
         In case the certificate can't be parsed an exception will be generated
         """
         try:
@@ -280,10 +274,10 @@ class X509(optiga.Object):
 
     def _read(self, to_pem=False):
         """
-        This function returns an exisiting certificate from the OPTIGA(TM) Trust device
+        This function returns an existing certificate from the OPTIGA(TM) Trust device
 
         :param to_pem:
-            A boolean flag to indecate, whether you want return certificate PEM encoded
+            A boolean flag to indicate, whether you want return certificate PEM encoded
 
         :raises:
             - ValueError - when any of the parameters contain an invalid value

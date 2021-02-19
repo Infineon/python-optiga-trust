@@ -21,16 +21,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE
 # ============================================================================
-import os
-import platform
-import sys
 from re import match
-from ctypes import *
 from collections import namedtuple
 import warnings
+from ctypes import c_int, c_ushort, c_ubyte, POINTER, byref, memmove
 
 from optigatrust.enums import x, m1, m3, m2id2, charge
 from .version import __version__, __version_info__
+from . import _backend
 
 
 __all__ = [
@@ -48,90 +46,23 @@ __all__ = [
 ]
 
 
-def _get_arch_os():
-    platforms = {
-        'linux': 'linux',
-        'linux1': 'linux',
-        'linux2': 'linux',
-        'darwin': 'osx',
-        'cygwin': 'win',
-        'msys': 'win',
-        'win32': 'win',
-    }
-
-    targets = {
-        '32bit': 'i686',
-        '64bit': 'amd64'
-    }
-
-    if sys.platform not in platforms:
-        return sys.platform
-
-    _, _, _, _, arch, _ = platform.uname()
-
-    if platforms[sys.platform] == 'win':
-        arch = targets[platform.architecture()[0]]
-
-    return arch, platforms[sys.platform]
-
-
-def _get_lib_name(interface='libusb'):
-    arch, _os = _get_arch_os()
-
-    if _os == 'win':
-        extension = 'dll'
-    elif _os == 'linux':
-        extension = 'so'
-    else:
-        raise OSError(
-            'You OS is not supported.Exit.'
-        )
-
-    return 'liboptigatrust-{interface}-{os}-{arch}.{ext}'.format(interface=interface, os=_os, arch=arch, ext=extension)
-
-
-def _load_lib(interface):
-    global _com_port
-    libname = _get_lib_name(interface)
-
-    old_path = os.getcwd()
-
-    curr_path = os.path.join(os.path.dirname(__file__), "csrc", "lib")
-
-    os.chdir(curr_path)
-
-    if interface == 'uart':
-        if not match(r"COM[0-9][0-9]", _com_port) and not match(r"COM[0-9]", _com_port):
-            raise ValueError(
-                'opts is specified, but value parameter is given: expected COMXX, your provided {0}. '
-                'Use set_com_port(\'COM39\')'.format(_com_port)
-            )
-        with open('optiga_comms.ini', 'w', encoding='utf-8') as f:
-            f.write(_com_port)
-
-    if os.path.exists(os.path.join(curr_path, libname)):
-        api = cdll.LoadLibrary(os.path.join(curr_path, libname))
-    else:
-        os.chdir(old_path)
-        raise OSError('Unable to find library in {}. Look for {}'.format(curr_path, libname))
-    api.exp_optiga_init.restype = c_int
-    ret = api.exp_optiga_init()
-    if ret != 0:
-        os.chdir(old_path)
-        raise OSError('Failed to initialise the chip. Exit.')
-
-    os.chdir(old_path)
-    return api
-
-
 UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
 _optiga_cddl = None
-_com_port = 'COM39'
 
 
 def set_com_port(com_port):
-    global _com_port
-    _com_port = com_port
+    """
+    A function to update globaly defined COM port which this module uses to connect, if uart is the target interface
+
+    :param com_port: A string with 'COM39' like content
+    """
+    if not match(r"COM[0-9][0-9]", com_port) and not match(r"COM[0-9]", com_port):
+        raise ValueError(
+            'opts is specified, but value parameter is given: expected COMXX, your provided {0}. '
+            'Use set_com_port(\'COM39\')'.format(com_port)
+        )
+    with open('optiga_comms.ini', 'w', encoding='utf-8') as f:
+        f.write(com_port)
 
 
 def _lookup_optiga(api):
@@ -178,13 +109,6 @@ def _lookup_optiga(api):
 class Chip:
     """
     A class used to represent the whole OPTIGA Trust Chip
-
-    :ivar api: A ctypes descriptor pointing to the right shared library used for the communication
-    :vartype api: ctypes.CDDL
-
-    :ivar name: We can't know for sure the right name of the chip, but we can have a good guess based on the firmware id
-    :vartype name: str
-
     """
     def __init__(self):
         """
@@ -202,31 +126,11 @@ class Chip:
         return:
             self
         """
-        global _optiga_cddl
 
-        if not _optiga_cddl:
-            supported_interfaces = {'libusb', 'uart', 'i2c'}
-            initialised = False
-            e = None
-            """
-            Here we try to probe which interface is actually in use, might be either libusb or i2c
-            We suppress stderr output of the libusb interface in case it's npot connected to not confuse
-            a user
-            """
-            for interface in supported_interfaces:
-                try:
-                    _optiga_cddl = _load_lib(interface)
-                    print('Loaded: {0}'.format(_get_lib_name(interface)))
-                    initialised = True
-                except OSError as e:
-                    pass
+        optiga_cddl = _backend.get_handler()
 
-            if not initialised:
-                print('Failed to connect to the chip. Exit.')
-                exit()
-
-        self.api = _optiga_cddl
-        consts, name = _lookup_optiga(_optiga_cddl)
+        self.api = optiga_cddl
+        consts, name = _lookup_optiga(optiga_cddl)
         self._name = name
         self.object_id = consts.ObjectId
         self.object_id_values = set(item.value for item in self.object_id)
@@ -244,14 +148,14 @@ class Chip:
     @property
     def name(self):
         """
-        This property returns a suggested name
+        This property returns a string with the chip name
         """
         return self._name
 
     @property
     def current_limit(self):
         """
-        This property allows to get or set the current limitation of the chip. Allowed range from 6 to 15 mA
+        This property allows to get or set the current limitation of the chip. Allowed range is from 6 to 15 (mA)
         """
         return int.from_bytes(Object(0xe0c4).read(), "big")
 
@@ -266,7 +170,7 @@ class Chip:
     @property
     def sleep_activation_delay(self):
         """
-        This property allows to get or set the sleep activation delay for your chip
+        This property allows to get or set the sleep activation delay for your chip. Should be from 1 to 255.
         (time the chip should wait after all operations are finished before going to sleep)
         """
         return int.from_bytes(Object(0xe0c3).read(), "big")
@@ -305,7 +209,7 @@ class Chip:
     def global_lifecycle_state(self):
         """
         This property allows to get or set the global lifecycle state for your chip.
-        Should be one of core.lifecycle_states
+        Should be one of :data:`optigatrust.lifecycle_states`
         """
         return lifecycle_states[int.from_bytes(Object(0xe0c0).read(), 'big')]
 
@@ -353,7 +257,7 @@ class Chip:
 
         :param t_max:
             Chip allows to perform one protected operation per t_max.
-            If more perfomed, internal SECcredit and afterwards SECcounter are increased until saturation. In the end
+            If more performed, internal SECcredit and afterwards SECcounter are increased until saturation. In the end
             the chip starts inducing delays of t_max between crypto operations
             t_max = 0 disables Security Monitor
 
@@ -361,7 +265,7 @@ class Chip:
             The maximum SECcredit that can be achieved
 
         :param delayed_sec_sync:
-            If there are multiple security events with in tmax due to use case demand,
+            If there are multiple security events with in t_max due to use case demand,
             the number of NVM write operations can be avoided by configuring this count appropriately
 
         """
@@ -951,24 +855,21 @@ class Object:
     """
     A class used to represent an Object on the OPTIGA Trust Chip
 
-    :ivar id: the id of the object; e.g. 0xe0e0
-    :vartype id: int
+    :param id: the id of the object; e.g. 0xe0e0
+    :type id: int
 
-    :ivar updated: This boolean variable notifies whether metadata or data has been updated and this can bu used to
+    :param updated: This boolean variable notifies whether metadata or data has been updated and this can bu used to
                    notify other modules to reread data if needed
-    :vartype updated: bool
+    :type updated: bool
     """
 
     def __init__(self, object_id):
         """
         This class
 
-        :ivar id:
+        :param object_id:
             an Object ID which you would like to initialise; e.g. 0xe0e0
-        :vartype id: int
-
-        return:
-            self
+        :type object_id: int
         """
         self.id = object_id
         self._optiga = Chip()
@@ -978,7 +879,19 @@ class Object:
     @property
     def meta(self):
         """ A dictionary of the metadata present right now on the chip for the given object. It is writable,
-        so user can update the metadata assigning the value to it
+        so user can update the metadata assigning the value to it. Example return ::
+
+            {
+                "lcso": "creation",
+                "change": [
+                    "lcso",
+                    "<",
+                    "operational"
+                ],
+                "execute": "always",
+                "algorithm": "secp384r1",
+                "key_usage": "0x21"
+            }
         """
         _array_meta = self.read_raw_meta()
         return _parse_raw_meta(_array_meta)
@@ -990,7 +903,7 @@ class Object:
 
     @property
     def used_size(self):
-        """ Every object on the chip which can store data should have used_size property
+        """ Every object on the chip which can store data should have used_size property. Cannot be updated.
         """
         if 'used_size' in self.meta:
             return self.meta['used_size']
@@ -1000,7 +913,7 @@ class Object:
 
     @property
     def max_size(self):
-        """ Every object on the chip which can store data should have max_size property
+        """ Every object on the chip which can store data should have max_size property. Cannot be updated.
         """
         if 'max_size' in self.meta:
             return self.meta['max_size']
@@ -1012,13 +925,12 @@ class Object:
         """
         This function helps to read the data stored on the chip
 
-        :ivar offset:
+        :param offset:
             An optional parameter defining whether you want to read the data with offset
-        :vartype offset: int
+        :type offset: int
 
-        :ivar force:
-            This is a parameter which can be used to try to read the data even if id can't be somehow finden
-        :vartype force: bool
+        :param force:
+            This is a :class:`bool` parameter which can be used to try to read the data even if id can't be found
 
         :raises:
             - ValueError - when any of the parameters contain an invalid value
@@ -1026,7 +938,7 @@ class Object:
             - OSError - when an error is returned by the chip initialisation library
 
         :return:
-            bytearray with the data
+            byte string
         """
         api = self._optiga.api
 
@@ -1060,13 +972,12 @@ class Object:
         """
         This function helps to write the data onto the chip
 
-        :ivar data:
-            Data to write
-        :vartype data: bytes or bytearray
+        :param data:
+            byte string to write
 
-        :ivar offset:
+        :param offset:
             An optional parameter defining whether you want to read the data with offset
-        :vartype offset: int
+        :type offset: int
 
         :raises
             - ValueError - when any of the parameters contain an invalid value
@@ -1111,7 +1022,7 @@ class Object:
             - OSError - when an error is returned by the chip initialisation library
 
         :returns:
-            bytearray with the data
+            byte string
         """
         api = self._optiga.api
 
@@ -1144,9 +1055,8 @@ class Object:
         """
         This function helps to write the metadata associated with the data object stored on the chip
 
-        :ivar data:
-            Data to write
-        :vartype data: bytes or bytearray
+        :param data:
+            byte string to write
 
         :raises
             - ValueError - when any of the parameters contain an invalid value
