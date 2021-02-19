@@ -9,6 +9,13 @@ def test_chip_control_set_current_limit():
     optiga = ot.Chip()
     optiga.current_limit = 6
     optiga.current_limit = 15
+    print(optiga.security_event_counter)
+    print(optiga.uid)
+    print(optiga.name)
+    print(optiga.global_lifecycle_state)
+    print(optiga.sleep_activation_delay)
+    print(optiga.security_monitor)
+    print(optiga.security_status)
 
 
 def test_chip_control_set_wrong_current_limit():

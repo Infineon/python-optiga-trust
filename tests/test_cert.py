@@ -3,9 +3,7 @@ import os
 import optigatrust.objects as optiga_objects
 import asn1crypto.x509 as asn1_x509
 import asn1crypto.pem as asn1_pem
-import logging
 
-LOGGER = logging.getLogger(__name__)
 pytest.test_dir = os.path.dirname(__file__)
 
 

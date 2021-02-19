@@ -1,30 +1,23 @@
-import pytest
-import optigatrust as ot
-import logging
-
-LOGGER = logging.getLogger(__name__)
+from optigatrust import port
+import json
 
 
-def test_chip_control_set_current_limit():
-    optiga = ot.Chip()
-    optiga.current_limit = 6
-    optiga.current_limit = 15
-    optiga.security_event_counter()
-    optiga.uid()
-    optiga.name()
-    optiga.global_lifecycle_state()
-    optiga.sleep_activation_delay()
-    optiga.security_monitor()
-    optiga.security_status()
+def test_port_to_json():
+    dump = port.to_json()
+    json.dumps(dump, indent=4)
 
 
-def test_chip_control_set_wrong_current_limit():
-    optiga = ot.Chip()
+def test_port_from_json():
+    dump = port.to_json()
+    port.from_json(dump)
 
-    with pytest.raises(ValueError):
-        optiga.current_limit = 0
 
-    with pytest.raises(ValueError):
-        optiga.current_limit = 20
+def test_port_from_json_path():
+    dump = port.to_json()
+    port.from_json(dump)
 
+    with open('.test.json', 'w+', encoding='utf-8') as f:
+        f.write(json.dumps(dump, indent=4))
+
+    port.from_json_path('.test.json')
 
