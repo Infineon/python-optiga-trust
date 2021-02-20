@@ -11,10 +11,11 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
-import re
 import sys
-sys.path.insert(0, os.path.abspath('../optigatrust'))
+
 autodoc_mock_imports = ["cryptography"]
+sys.path.insert(0, os.path.abspath('..'))
+import optigatrust
 
 
 # -- Project information -----------------------------------------------------
@@ -24,7 +25,8 @@ author = 'Infineon Technologies AG'
 copyright = '2021, Infineon Technologies AG'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.1'
+release = optigatrust.__version__
+version = optigatrust.__version__
 
 
 # -- General configuration ---------------------------------------------------
