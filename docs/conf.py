@@ -14,7 +14,7 @@ import os
 import re
 import sys
 sys.path.insert(0, os.path.abspath('../optigatrust'))
-autodoc_mock_imports = ["cryptography", "asn1crypto", "oscrypto", "jinja2"]
+autodoc_mock_imports = ["cryptography", "asn1crypto", "oscrypto", "jinja2", "optigatrust"]
 
 
 # -- Project information -----------------------------------------------------
