@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to infineon/python-optiga-trust &mdash; python-optiga-trust 1.0.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="1. OPTIGA™ Trust management" href="chip.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home" alt="Documentation Home"> python-optiga-trust
+          
+
+          
+            
+            <img src="_static/infineon_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">3. Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">python-optiga-trust</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Welcome to <code class="docutils literal notranslate"><span class="pre">infineon/python-optiga-trust</span></code></li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-infineon-python-optiga-trust">
+<h1>Welcome to <code class="docutils literal notranslate"><span class="pre">infineon/python-optiga-trust</span></code><a class="headerlink" href="#welcome-to-infineon-python-optiga-trust" title="Permalink to this headline">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">optigatrust</span></code> python module is a ctypes based wrapper to work with the OPTIGA™ Trust security solutions.</p>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>Python 3.7+</p></li>
+<li><p>CSR and X509 Handling - <a class="reference external" href="https://github.com/wbond/asn1crypto">asn1crypto</a></p></li>
+<li><p>For tests - <a class="reference external" href="https://github.com/wbond/oscrypto">oscrypto</a>, <a class="reference external" href="https://github.com/pyca/cryptography">cryptography</a></p></li>
+<li><p>XML handling in export module <a class="reference external" href="https://jinja.palletsprojects.com/en/2.11.x/">jinja2</a></p></li>
+<li><p>Keys wrap/unwrap operations <a class="reference external" href="https://github.com/pyca/cryptography">cryptography</a></p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="how-does-it-work">
+<h2>How does it work<a class="headerlink" href="#how-does-it-work" title="Permalink to this headline">¶</a></h2>
+<p>This python module comes with a set of shared libraries, which are precompiled for different communication interfaces.
+The shared libraries are fully based on the <a class="reference external" href="https://github.com/Infineon/optiga-trust-m/">official framework</a>. This module doesn’t simply implement bindings for the library, but add many more things on top. See Documentation.
+In the end the module supports the following combinations</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 32%" />
+<col style="width: 26%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Interface/OS</p></td>
+<td><p><strong>Windows</strong></p></td>
+<td><p><strong>Linux</strong></p></td>
+</tr>
+<tr class="row-even"><td><p><strong>EvalKit</strong></p></td>
+<td><p>Yes</p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>PersoBoard</strong></p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>Raw I2C</strong></p></td>
+<td><p>No</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="required-hardware">
+<h2>Required Hardware<a class="headerlink" href="#required-hardware" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>Any of the following</dt><dd><ul>
+<li><p>OPTIGA™ Trust M1/M3/Charge EvalKit. See <a class="reference internal" href="prov_mode.html"><span class="doc">Provisioning mode</span></a> for details.</p></li>
+<li><p>OPTIGA™ Trust Personalisation Board, or any FTDI USB-HID/I2C Converter board</p></li>
+<li><p>Raspberry Pi + Shield2Go RPi <a class="reference external" href="https://www.infineon.com/cms/en/product/evaluation-boards/s2go-adapter-rasp-pi-iot/">Adapter</a></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>OPTIGA™ Trust X/M/Charge sample or a Security Shield2Go</p></li>
+</ul>
+</div></blockquote>
+<p>Note: If you use any of the embedded Linux as a Host, please don’t forget to enable i2c support in your kernel (RPi3: via <cite>raspi-config</cite> command), as well as add your user to the gpio group (RPi3: via <cite>sudo adduser pi gpio</cite>)
+<a class="reference external" href="https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_x_rpi3_setup.jpg">RaspberryPi3 Connection Example</a>.</p>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip install optigatrust
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>Tests are written using <cite>pytest</cite> and <cite>oscrypto</cite> and require these packages to be installed:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pip3 install pytest oscrypto
+$ git clone --recurse-submodules https://github.com/Infineon/python-optiga-trust
+...
+$ cd python-optiga-trust
+$ cd tests
+$ pytest
+</pre></div>
+</div>
+<p>To run only some tests, pass a regular expression as a parameter to <cite>tests</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ pytest test_rand.py
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#objects">2.1. Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#x509-object">2.1.1. X509 object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#ecc-key-object">2.1.2. ECC Key object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#rsa-key-object">2.1.3. RSA Key object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#aes-key-object">2.1.4. AES Key object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#session-object">2.1.5. Session object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#acquiredsession-object">2.1.6. AcquiredSession object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#appdata-object">2.1.7. AppData object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#metadata">2.2. Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#options">2.2.1. Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#metadata-tags">2.2.2. Metadata Tags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#access-conditions">2.2.3. Access Conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#printing-all-metadata-in-human-readable-form">2.2.4. Printing All metadata in human readable form</a></li>
+<li class="toctree-l3"><a class="reference internal" href="metadata.html#updating-metadata-of-the-certificate-object">2.2.5. Updating Metadata of the Certificate Object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="metadata.html#api">2.3. API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">3. Cryptography</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#generate-random">3.1. Generate random</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#generate-a-keypair-ecc-rsa">3.2. Generate a keypair (ECC, RSA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#ecdsa-sign">3.3. ECDSA Sign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#pkcs1-v1-5-sign">3.4. PKCS1 v1.5 Sign</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#hmac">3.5. HMAC</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#key-dereviation-hkdf-tls-prf">3.6. Key Dereviation (HKDF, TLS PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#en-decryption-rsa-aes">3.7. En-/Decryption (RSA, AES)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="crypto.html#module-optigatrust.crypto">3.8. API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="csr.html#example">4.1. Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="csr.html#module-optigatrust.csr">4.2. API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="port.html#example">5.1. Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="port.html#module-optigatrust.port">5.2. API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="prov_mode.html#optiga-trust-m-evaluation-kit">7.1. OPTIGA™ Trust M Evaluation Kit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prov_mode.html#optiga-trust-charge-evaluation-kit">7.2. OPTIGA™ Trust Charge Evaluation Kit</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="copyright.html#oscrypto-ans-asn1crypto-python-module">8.1. oscrypto ans asn1crypto Python module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="copyright.html#jinja2-python-module">8.2. jinja2 python module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="copyright.html#cryprography-python-module">8.3. cryprography python module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="copyright.html#license-psf">8.3.1. LICENSE.PSF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="copyright.html#license-apache">8.3.2. LICENSE.APACHE</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="copyright.html#mbedtls-library-shared-library-as-part-of-the-optiga-stack">8.4. mbedtls library (shared library as part of the OPTIGA Stack)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="chip.html" class="btn btn-neutral float-right" title="1. OPTIGA™ Trust management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        
+        &copy; <a href="copyright.html">Copyright</a> 2021, Infineon Technologies AG
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

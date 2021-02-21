@@ -1,0 +1,309 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>6. Porting to non-Raspberry Linux &mdash; python-optiga-trust 1.0.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="copyright" title="Copyright" href="copyright.html" />
+    <link rel="next" title="7. Enable the provisioning mode on your Evaluation Kit" href="prov_mode.html" />
+    <link rel="prev" title="5. Export or Import Chip (Meta)Data" href="port.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> python-optiga-trust
+          
+
+          
+            
+            <img src="_static/infineon_logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0.2
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">3. Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">6. Porting to non-Raspberry Linux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">python-optiga-trust</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li><span class="section-number">6. </span>Porting to non-Raspberry Linux</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/linux_support.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="porting-to-non-raspberry-linux">
+<h1><span class="section-number">6. </span>Porting to non-Raspberry Linux<a class="headerlink" href="#porting-to-non-raspberry-linux" title="Permalink to this headline">¶</a></h1>
+<p>The SDK uses a shared library to connect to the chip over the i2c device.
+The SDk is  comes with a shared library compiled for Raspberry Pi3 (armv7l) which uses in the end /dev/i2c-1 device to access the Security Chip.</p>
+<p>If the default library doesn’t work for your setup or architecture, you might need to build the shared library for your platform.</p>
+<p>For this you need to have <cite>cmake</cite> and <cite>build-essential</cite> packages installed in your system.
+Additionally, if you have OPTIGA connected to other than /dev/i2c-1 device, you might need to change this value <a class="reference external" href="https://github.com/Infineon/python-optiga-trust/blob/af928b9aa19b7c0174d1230628c52c781073beee/optigatrust/csrc/optiga-trust-m/pal/linux/pal_i2c.c#L53">here</a> before you continue with other steps</p>
+<p>Then you can do the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>pi@pi:/home/pi/git$ git clone https://github.com/Infineon/python-optiga-trust
+pi@pi:/home/pi/git$ cd python-optiga-trust/optigatrust/csrc
+pi@pi:/home/pi/git/python-optiga-trust/optigatrust/csrc$ mkdir build &amp;&amp; cd build
+pi@pi:/home/pi/git/python-optiga-trust/optigatrust/csrc/build$ cmake ..
+pi@pi:/home/pi/git/python-optiga-trust/optigatrust/csrc/build$ make
+Scanning dependencies of target optigatrust-libusb-linux-armv7l
+[  1%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/crypt/optiga_crypt.c.o
+[  3%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/util/optiga_util.c.o
+[  4%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/cmd/CommandLib.c.o
+[  6%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/common/Logger.c.o
+[  8%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/common/Util.c.o
+[  9%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c.c.o
+[ 11%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_config.c.o
+[ 13%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_data_link_layer.c.o
+[ 14%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_physical_layer.c.o
+[ 16%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_transport_layer.c.o
+[ 18%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/AlertProtocol.c.o
+[ 19%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsFlightHandler.c.o
+[ 21%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsHandshakeProtocol.c.o
+[ 22%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsRecordLayer.c.o
+[ 24%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsTransportLayer.c.o
+[ 26%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsWindowing.c.o
+[ 27%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/HardwareCrypto.c.o
+[ 29%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/MessageLayer.c.o
+[ 31%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/OCP.c.o
+[ 32%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga/dtls/OCPConfig.c.o
+[ 34%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/optiga_trust_init.c.o
+[ 36%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/optiga_comms_ifx_i2c_usb.c.o
+[ 37%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_common.c.o
+[ 39%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal.c.o
+[ 40%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_gpio.c.o
+[ 42%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_i2c.c.o
+[ 44%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_ifx_usb_config.c.o
+[ 45%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_os_event.c.o
+[ 47%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_os_lock.c.o
+[ 49%] Building C object CMakeFiles/optigatrust-libusb-linux-armv7l.dir/optiga-trust-x/pal/libusb/pal_os_timer.c.o
+[ 50%] Linking C shared library ../lib/liboptigatrust-libusb-linux-armv7l.so
+[ 50%] Built target optigatrust-libusb-linux-armv7l
+Scanning dependencies of target optigatrust-i2c-linux-armv7l
+[ 52%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/crypt/optiga_crypt.c.o
+[ 54%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/util/optiga_util.c.o
+[ 55%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/cmd/CommandLib.c.o
+[ 57%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/common/Logger.c.o
+[ 59%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/common/Util.c.o
+[ 60%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c.c.o
+[ 62%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_config.c.o
+[ 63%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_data_link_layer.c.o
+[ 65%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_physical_layer.c.o
+[ 67%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/comms/ifx_i2c/ifx_i2c_transport_layer.c.o
+[ 68%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/AlertProtocol.c.o
+[ 70%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsFlightHandler.c.o
+[ 72%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsHandshakeProtocol.c.o
+[ 73%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsRecordLayer.c.o
+[ 75%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsTransportLayer.c.o
+[ 77%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/DtlsWindowing.c.o
+[ 78%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/HardwareCrypto.c.o
+[ 80%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/MessageLayer.c.o
+[ 81%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/OCP.c.o
+[ 83%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/dtls/OCPConfig.c.o
+[ 85%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga_trust_init.c.o
+[ 86%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/optiga/comms/optiga_comms.c.o
+[ 88%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/pal.c.o
+[ 90%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/pal_gpio.c.o
+[ 91%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/pal_i2c.c.o
+[ 93%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/target/rpi3/pal_ifx_i2c_config.c.o
+[ 95%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/pal_os_event.c.o
+[ 96%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/pal_os_lock.c.o
+[ 98%] Building C object CMakeFiles/optigatrust-i2c-linux-armv7l.dir/optiga-trust-x/pal/linux/pal_os_timer.c.o
+[100%] Linking C shared library ../lib/liboptigatrust-i2c-linux-armv7l.so
+[100%] Built target optigatrust-i2c-linux-armv7l
+pi@pi:/home/pi/git/python-optiga-trust/optigatrust/csrc/build$ cd ../../../
+pi@pi:/home/pi/git/python-optiga-trust$ pip install .
+</pre></div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="prov_mode.html" class="btn btn-neutral float-right" title="7. Enable the provisioning mode on your Evaluation Kit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="port.html" class="btn btn-neutral float-left" title="5. Export or Import Chip (Meta)Data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        
+        &copy; <a href="copyright.html">Copyright</a> 2021, Infineon Technologies AG
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
