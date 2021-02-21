@@ -1,4 +1,4 @@
-# optigatrust
+# optigatrust Python library
 
 A ctypes based Python wrapper to work with the OPTIGA™ Trust security solutions.
 
