@@ -12,15 +12,15 @@ Find more about these products here:
 * [OPTIGA™ Trust Charge](https://github.com/Infineon/optiga-trust-charge)
 * [OPTIGA™ Trust X](https://github.com/Infineon/optiga-trust-x)
 
-[Documentation]()
+[**Documentation**](https://infineon.github.io/python-optiga-trust)
  
 ## Required Hardware
 
 * Any of the following
-    - OPTIGA™ Trust M1/M3/Charge Evaluation Kit. See :doc:`Provisioning mode <prov_mode>` for more details.
-    - OPTIGA™ Trust Personalisation Board, or any FTDI USB-HID/I2C Converter board
-    - Raspberry Pi + Shield2Go RPi Adapter_
-* OPTIGA™ Trust X/M sample or a Security Shield2Go
+    - OPTIGA™ Trust [M](https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-m-eval-kit/)/[Charge](https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-ch-eval-kit/) Evaluation Kit
+    - OPTIGA™ Trust Personalisation Board (SP005405452), or any FTDI USB-HID/I2C Converter board
+    - Raspberry Pi + [Shield2Go RPi Adapter](https://www.infineon.com/cms/en/product/evaluation-boards/s2go-adapter-rasp-pi-iot/)
+* OPTIGA™ Trust X/M/Charge sample or a Security Shield2Go
 
 ## Installation
 
