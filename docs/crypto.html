@@ -95,13 +95,13 @@
 <li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
 <li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">3. Cryptography</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#generate-random">3.1. Generate random</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#generate-a-keypair-ecc-rsa">3.2. Generate a keypair (ECC, RSA)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ecdsa-sign">3.3. ECDSA Sign</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pkcs1-v1-5-sign">3.4. PKCS1 v1.5 Sign</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#hmac">3.5. HMAC</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#key-dereviation-hkdf-tls-prf">3.6. Key Dereviation (HKDF, TLS PRF)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#en-decryption-rsa-aes">3.7. En-/Decryption (RSA, AES)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#true-random-number-generation">3.1. True random number generation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#keypair-generation-ecc-rsa">3.2. Keypair generation (ECC, RSA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#elliptic-curve-digital-signature-algorithm-ecdsa">3.3. Elliptic Curve Digital Signature Algorithm (ECDSA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pkcs1-v1-5-signature-generation-rsa-ssa">3.4. PKCS1 v1.5 Signature generation (RSA SSA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#elliptic-curve-diffie-hellman-ecdh">3.5. Elliptic Curve Diffie-Hellman (ECDH)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hash-based-message-authentication-code-hmac">3.6. Hash-based Message Authentication Code (HMAC)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-derivation-hkdf-tls-prf">3.7. Key Derivation (HKDF, TLS PRF)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-optigatrust.crypto">3.8. API</a></li>
 </ul>
 </li>
@@ -178,18 +178,17 @@
   <div class="section" id="cryptography">
 <h1><span class="section-number">3. </span>Cryptography<a class="headerlink" href="#cryptography" title="Permalink to this headline">¶</a></h1>
 <p>Here are some examples for what you can do with this submodule</p>
-<div class="section" id="generate-random">
-<h2><span class="section-number">3.1. </span>Generate random<a class="headerlink" href="#generate-random" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="true-random-number-generation">
+<h2><span class="section-number">3.1. </span>True random number generation<a class="headerlink" href="#true-random-number-generation" title="Permalink to this headline">¶</a></h2>
+<p>Generate a true random number, accepted values from 8 to 255 bytes</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
 
-<span class="n">random_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">64</span><span class="p">,</span> <span class="mi">128</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
-<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">random_tuple</span><span class="p">:</span>
-    <span class="n">crypto</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="n">crypto</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="generate-a-keypair-ecc-rsa">
-<h2><span class="section-number">3.2. </span>Generate a keypair (ECC, RSA)<a class="headerlink" href="#generate-a-keypair-ecc-rsa" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="keypair-generation-ecc-rsa">
+<h2><span class="section-number">3.2. </span>Keypair generation (ECC, RSA)<a class="headerlink" href="#keypair-generation-ecc-rsa" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
 <span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
 
@@ -208,8 +207,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="ecdsa-sign">
-<h2><span class="section-number">3.3. </span>ECDSA Sign<a class="headerlink" href="#ecdsa-sign" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="elliptic-curve-digital-signature-algorithm-ecdsa">
+<h2><span class="section-number">3.3. </span>Elliptic Curve Digital Signature Algorithm (ECDSA)<a class="headerlink" href="#elliptic-curve-digital-signature-algorithm-ecdsa" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
 <span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
 
@@ -219,8 +218,8 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="pkcs1-v1-5-sign">
-<h2><span class="section-number">3.4. </span>PKCS1 v1.5 Sign<a class="headerlink" href="#pkcs1-v1-5-sign" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="pkcs1-v1-5-signature-generation-rsa-ssa">
+<h2><span class="section-number">3.4. </span>PKCS1 v1.5 Signature generation (RSA SSA)<a class="headerlink" href="#pkcs1-v1-5-signature-generation-rsa-ssa" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">crypto</span>
 <span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
 
@@ -230,14 +229,176 @@
 </pre></div>
 </div>
 </div>
-<div class="section" id="hmac">
-<h2><span class="section-number">3.5. </span>HMAC<a class="headerlink" href="#hmac" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="elliptic-curve-diffie-hellman-ecdh">
+<h2><span class="section-number">3.5. </span>Elliptic Curve Diffie-Hellman (ECDH)<a class="headerlink" href="#elliptic-curve-diffie-hellman-ecdh" title="Permalink to this headline">¶</a></h2>
+<p>Store the shared secret internally on the chip</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle objects</span>
+<span class="kn">import</span> <span class="nn">optigatrust.objects</span> <span class="k">as</span> <span class="nn">objects</span>
+<span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="c1"># imports from the cryptography package to create a third party private, public key pairs</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="kn">import</span> <span class="n">ec</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.backends</span> <span class="kn">import</span> <span class="n">default_backend</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="kn">import</span> <span class="n">serialization</span>
+
+<span class="c1"># Generate a new keypair</span>
+<span class="c1"># ignore the public part, as we need only the private key generated in the slot</span>
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">ECCKey</span><span class="p">(</span><span class="mh">0xe0f1</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="s1">&#39;secp256r1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Generate a new keypair in soft, export the peer part</span>
+<span class="n">private_key</span> <span class="o">=</span> <span class="n">ec</span><span class="o">.</span><span class="n">generate_private_key</span><span class="p">(</span><span class="n">ec</span><span class="o">.</span><span class="n">SECP256R1</span><span class="p">(),</span> <span class="n">default_backend</span><span class="p">())</span>
+<span class="n">peer_public_key</span> <span class="o">=</span> <span class="n">private_key</span><span class="o">.</span><span class="n">public_key</span><span class="p">()</span><span class="o">.</span><span class="n">public_bytes</span><span class="p">(</span>
+    <span class="n">encoding</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">Encoding</span><span class="o">.</span><span class="n">DER</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">PublicFormat</span><span class="o">.</span><span class="n">SubjectPublicKeyInfo</span>
+<span class="p">)</span>
+
+<span class="c1"># Derive a shared secret using our internally store private key, and external public</span>
+<span class="c1"># Don&#39;t export the shared secret, but store internally</span>
+<span class="n">session_object</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">ecdh</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">peer_public_key</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="key-dereviation-hkdf-tls-prf">
-<h2><span class="section-number">3.6. </span>Key Dereviation (HKDF, TLS PRF)<a class="headerlink" href="#key-dereviation-hkdf-tls-prf" title="Permalink to this headline">¶</a></h2>
+<p>Use a different curve - ‘brainpool256r1’</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle objects</span>
+<span class="kn">import</span> <span class="nn">optigatrust.objects</span> <span class="k">as</span> <span class="nn">objects</span>
+<span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="c1"># imports from the cryptography package to create a third party private, public key pairs</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives.asymmetric</span> <span class="kn">import</span> <span class="n">ec</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.backends</span> <span class="kn">import</span> <span class="n">default_backend</span>
+<span class="kn">from</span> <span class="nn">cryptography.hazmat.primitives</span> <span class="kn">import</span> <span class="n">serialization</span>
+
+<span class="c1"># Generate a new keypair</span>
+<span class="c1"># ignore the public part, as we need only the private key generated in the slot</span>
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">ECCKey</span><span class="p">(</span><span class="mh">0xe0f1</span><span class="p">)</span>
+<span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="s1">&#39;brainpoolp256r1&#39;</span><span class="p">)</span>
+
+<span class="c1"># Generate a new keypair in soft, export the peer part</span>
+<span class="n">private_key</span> <span class="o">=</span> <span class="n">ec</span><span class="o">.</span><span class="n">generate_private_key</span><span class="p">(</span><span class="n">ec</span><span class="o">.</span><span class="n">BrainpoolP256R1</span><span class="p">(),</span> <span class="n">default_backend</span><span class="p">())</span>
+<span class="n">peer_public_key</span> <span class="o">=</span> <span class="n">private_key</span><span class="o">.</span><span class="n">public_key</span><span class="p">()</span><span class="o">.</span><span class="n">public_bytes</span><span class="p">(</span>
+    <span class="n">encoding</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">Encoding</span><span class="o">.</span><span class="n">DER</span><span class="p">,</span>
+    <span class="nb">format</span><span class="o">=</span><span class="n">serialization</span><span class="o">.</span><span class="n">PublicFormat</span><span class="o">.</span><span class="n">SubjectPublicKeyInfo</span>
+<span class="p">)</span>
+
+<span class="c1"># Derive a shared secret using our internally store private key, and external public</span>
+<span class="c1"># Don&#39;t export the shared secret, but store internally</span>
+<span class="n">session_object</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">ecdh</span><span class="p">(</span><span class="n">key_object</span><span class="p">,</span> <span class="n">peer_public_key</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="en-decryption-rsa-aes">
-<h2><span class="section-number">3.7. </span>En-/Decryption (RSA, AES)<a class="headerlink" href="#en-decryption-rsa-aes" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="hash-based-message-authentication-code-hmac">
+<h2><span class="section-number">3.6. </span>Hash-based Message Authentication Code (HMAC)<a class="headerlink" href="#hash-based-message-authentication-code-hmac" title="Permalink to this headline">¶</a></h2>
+<p>Using an ECDH to generate the shared secret, and use this secret for HMAC</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="c1"># ... repeat steps to generate a proper shared secret on the chip from the above example</span>
+<span class="n">session_object</span> <span class="o">=</span> <span class="n">ecdh</span><span class="p">(</span><span class="s1">&#39;with_secp256r1_curve&#39;</span><span class="p">)</span>
+
+<span class="c1"># Generate hash-based MAC</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;Hello world!&#39;</span>
+<span class="n">mac</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">hmac</span><span class="p">(</span><span class="n">session_object</span><span class="p">,</span> <span class="nb">str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="s1">&#39;sha256&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or with a different curve</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="c1"># ... repeat steps to generate a proper shared secret on the chip from the above example</span>
+<span class="n">session_object</span> <span class="o">=</span> <span class="n">ecdh</span><span class="p">(</span><span class="s1">&#39;with_brainpoolp512r1_curve&#39;</span><span class="p">)</span>
+
+<span class="c1"># Generate hash-based MAC</span>
+<span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;Hello world!&#39;</span>
+<span class="n">mac</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">hmac</span><span class="p">(</span><span class="n">session_object</span><span class="p">,</span> <span class="nb">str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="s1">&#39;sha512&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use an externally provided secret</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle objects</span>
+<span class="kn">import</span> <span class="nn">optigatrust.objects</span> <span class="k">as</span> <span class="nn">objects</span>
+<span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="n">secret</span> <span class="o">=</span> <span class="s1">&#39;BFB770EEBF8F61C704E00D828B7A3641D5CD7A3846DEF90F214240250AAF9C2E&#39;</span>
+
+<span class="c1"># Initialise the object and write secret data to it.</span>
+<span class="n">app_data</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">AppData</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
+<span class="n">app_data</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">()</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+
+<span class="c1"># AppData Object should have a shared secret type to be used for hmac</span>
+<span class="n">app_data</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;pre_sh_secret&#39;</span><span class="p">,</span> <span class="s1">&#39;execute&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span><span class="p">}</span>
+
+<span class="n">mac</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">hmac</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="nb">str</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="s1">&#39;sha256&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="key-derivation-hkdf-tls-prf">
+<h2><span class="section-number">3.7. </span>Key Derivation (HKDF, TLS PRF)<a class="headerlink" href="#key-derivation-hkdf-tls-prf" title="Permalink to this headline">¶</a></h2>
+<p>TLS PRF</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="c1"># random seed for the kdf function</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="s1">&#39;61C7DEF90FD5CD7A8B7A364104E00D823846BFB770EEBF8F40252E0A2142AF9C&#39;</span>
+
+<span class="c1"># ... repeat steps to generate a proper shared secret on the chip from the above example</span>
+<span class="n">session_object</span> <span class="o">=</span> <span class="n">ecdh</span><span class="p">(</span><span class="s1">&#39;with_secp256r1_curve&#39;</span><span class="p">)</span>
+
+<span class="c1"># derive a key and export it</span>
+<span class="n">derived_key</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">tls_prf</span><span class="p">(</span><span class="n">session_object</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="nb">bytes</span><span class="p">()</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use an externally provided secret</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle objects</span>
+<span class="kn">import</span> <span class="nn">optigatrust.objects</span> <span class="k">as</span> <span class="nn">objects</span>
+<span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="n">secret</span> <span class="o">=</span> <span class="s1">&#39;BFB770EEBF8F61C704E00D828B7A3641D5CD7A3846DEF90F214240250AAF9C2E&#39;</span>
+
+<span class="c1"># Initialise the object and write secret data to it.</span>
+<span class="n">app_data</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">AppData</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
+<span class="n">app_data</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">()</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+
+<span class="c1"># AppData Object should have a shared secret type to be used for an kdf</span>
+<span class="n">app_data</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;pre_sh_secret&#39;</span><span class="p">,</span> <span class="s1">&#39;execute&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span><span class="p">}</span>
+
+<span class="n">derived_key</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">tls_prf</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Firmware update&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="nb">bytes</span><span class="p">()</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">seed</span><span class="p">),</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="n">hash_alg</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>HKDF</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="c1"># random seed for the kdf function</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="s1">&#39;61C7DEF90FD5CD7A8B7A364104E00D823846BFB770EEBF8F40252E0A2142AF9C&#39;</span>
+
+<span class="c1"># ... repeat steps to generate a proper shared secret on the chip from the above example</span>
+<span class="n">session_object</span> <span class="o">=</span> <span class="n">ecdh</span><span class="p">(</span><span class="s1">&#39;with_secp512r1_curve&#39;</span><span class="p">)</span>
+
+<span class="c1"># derive a key and export it</span>
+<span class="n">derived_key</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">hkdf</span><span class="p">(</span><span class="n">session_object</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="s1">&#39;sha512&#39;</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Use an externally provided secret</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># methods to handle objects</span>
+<span class="kn">import</span> <span class="nn">optigatrust.objects</span> <span class="k">as</span> <span class="nn">objects</span>
+<span class="c1"># methods to handle crypto functions on the optiga</span>
+<span class="kn">import</span> <span class="nn">optigatrust.crypto</span> <span class="k">as</span> <span class="nn">optiga_ec</span>
+
+<span class="n">secret</span> <span class="o">=</span> <span class="s1">&#39;BFB770EEBF8F61C704E00D828B7A3641D5CD7A3846DEF90F214240250AAF9C2E&#39;</span>
+
+<span class="c1"># Initialise the object and write secret data to it.</span>
+<span class="n">app_data</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">AppData</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
+<span class="n">app_data</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">()</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
+
+<span class="c1"># AppData Object should have a shared secret type to be used for an kdf</span>
+<span class="n">app_data</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;pre_sh_secret&#39;</span><span class="p">,</span> <span class="s1">&#39;execute&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span><span class="p">}</span>
+
+<span class="n">derived_key</span> <span class="o">=</span> <span class="n">optiga_ec</span><span class="o">.</span><span class="n">hkdf</span><span class="p">(</span><span class="n">app_data</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="n">hash_algorithm</span><span class="o">=</span><span class="s1">&#39;sha256&#39;</span><span class="p">,</span> <span class="n">export</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="module-optigatrust.crypto">
 <span id="api"></span><h2><span class="section-number">3.8. </span>API<a class="headerlink" href="#module-optigatrust.crypto" title="Permalink to this headline">¶</a></h2>
@@ -282,7 +443,8 @@ of the key from which this method will be called represents the private key on t
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>in case <cite>export</cite> set to True returns a shared secret</p>
+<dd class="field-odd"><p>in case <cite>export</cite> set to True returns a shared secret,
+otherwise returns <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession()</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -361,8 +523,7 @@ Example (EC)</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key_object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
 Can be one of the following classes
-<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.Session" title="optigatrust.objects.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>,
-or <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
+<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
 <li><p><strong>key_length</strong> – Size of the requested key.
 Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
 session reference; maximum length = 256 byte in case of returned secret</p></li>
@@ -381,7 +542,7 @@ session reference; maximum length = 256 byte in case of returned secret</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>byte string with the key if requested, otherwise None</p>
+<dd class="field-odd"><p>byte string with the key if requested, otherwise <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -479,8 +640,7 @@ Should be of type <a class="reference internal" href="metadata.html#optigatrust.
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>object</strong> – Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
 Can be one of the following classes
-<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.Session" title="optigatrust.objects.Session"><code class="xref py py-class docutils literal notranslate"><span class="pre">Session</span></code></a>,
-or <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
+<a class="reference internal" href="metadata.html#optigatrust.objects.AppData" title="optigatrust.objects.AppData"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppData</span></code></a>, <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p></li>
 <li><p><strong>key_length</strong> – Size of the requested key.
 Minimum Length = 16 byte; maximum length = 66 bytes (in case of OPTIGA™ Trust M V1, = 48 bytes) in case of
 session reference; maximum length = 256 byte in case of returned secret</p></li>
@@ -499,7 +659,7 @@ session reference; maximum length = 256 byte in case of returned secret</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>byte string with the key if requested, otherwise None</p>
+<dd class="field-odd"><p>byte string with the key if requested, otherwise <a class="reference internal" href="metadata.html#optigatrust.objects.AcquiredSession" title="optigatrust.objects.AcquiredSession"><code class="xref py py-class docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>

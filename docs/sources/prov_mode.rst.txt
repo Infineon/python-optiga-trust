@@ -5,7 +5,7 @@ OPTIGA™ Trust M Evaluation Kit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Make sure you have connected your Evaluation Kit as depicted below (USB Port **X1002**)
 
-.. image:: https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_m_evalkit_debug_mode.jpg
+.. image:: https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_m_evalkit_debug_mode.jpg
 
 - Make usre you have Segger J-Link tool v6.00 installed. J-Link tool `Download for Windows, Linux, Mac`_
 - Click on **Device** to select a target device: Select Infineon as Manufacturer
@@ -15,7 +15,7 @@ OPTIGA™ Trust M Evaluation Kit
 - Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port **X100**)
 
 
-.. image:: https://github.com/Infineon/Assets/blob/master/Pictures/optiga_trust_m_evalkit_provisioning_mode.jpg
+.. image:: https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_m_evalkit_provisioning_mode.jpg
 
 OPTIGA™ Trust Charge Evaluation Kit
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -35,5 +35,5 @@ OPTIGA™ Trust Charge Evaluation Kit
 
 
 .. _Download for Windows, Linux, Mac: https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack
-.. _xmc4700 hex file: _static/optiga_trust_charge_evalkit_uart_python.hex
-.. _xmc4800 hex file: _static/optiga_trust_charge_m_uart_python.hex
+.. _xmc4700 hex file: static/optiga_trust_charge_evalkit_uart_python.hex
+.. _xmc4800 hex file: static/optiga_trust_charge_m_uart_python.hex

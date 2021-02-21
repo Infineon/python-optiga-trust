@@ -3,19 +3,19 @@ Cryptography
 
 Here are some examples for what you can do with this submodule
 
-Generate random
----------------
+True random number generation
+-----------------------------
+
+Generate a true random number, accepted values from 8 to 255 bytes
 
 ::
 
     from optigatrust import crypto
 
-    random_tuple = (8, 9, 15, 31, 33, 64, 128, 129, 255, 256)
-    for n in random_tuple:
-        crypto.random(n)
+    crypto.random(8)
 
-Generate a keypair (ECC, RSA)
-------------------------------------
+Keypair generation (ECC, RSA)
+-----------------------------
 
 ::
 
@@ -35,8 +35,8 @@ Generate a keypair (ECC, RSA)
 
     pkey, key = crypto.generate_pair(key_object=key_object, curve='secp256r1', export=True)
 
-ECDSA Sign
-----------
+Elliptic Curve Digital Signature Algorithm (ECDSA)
+--------------------------------------------------
 
 ::
 
@@ -48,8 +48,8 @@ ECDSA Sign
     s = crypto.ecdsa_sign(key_object, 'Hello World')
 
 
-PKCS1 v1.5 Sign
----------------
+PKCS1 v1.5 Signature generation (RSA SSA)
+-----------------------------------------
 
 ::
 
@@ -60,14 +60,199 @@ PKCS1 v1.5 Sign
     _, _ = crypto.generate_pair(key_object, key_size=1024)
     s = crypto.pkcs1v15_sign(key_object, 'Hello World')
 
-HMAC
-----
+Elliptic Curve Diffie-Hellman (ECDH)
+------------------------------------
 
-Key Dereviation (HKDF, TLS PRF)
--------------------------------
+Store the shared secret internally on the chip
 
-En-/Decryption (RSA, AES)
--------------------------
+::
+
+    # methods to handle objects
+    import optigatrust.objects as objects
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    # imports from the cryptography package to create a third party private, public key pairs
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import serialization
+
+    # Generate a new keypair
+    # ignore the public part, as we need only the private key generated in the slot
+    key_object = objects.ECCKey(0xe0f1)
+    _, _ = optiga_ec.generate_pair(key_object, 'secp256r1')
+
+    # Generate a new keypair in soft, export the peer part
+    private_key = ec.generate_private_key(ec.SECP256R1(), default_backend())
+    peer_public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    # Derive a shared secret using our internally store private key, and external public
+    # Don't export the shared secret, but store internally
+    session_object = optiga_ec.ecdh(key_object, peer_public_key)
+
+Use a different curve - 'brainpool256r1'
+
+::
+
+    # methods to handle objects
+    import optigatrust.objects as objects
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    # imports from the cryptography package to create a third party private, public key pairs
+    from cryptography.hazmat.primitives.asymmetric import ec
+    from cryptography.hazmat.backends import default_backend
+    from cryptography.hazmat.primitives import serialization
+
+    # Generate a new keypair
+    # ignore the public part, as we need only the private key generated in the slot
+    key_object = objects.ECCKey(0xe0f1)
+    _, _ = optiga_ec.generate_pair(key_object, 'brainpoolp256r1')
+
+    # Generate a new keypair in soft, export the peer part
+    private_key = ec.generate_private_key(ec.BrainpoolP256R1(), default_backend())
+    peer_public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
+
+    # Derive a shared secret using our internally store private key, and external public
+    # Don't export the shared secret, but store internally
+    session_object = optiga_ec.ecdh(key_object, peer_public_key)
+
+
+Hash-based Message Authentication Code (HMAC)
+---------------------------------------------
+
+Using an ECDH to generate the shared secret, and use this secret for HMAC
+
+::
+
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    # ... repeat steps to generate a proper shared secret on the chip from the above example
+    session_object = ecdh('with_secp256r1_curve')
+
+    # Generate hash-based MAC
+    data = 'Hello world!'
+    mac = optiga_ec.hmac(session_object, str.encode(data), hash_algorithm='sha256')
+
+or with a different curve
+
+::
+
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    # ... repeat steps to generate a proper shared secret on the chip from the above example
+    session_object = ecdh('with_brainpoolp512r1_curve')
+
+    # Generate hash-based MAC
+    data = 'Hello world!'
+    mac = optiga_ec.hmac(session_object, str.encode(data), hash_algorithm='sha512')
+
+Use an externally provided secret
+
+::
+
+    # methods to handle objects
+    import optigatrust.objects as objects
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    secret = 'BFB770EEBF8F61C704E00D828B7A3641D5CD7A3846DEF90F214240250AAF9C2E'
+
+    # Initialise the object and write secret data to it.
+    app_data = objects.AppData(0xf1d0)
+    app_data.write(bytes().fromhex(secret))
+
+    # AppData Object should have a shared secret type to be used for hmac
+    app_data.meta = {'type': 'pre_sh_secret', 'execute': 'always'}
+
+    mac = optiga_ec.hmac(app_data, str.encode(data), hash_algorithm='sha256')
+
+Key Derivation (HKDF, TLS PRF)
+------------------------------
+
+TLS PRF
+
+::
+
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    # random seed for the kdf function
+    seed = '61C7DEF90FD5CD7A8B7A364104E00D823846BFB770EEBF8F40252E0A2142AF9C'
+
+    # ... repeat steps to generate a proper shared secret on the chip from the above example
+    session_object = ecdh('with_secp256r1_curve')
+
+    # derive a key and export it
+    derived_key = optiga_ec.tls_prf(session_object, 32, seed=bytes().fromhex(seed), hash_algorithm='sha256', export=True)
+
+
+Use an externally provided secret
+
+::
+
+    # methods to handle objects
+    import optigatrust.objects as objects
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    secret = 'BFB770EEBF8F61C704E00D828B7A3641D5CD7A3846DEF90F214240250AAF9C2E'
+
+    # Initialise the object and write secret data to it.
+    app_data = objects.AppData(0xf1d0)
+    app_data.write(bytes().fromhex(secret))
+
+    # AppData Object should have a shared secret type to be used for an kdf
+    app_data.meta = {'type': 'pre_sh_secret', 'execute': 'always'}
+
+    derived_key = optiga_ec.tls_prf(app_data, 32, label='Firmware update', seed=bytes().fromhex(seed), hash_algorithm=hash_alg, export=True)
+
+
+HKDF
+
+::
+
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    # random seed for the kdf function
+    seed = '61C7DEF90FD5CD7A8B7A364104E00D823846BFB770EEBF8F40252E0A2142AF9C'
+
+    # ... repeat steps to generate a proper shared secret on the chip from the above example
+    session_object = ecdh('with_secp512r1_curve')
+
+    # derive a key and export it
+    derived_key = optiga_ec.hkdf(session_object, 32, hash_algorithm='sha512', export=True)
+
+
+Use an externally provided secret
+
+::
+
+    # methods to handle objects
+    import optigatrust.objects as objects
+    # methods to handle crypto functions on the optiga
+    import optigatrust.crypto as optiga_ec
+
+    secret = 'BFB770EEBF8F61C704E00D828B7A3641D5CD7A3846DEF90F214240250AAF9C2E'
+
+    # Initialise the object and write secret data to it.
+    app_data = objects.AppData(0xf1d0)
+    app_data.write(bytes().fromhex(secret))
+
+    # AppData Object should have a shared secret type to be used for an kdf
+    app_data.meta = {'type': 'pre_sh_secret', 'execute': 'always'}
+
+    derived_key = optiga_ec.hkdf(app_data, 32, hash_algorithm='sha256', export=True)
+
 
 API
 ---

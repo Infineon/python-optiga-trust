@@ -17,4 +17,13 @@ help:
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
+	rm *.html *.js *.inv
+	rm -rf doctrees
+	rm -rf static
+	rm -rf sources
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	mv html/* .
+	rm -rf html
+	mv _static static
+	mv _sources sources
+	grep -rl "_static" --exclude='Makefile' .  | xargs sed -i 's/_static/static/g'
