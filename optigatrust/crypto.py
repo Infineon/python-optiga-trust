@@ -525,7 +525,8 @@ def ecdh(key_object, external_pkey, export=False):
         - OSError - when an error is returned by the core initialisation library
 
     :returns:
-        in case `export` set to True returns a shared secret
+        in case `export` set to True returns a shared secret,
+        otherwise returns :class:`~optigatrust.objects.AcquiredSession()`
     """
     if not isinstance(key_object, objects.ECCKey):
         raise TypeError(
@@ -565,6 +566,8 @@ def ecdh(key_object, external_pkey, export=False):
     if ret == 0:
         if export:
             return bytes(shared_secret)
+        else:
+            return objects.AcquiredSession()
     else:
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
@@ -707,8 +710,7 @@ def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', expor
     :param object:
         Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
         Can be one of the following classes
-        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.Session`,
-        or :class:`~optigatrust.objects.AcquiredSession`
+        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.AcquiredSession`
 
     :param key_length:
         Size of the requested key.
@@ -734,14 +736,12 @@ def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', expor
         - OSError - when an error is returned by the core initialisation library
 
     :returns:
-        byte string with the key if requested, otherwise None
+        byte string with the key if requested, otherwise :class:`~optigatrust.objects.AcquiredSession`
     """
     api = optiga.Chip().api
-    if not isinstance(object, (objects.AppData, objects.Session, objects.AcquiredSession)):
+    if not isinstance(object, (objects.AppData, objects.AcquiredSession)):
         raise TypeError(
-            'key_object should be either {0}, {1}, or {2} types'.format(
-                objects.AppData, objects.Session, objects.AcquiredSession
-            )
+            'key_object should be either {0}, or {1} types'.format(objects.AppData,  objects.AcquiredSession)
         )
     if isinstance(object, objects.AppData):
         try:
@@ -785,6 +785,8 @@ def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', expor
     if ret == 0:
         if export:
             return bytes(derived_key)
+        else:
+            return objects.AcquiredSession()
     else:
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
@@ -798,8 +800,7 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
     :param key_object:
         Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
         Can be one of the following classes
-        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.Session`,
-        or :class:`~optigatrust.objects.AcquiredSession`
+        :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.AcquiredSession`
 
     :param key_length:
         Size of the requested key.
@@ -825,14 +826,12 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
         - OSError - when an error is returned by the core initialisation library
 
     :returns:
-        byte string with the key if requested, otherwise None
+        byte string with the key if requested, otherwise :class:`~optigatrust.objects.AcquiredSession`
     """
     api = optiga.Chip().api
-    if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
+    if not isinstance(key_object, (objects.AppData, objects.AcquiredSession)):
         raise TypeError(
-            'key_object should be either {0}, {1}, or {2} types'.format(
-                objects.AppData, objects.Session, objects.AcquiredSession
-            )
+            'key_object should be either {0},  or {1} types'.format(objects.AppData, objects.AcquiredSession)
         )
     if isinstance(key_object, objects.AppData):
         try:
@@ -876,6 +875,8 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
     if ret == 0:
         if export:
             return bytes(derived_key)
+        else:
+            return objects.AcquiredSession()
     else:
         raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 

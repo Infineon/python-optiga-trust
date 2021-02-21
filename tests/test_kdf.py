@@ -24,9 +24,8 @@ def test_tls_prf(hash_alg, hazmat_curve, curve):
     private_key = ec.generate_private_key(hazmat_curve, default_backend())
     peer_public_key = private_key.public_key().public_bytes(encoding=serialization.Encoding.DER,
                                                             format=serialization.PublicFormat.SubjectPublicKeyInfo)
-    optiga_ec.ecdh(key, peer_public_key)
-    ses = objects.AcquiredSession()
-    derived_key = optiga_ec.tls_prf(ses, 32, seed=bytes().fromhex(seed), hash_algorithm=hash_alg, export=True)
+    session_object = optiga_ec.ecdh(key, peer_public_key)
+    derived_key = optiga_ec.tls_prf(session_object, 32, seed=bytes().fromhex(seed), hash_algorithm=hash_alg, export=True)
 
 
 @pytest.mark.parametrize("hash_alg", ['sha256', 'sha384', 'sha512'])
@@ -67,9 +66,8 @@ def test_hkdf(hash_alg, hazmat_curve, curve):
         encoding=serialization.Encoding.DER,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-    optiga_ec.ecdh(key, peer_public_key)
-    ses = objects.AcquiredSession()
-    derived_key = optiga_ec.hkdf(ses, 32, hash_algorithm=hash_alg, export=True)
+    session_object = optiga_ec.ecdh(key, peer_public_key)
+    derived_key = optiga_ec.hkdf(session_object, 32, hash_algorithm=hash_alg, export=True)
 
 
 @pytest.mark.parametrize("hash_alg", ['sha256', 'sha384', 'sha512'])

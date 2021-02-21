@@ -23,7 +23,6 @@ def test_hmac(hash_alg, hazmat_curve, curve):
         encoding=serialization.Encoding.DER,
         format=serialization.PublicFormat.SubjectPublicKeyInfo
     )
-    optiga_ec.ecdh(key, peer_public_key)
+    session_object = optiga_ec.ecdh(key, peer_public_key)
     data = 'Hello world!'
-    ses = objects.AcquiredSession()
-    mac = optiga_ec.hmac(ses, str.encode(data), hash_algorithm=hash_alg)
+    mac = optiga_ec.hmac(session_object, str.encode(data), hash_algorithm=hash_alg)
