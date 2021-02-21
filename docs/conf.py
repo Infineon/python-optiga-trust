@@ -13,7 +13,6 @@
 import os
 import sys
 
-autodoc_mock_imports = ["cryptography", "optigatrust"]
 sys.path.insert(0, os.path.abspath('..'))
 import optigatrust
 
