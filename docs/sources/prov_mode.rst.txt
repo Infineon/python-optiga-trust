@@ -11,7 +11,7 @@ OPTIGA™ Trust M Evaluation Kit
 - Click on **Device** to select a target device: Select Infineon as Manufacturer
 - Run JFlashLite.exe from JLink installation folder. It shows a notice window. Click OK.
 - Select Infineon as Manufacturer and Device as XMC4800-2048, and then click OK.
-- Select `xmc4800 hex file`_ to be flashed under **Data File** and click on **Program Device**. It then shows the programming progress window.
+- Select `xmc4800 hex file`_ (right click, Save) to be flashed under **Data File** and click on **Program Device**. It then shows the programming progress window.
 - Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port **X100**)
 
 
@@ -27,7 +27,7 @@ OPTIGA™ Trust Charge Evaluation Kit
 - Click on **Device** to select a target device: Select Infineon as Manufacturer
 - Run JFlashLite.exe from JLink installation folder. It shows a notice window. Click OK.
 - Select Infineon as Manufacturer and Device as XMC4700-2048, and then click OK.
-- Select `xmc4700 hex file`_ to be flashed under **Data File** and click on **Program Device**. It then shows the programming progress window.
+- Select `xmc4700 hex file`_ (right click, Save) to be flashed under **Data File** and click on **Program Device**. It then shows the programming progress window.
 - Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port **X100**)
 
 .. image:: https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_charge_evalkit_provisioning_mode.jpg
