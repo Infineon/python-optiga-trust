@@ -11,8 +11,6 @@ Here are some code example using the API
 
     chip = optiga.Chip()
 
-    pkey, _ = crypto.generate_pair(key_object=csr_key_obj, curve=ki)
-
     chip.current_limit = 15 # allowed are from 6 to 15
     chip.sleep_activation_delay = 255 # allowed are from 0 to 255
     # This might affect your chip, and even lock it, so please make sure you know what you do
