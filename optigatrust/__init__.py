@@ -39,7 +39,6 @@ __all__ = [
     'csr',
     'port',
     'lifecycle_states',
-    'set_com_port',
     'Chip',
     'Object'
 ]
@@ -47,10 +46,6 @@ __all__ = [
 
 UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
 _optiga_cddl = None
-
-
-def set_com_port(com_port):
-    _backend.set_com_port_config(com_port)
 
 
 def _lookup_optiga(api):

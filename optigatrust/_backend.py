@@ -25,6 +25,7 @@ from ctypes import *
 import os
 import platform
 import sys
+from serial.tools import list_ports
 from re import match
 
 
@@ -33,7 +34,7 @@ _optiga_cddl = None
 
 __all__ = [
     'get_handler',
-    'set_com_port_config'
+    '_set_com_port_config'
 ]
 
 
@@ -79,7 +80,18 @@ def _get_lib_name(interface='libusb'):
     return 'liboptigatrust-{interface}-{os}-{arch}.{ext}'.format(interface=interface, os=_os, arch=arch, ext=extension)
 
 
+def _scan_com_ports():
+    com_ports = list(list_ports.comports())
+    for com_port in com_ports:
+        # print("Found a com port: {0}: {1}".format(com_port.device, com_port.description))
+        if com_port.description.startswith("USB Serial Device") or com_port.description.startswith("KitProg3"):
+            _set_com_port_config(com_port.device)
+
+
 def _load_lib(interface):
+    if interface == 'uart':
+        _scan_com_ports()
+
     libname = _get_lib_name(interface)
 
     old_path = os.getcwd()
@@ -104,7 +116,7 @@ def _load_lib(interface):
     return api
 
 
-def set_com_port_config(com_port):
+def _set_com_port_config(com_port):
     """
     A function to update globaly defined COM port which this module uses to connect, if uart is the target interface
 

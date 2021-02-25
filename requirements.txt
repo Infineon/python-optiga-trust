@@ -1,3 +1,4 @@
+pyserial
 asn1crypto
 jinja2
 cryptography
