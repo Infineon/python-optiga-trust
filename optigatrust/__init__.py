@@ -298,6 +298,7 @@ _meta_tags = {
     'execute': 0xd3,
     'change': 0xd0,
     'read': 0xd1,
+    'meta_update': 0xd8,
     'metadata': 0x20,
     'lcso': 0xc0,
     'version': 0xc1,
@@ -589,6 +590,7 @@ _parser_map = {
     'change': _parse_access_conditions,
     'execute': _parse_access_conditions,
     'read': _parse_access_conditions,
+    'meta_update': _parse_access_conditions,
     'version': _parse_version
 }
 
