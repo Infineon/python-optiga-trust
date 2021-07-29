@@ -117,7 +117,6 @@ def _native_to_pkcs(pkey, key=None, algorithm=None):
         pyca_curve = _algorithms_map[algorithm][2]
         public_key = prefix + pkey
         if key is not None:
-            print(int.from_bytes(key[2:], 'big'))
             private_key = ec.derive_private_key(int.from_bytes(key[2:], 'big'), pyca_curve, default_backend())
             private_key = private_key.private_bytes(encoding=serialization.Encoding.DER,
                                                     format=serialization.PrivateFormat.PKCS8,
@@ -402,8 +401,8 @@ def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=
         A tuple of keys (public_key, private_key) if export isnt requested, the private part is None
         Example (EC) ::
 
-            private_key= '308187020100301306072a8648ce3d020106082a86....1159ddc0bfe7341e40e9'
             public_key= '3059301306072a8648ce3d020106082a8648ce...67477a4deb6ab7d1159ddc0bfe7341e40e9'
+            private_key= '308187020100301306072a8648ce3d020106082a86....1159ddc0bfe7341e40e9'
 
     """
     if isinstance(key_object, objects.ECCKey):
