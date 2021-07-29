@@ -139,6 +139,11 @@ if __name__ == '__main__':
         package_dir=__package_dir,
         package_data=__package_data,
         setup_requires=['setuptools>=40', 'wheel'],
-        install_requires=['optigatrust', 'asn1crypto', 'jinja2', 'cryptography', 'pyserial'],
+        install_requires=['optigatrust', 'asn1crypto', 'jinja2', 'cryptography', 'pyserial', 'click'],
         python_requires='>=3.5',
+        entry_points={
+            'console_scripts': [
+                'optigatrust = optigatrust.clidriver:main',
+            ],
+        },
     )
