@@ -448,7 +448,7 @@ _data_object_types_swaped = {y: x for x, y in _data_object_types.items()}
 _reset_types = {
     # Setting the LcsO of either a key or data object.
     'lcso_to_creation': 0x01,
-    'lcso_to_initialisation': 0x02,
+    'lcso_to_initialisation': 0x03,
     'lcso_to_operational': 0x07,
     'lcso_to_termination': 0x0f,
     # - Flushing of either a key or data object with zero and set the used length of data objects, if present, to 0x0000
@@ -550,12 +550,22 @@ def _parse_algorithm(tag_size, meta_itr):
 
 
 def _parse_reset_type(tag_size, meta_itr):
-    reset_type = next(meta_itr)
-    if reset_type not in _reset_types_swaped:
-        raise ValueError(
-            'Reset Type tag value {0} not found in supported {1}'.format(reset_type, _reset_types_swaped)
-        )
-    return _reset_types_swaped[reset_type]
+    reset_type_bytes = next(meta_itr)
+    tag_data = list()
+    if reset_type_bytes & _reset_types['lcso_to_initialisation']:
+        tag_data.append('lcso_to_initialisation')
+    if reset_type_bytes & _reset_types['lcso_to_creation']:
+        tag_data.append('lcso_to_creation')
+    if reset_type_bytes & _reset_types['lcso_to_operational']:
+        tag_data.append('lcso_to_operational')
+    if reset_type_bytes & _reset_types['lcso_to_termination']:
+        tag_data.append('lcso_to_termination')
+    if reset_type_bytes & _reset_types['flushing']:
+        tag_data.append('flushing')
+    if reset_type_bytes & _reset_types['random_data']:
+        tag_data.append('random_data')
+
+    return tag_data
 
 
 def _parse_type(tag_size, meta_itr):
@@ -700,6 +710,7 @@ def _prepare_access_conditions(key, value: list) -> list:
     return meta
 
 
+# ToDo: Add a test to test a key usage assignment
 def _prepare_key_usage(key, value) -> int and list:
     key_usage = 0
     # the value should be of type list()
@@ -707,6 +718,7 @@ def _prepare_key_usage(key, value) -> int and list:
         raise TypeError(
             'key usage tag should be provided in the form of a list for instance [\'x\', \'y\', \'z\']'
         )
+
     for i in value:
         if i not in _key_usages:
             raise ValueError(
@@ -718,6 +730,30 @@ def _prepare_key_usage(key, value) -> int and list:
         _meta_tags[key],  # key
         1,  # size
         key_usage  # value
+    ]
+
+    return meta
+
+
+# ToDo: Add a test to test a reset type assignment
+def _prepare_reset_type(key, value) -> int and list:
+    reset_type = 0
+    # the value should be of type list()
+    if not isinstance(value, list):
+        raise TypeError(
+            'reset type tag should be provided in the form of a list for instance [\'x\', \'y\', \'z\']'
+        )
+    for i in value:
+        if i not in _reset_types:
+            raise ValueError(
+                'reset type isn\'t supported. Supported values {0}, you provided {1}'.format(_reset_types, i)
+            )
+        reset_type |= _reset_types[i]
+
+    meta = [
+        _meta_tags[key],  # key
+        1,  # size
+        reset_type  # value
     ]
 
     return meta
@@ -767,6 +803,8 @@ def _prepare_meta_and_size(key, value) -> list:
         meta = _prepare_lcso(key, value)
     elif key == 'key_usage':
         meta = _prepare_key_usage(key, value)
+    elif key == 'reset_type':
+        meta = _prepare_reset_type(key, value)
     # otherwise the value is most likely an access condition expression
     elif isinstance(value, list):
         meta = _prepare_access_conditions(key, value)
