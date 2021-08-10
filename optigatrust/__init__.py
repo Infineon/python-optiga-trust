@@ -260,6 +260,38 @@ class Chip:
         config += bytes([delayed_sec_sync])
         Object(0xe0c9).write(config)
 
+    def protected_update(self, manifest, fragments):
+        """
+        This function helps to use the protected update feature of the chip
+
+        :param manifest:
+            The Manifest is a top level construct that ties all other structures together and is signed by an authorized
+            entity whose identity is represented by a trust anchor installed at the OPTIGA™. See Portected Update in the
+            Solution Reference Manual
+
+        :param fragments
+            Data streams used for the actual data update. fragments should be a list, where all the fragments are
+            sorted in the order they should be transmitted to the chip. Each fragment should be bytes
+
+        :raises
+            - ValueError - when any of the parameters contain an invalid value
+            - TypeError - when any of the parameters are of the wrong type
+            - OSError - when an error is returned by the chip initialisation library
+        """
+        api = self.api
+
+        if not isinstance(manifest, bytes) and not isinstance(manifest, bytearray):
+            raise TypeError("manifest should be bytes type")
+
+        if not isinstance(fragments, list) and not isinstance(fragments, list):
+            raise TypeError("fragments should be bytes type")
+
+        for fragment in fragments:
+            if not isinstance(fragment, bytes) and not isinstance(fragment, bytearray):
+                raise TypeError("Each fragment should be bytes type")
+
+        _backend.protected_update(api, manifest, fragments)
+
     def __str__(self):
         header = "=============================================="
         top = "Guessed chip name: {0}\n".format(self.name)
@@ -552,14 +584,16 @@ def _parse_algorithm(tag_size, meta_itr):
 def _parse_reset_type(tag_size, meta_itr):
     reset_type_bytes = next(meta_itr)
     tag_data = list()
-    if reset_type_bytes & _reset_types['lcso_to_initialisation']:
+    reset_type_bytes_lower_nibble = reset_type_bytes & 0x0f
+    if reset_type_bytes_lower_nibble == _reset_types['lcso_to_initialisation']:
         tag_data.append('lcso_to_initialisation')
-    if reset_type_bytes & _reset_types['lcso_to_creation']:
+    if reset_type_bytes_lower_nibble == _reset_types['lcso_to_creation']:
         tag_data.append('lcso_to_creation')
-    if reset_type_bytes & _reset_types['lcso_to_operational']:
+    if reset_type_bytes_lower_nibble == _reset_types['lcso_to_operational']:
         tag_data.append('lcso_to_operational')
-    if reset_type_bytes & _reset_types['lcso_to_termination']:
+    if reset_type_bytes_lower_nibble == _reset_types['lcso_to_termination']:
         tag_data.append('lcso_to_termination')
+
     if reset_type_bytes & _reset_types['flushing']:
         tag_data.append('flushing')
     if reset_type_bytes & _reset_types['random_data']:
@@ -898,6 +932,31 @@ class Object:
         self._optiga = Chip()
         # A flag to understand whether the object was recently updated
         self.updated = False
+
+    @property
+    def meta(self):
+        """ A dictionary of the metadata present right now on the chip for the given object. It is writable,
+        so user can update the metadata assigning the value to it. Example return ::
+
+            {
+                "lcso": "creation",
+                "change": [
+                    "lcso",
+                    "<",
+                    "operational"
+                ],
+                "execute": "always",
+                "algorithm": "secp384r1",
+                "key_usage": "0x21"
+            }
+        """
+        _array_meta = self.read_raw_meta()
+        return _parse_raw_meta(_array_meta)
+
+    @meta.setter
+    def meta(self, new_meta: dict):
+        meta = _prepare_raw_meta(new_meta)
+        self.write_raw_meta(meta)
 
     @property
     def meta(self):
