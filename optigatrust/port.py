@@ -115,7 +115,7 @@ def from_json(data=None):
     """
     This function will take as an input your data and populate the chip with it, whatever is possible
 
-    :param data: JSON string with the dump of the data
+    :param data: JSON string with the dump of the data. Should be a valid dict structure
 
     .. highlight:: python
     .. code-block:: python
