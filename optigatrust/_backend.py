@@ -159,3 +159,40 @@ def get_handler():
             exit()
 
     return _optiga_cddl
+
+
+def protected_update(api, manifest, fragments):
+    _manifest = (c_ubyte * len(manifest))(*manifest)
+
+    api.exp_optiga_util_protected_update_start.argtypes = c_ubyte, POINTER(c_ubyte), c_ushort
+    api.exp_optiga_util_protected_update_start.restype = c_int
+
+    ret = api.exp_optiga_util_protected_update_start(c_ubyte(0x01), _manifest, len(_manifest))
+
+    if ret != 0:
+        print("".join('{:02x} '.format(x) for x in list(_manifest)))
+        print(len(_manifest))
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    for fragment in fragments[:-1]:
+        _fragment = (c_ubyte * len(fragment))(*fragment)
+
+        api.exp_optiga_util_protected_update_continue.argtypes = POINTER(c_ubyte), c_ushort
+        api.exp_optiga_util_protected_update_continue.restype = c_int
+
+        ret = api.exp_optiga_util_protected_update_continue(_fragment, len(_fragment))
+
+        if ret != 0:
+            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    final_fragment = (c_ubyte * len(fragments[-1]))(*fragments[-1])
+
+    api.exp_optiga_util_protected_update_final.argtypes = POINTER(c_ubyte), c_ushort
+    api.exp_optiga_util_protected_update_final.restype = c_int
+
+    ret = api.exp_optiga_util_protected_update_final(final_fragment, len(final_fragment))
+
+    if ret != 0:
+        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    return ret
