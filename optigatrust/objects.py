@@ -231,10 +231,10 @@ class X509(optiga.Object):
 
         _supported_objects = (oids.IFX_CERT.value, oids.USER_CERT_1.value, oids.USER_CERT_2.value, oids.USER_CERT_3.value,
                               oids.TRUST_ANCHOR_1.value, oids.TRUST_ANCHOR_2.value,
-                              oids.DATA_SLOT_1500B_0, oids.DATA_SLOT_1500B_1)
+                              oids.DATA_SLOT_1500B_0.value, oids.DATA_SLOT_1500B_1.value)
         if self.id not in _supported_objects:
             raise ValueError(
-                'Object ID is not one of supported {0}'.format(_supported_objects)
+                'Object ID is not one of supported {0}'.format([hex(i) for i in _supported_objects])
             )
 
         if not isinstance(cert, str) and not isinstance(cert, bytes) and not isinstance(cert, bytearray):
@@ -296,10 +296,10 @@ class X509(optiga.Object):
             )
         _supported_objects = (oid.IFX_CERT.value, oid.USER_CERT_1.value, oid.USER_CERT_2.value, oid.USER_CERT_3.value,
                               oid.TRUST_ANCHOR_1.value, oid.TRUST_ANCHOR_2.value,
-                              oid.DATA_SLOT_1500B_0, oid.DATA_SLOT_1500B_1)
+                              oid.DATA_SLOT_1500B_0.value, oid.DATA_SLOT_1500B_1.value)
         if self.id not in _supported_objects:
             raise ValueError(
-                'Object ID is not one of supported {0}'.format(_supported_objects)
+                'Object ID is not one of supported {0}'.format([hex(i) for i in _supported_objects])
             )
 
         der_cert = self.read()
