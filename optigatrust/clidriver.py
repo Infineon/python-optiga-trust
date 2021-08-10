@@ -22,17 +22,20 @@
 # SOFTWARE
 # ============================================================================
 import os
+import ntpath
 import click
 import optigatrust.version as optiga_version
 import optigatrust as optiga
 import json
-from optigatrust import objects, crypto
+from ast import literal_eval
+
+from asn1crypto import pem
+from optigatrust import objects, crypto, port
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
 
 def command_required_option_from_option(require_name, require_map):
-
     class CommandOptionRequiredClass(click.Command):
 
         def invoke(self, ctx):
@@ -50,15 +53,10 @@ def command_required_option_from_option(require_name, require_map):
     return CommandOptionRequiredClass
 
 
-@click.group(chain=True)
-@click.version_option(optiga_version.__version__)
-@click.pass_context
-def main(ctx):
-    pass
-
-
 def validate_id(ctx, param, value):
     try:
+        if value is None:
+            return None
         obj = optiga.Object(int(value, base=16))
         obj = obj.meta
         return int(value, base=16)
@@ -76,7 +74,7 @@ def validate_ecc_id(ctx, param, value):
 
 
 def validate_extension(filename):
-    split_tup = os.path.splitext(filename)
+    split_tup = os.path.splitext(ntpath.basename(filename))
     file_extension = split_tup[1]
     if file_extension not in ('.json', '.pem', '.dat'):
         raise click.BadParameter('File extension is not supported. Read --help')
@@ -92,7 +90,8 @@ def handle_pem_extension(oid, _input):
         )
 
 
-def handle_dat_extension(obj, _input):
+def handle_dat_extension(oid, _input):
+    obj = optiga.Object(oid)
     try:
         split_buffer = _input.read().split()
         data = bytes([int(i, base=16) for i in split_buffer])
@@ -106,24 +105,66 @@ def handle_dat_extension(obj, _input):
 def insert_newlines(string, every=64):
     lines = []
     for i in range(0, len(string), every):
-        lines.append(string[i:i+every])
+        lines.append(string[i:i + every])
     return '\n'.join(lines)
+
+
+def process_metadata_file(file):
+    data = file.read()
+
+    # Find manifest + '=' '{'
+    manifest_begin = data.split().index("manifest_data[]") + 3
+    manifest_end = data.split().index("};")
+    manifest_data = data.split()[manifest_begin:manifest_end]
+
+    for num, elem in enumerate(manifest_data):
+        manifest_data[num] = int(elem[:-1], base=16)
+
+    _manifest = bytearray(manifest_data)
+
+    _fragments = []
+    for i in range(1, 100):
+        try:
+            fragment_num = "fragment_0{0}[]".format(i)
+            fragment_begin = data.split().index(fragment_num) + 3
+            fragment_end = data.split().index("};", fragment_begin)
+            fragment_data = data.split()[fragment_begin:fragment_end]
+
+            for num, elem in enumerate(fragment_data):
+                fragment_data[num] = int(elem[:-1], base=16)
+
+            _fragments.append(bytearray(fragment_data))
+        except ValueError:
+            return _manifest, _fragments
+
+
+@click.group()
+@click.version_option(optiga_version.__version__)
+@click.pass_context
+def main(ctx):
+    pass
 
 
 # optigatrust object --id 0xe0f0 --read
 # optigatrust object --id 0xe0f0 --read --out [file]
 # optigatrust object --id 0xe0f0 --read --meta
-# optigatrust object --id 0xe0f0 --write [file]
+# optigatrust object --id 0xe0f0 --in [file]
 @main.command('object', help='Manages objects data and metadata')
 @click.pass_context
-@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, prompt=True,
-              default='0xe0e0', show_default=True, required=True,
+@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, required=False,
               metavar='<0x1234>',
-              help='Select an Object ID you would like to use. Use 0xffff to read all')
+              help='Select an Object ID you would like to use.')
+@click.option('--lock', is_flag=True, default=False, required=False,
+              help='Lock a given Object by changing it Lifecycle State. '
+                   'This action can be reversed only in special cases. See Metadata Update.')
+@click.option('--unlock', is_flag=True, default=False, required=False,
+              help='Unlock a given Object by running a protected update. ')
+@click.option('--export-all', is_flag=True, default=False, required=False,
+              help='Export data and metadata from all the objects from the connected device.')
 @click.option('--meta', is_flag=True,
-              default=None, required=False,
+              default=False, required=False,
               help='Read metadata from a given Object ID')
-@click.option('--in', '-i', 'inp', type=click.File('r'),
+@click.option('--in', 'inp', type=click.File('r'),
               default=None, required=False,
               help="""
                     Write data or metadata into a given Object ID.
@@ -144,50 +185,322 @@ def insert_newlines(string, every=64):
 @click.option('--out', type=click.File('w'),
               default=None, required=False,
               help='Select the file where the output should be stored')
-@click.option('--outform', type=click.Choice(['PEM', 'DER', 'C', 'RAW']),
-              default='RAW', required=True,
+@click.option('--outform', type=click.Choice(['PEM', 'DER', 'C', 'DAT']),
+              default=None, required=False,
               help='Define which output type to use')
-def objects_parser(ctx, oid, meta, inp, out, outform):
-    obj = optiga.Object(oid)
+def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
     buffer = ''
     output = out
+
+    if export_all:
+        click.echo("Warning, export might take a few minutes to complete")
+        if oid or lock or meta or inp or outform:
+            raise click.BadParameter('with the --export_all option only --out is allowed')
+        buffer = json.dumps(port.to_json(), indent=4)
+
+        click.echo(message=buffer, file=output)
+        click.echo("Export Completed")
+        exit(0)
+
+    # Todo Test lock
+    if lock:
+        obj = optiga.Object(oid)
+
+        if export_all or meta or inp or out or outform:
+            raise click.BadParameter('with the --lock option only --id is allowed')
+
+        if click.confirm('Locking might be irreversible, would you like to prepare the object for a \n '
+                         'protected update to be able to revert this?'):
+            click.echo("Please use prepare-update command first to prepare the object for a protected update")
+            exit(0)
+
+        if click.confirm('Do you want to lock this object?\n'
+                         'This action is going to modify the "Change" Object Access Condition as well as '
+                         'the Lifecycle State of the Object and might be IRREVERSIBLE.'):
+            try:
+                obj.meta = {'change': ['lcso', '<', 'operational'], 'lcso': 'operational'}
+                click.echo('New metadata:')
+                buffer = json.dumps(obj.meta, indent=4)
+                click.echo(message=buffer, file=output)
+            except OSError:
+                raise click.UsageError('Lock is not possible')
+        exit(0)
+
+    # Todo Test unlock
+    if unlock:
+        chip = optiga.Chip()
+
+        if export_all or meta or out or outform:
+            raise click.BadParameter('with the --lock option only --id and --in are allowed')
+
+        if click.confirm('Do you want to unlock this object? This will run the protected update procedure. '
+                         'In case you didn\'t prepare the object in advance this action will no take any effect\n'):
+            try:
+                if inp.name != oid:
+                    raise click.UsageError('The given filename should have the same name as the target Object ID; '
+                                           'e.g. 0xe0e1.txt with the manifest and fragment structures as generated'
+                                           'by the protected update data set tool')
+                manifest, fragments = process_metadata_file(inp)
+                chip.protected_update(manifest, fragments)
+            except OSError:
+                raise click.UsageError('Unlock is not possible')
+        exit(0)
 
     # out will be either stdout or a file
     # so if metadata isn't requested we form a valid output for a file
     if meta:
+        obj = optiga.Object(oid)
         buffer = json.dumps(obj.meta, indent=4)
-    elif outform == 'PEM':
-        cert = objects.X509(oid)
-        buffer = cert.pem
+        if outform in ('PEM', 'DER'):
+            raise click.BadParameter('combination of --meta and --outform')
+    else:
+        if outform is None and oid:
+            outform = 'DAT'
+
+    if outform == 'PEM':
+        try:
+            cert = objects.X509(oid)
+            buffer = cert.pem
+        except ValueError as err:
+            raise click.BadParameter('PEM is supported only for objects more than 1.5 kBytes. '
+                                     'Original error: {0}'.format(err))
     elif outform == 'DER':
-        cert = objects.X509(oid)
-        buffer = cert.der
+        obj = optiga.Object(oid)
+        try:
+            cert = objects.X509(oid)
+            buffer = cert.der
+        except ValueError as err:
+            raise click.BadParameter('DER is supported only for objects more than 1.5 kBytes. '
+                                     'Original error: {0}'.format(err))
     elif outform == 'C':
-        buffer = ''.join('0x{:02x}, '.format(x) for x in obj.read())
+        obj = optiga.Object(oid)
+        if meta is True:
+            data = obj.read_raw_meta()
+        else:
+            data = obj.read()
+        buffer = ''.join('0x{:02x}, '.format(x) for x in data)
         buffer = '\n'.join(buffer[i:i + 96] for i in range(0, len(buffer), 96))
-    elif outform == 'RAW':
-        buffer = ''.join('{:02x} '.format(x) for x in obj.read())
+
+    elif outform == 'DAT':
+        obj = optiga.Object(oid)
+        if meta is True:
+            data = obj.read_raw_meta()
+        else:
+            data = obj.read()
+        buffer = ''.join('{:02x} '.format(x) for x in data)
         buffer = '\n'.join(buffer[i:i + 66] for i in range(0, len(buffer), 66))
 
     if inp:
         buffer = 'Object Updated'
         output = None
         validate_extension(inp.name)
-        split_tup = os.path.splitext(inp.name)
+        split_tup = os.path.splitext(ntpath.basename(inp.name))
         file_extension = split_tup[1]
         if file_extension == '.json':
+            if oid:
+                click.echo("Import is in progress, the --id option is ignored")
             try:
-                obj.meta = inp.read()
+                port.from_json(literal_eval(inp.read()))
             except (ValueError, TypeError, OSError):
                 click.BadParameter(
                     '[{0}]: File Content can\'t be parsed or written.\n {1}'.format(inp.name, inp.read())
                 )
         elif file_extension == '.dat':
-            handle_dat_extension(obj, inp)
+            handle_dat_extension(oid, inp)
         elif file_extension == '.pem':
             handle_pem_extension(oid, inp)
 
     click.echo(message=buffer, file=output)
+
+
+@main.command('update-wizard', help='Guide through the protected update preparation for a specific Object ID')
+@click.pass_context
+@click.option('--target-id', type=click.UNPROCESSED, callback=validate_id, required=True,
+              metavar='<0x1234>',
+              help='Select an Object ID you would like to prepare a protected update for')
+@click.option('--int-id', 'int_oid', type=click.UNPROCESSED, callback=validate_id, required=True,
+              metavar='<0x1234>',
+              help='define Integrity (Int) enabled for the protected update.'
+                   'In layman terms, define an Object ID where a valid X.509 certificate should be stored. '
+                   'This certificate will be then used to verify a signed payload from an incoming object '
+                   'update request from a remote server.')
+@click.option('--int-file', type=click.File('r'), default=None, required=True,
+              help='Provide a valid X.509 certificate encoded as a PEM file (.pem)')
+def update_wizard(ctx, target_id, int_oid, int_file):
+    # Access Conditions
+    ac = []
+    conf_lock = False
+    int_lock = False
+    zero = False
+    protected_update_meta = {}
+
+    # Open the target object
+    target_obj = optiga.Object(target_id)
+
+    click.secho('[0/7]: To run the protected data/metadata update, a host MCU needs to send (forward) a manifest and \n'
+                'payload (in fragments). This data might be only signed, or signed and encrypted. \n'
+                'This wizard helps you to configure the target Object on the Trust M. \n'
+                'This configuration should match the settings set during protected payload generation '
+                'on the remote server.\n'
+                'NB: If your target Object already has an entry in its metadata; e.g. it has a \'reset_type\' '
+                'already defined\n it is not possible to remove this entry anymore even after during the protected '
+                'metadata update', fg='green')
+    click.secho('[1/7]: Integrity protection selected. Trust Anchor [{0}] is used to verify the signature of \n'
+                'the incoming payload during the protected update. If you leave it unlocked it can be modified in '
+                'the future.'.format(hex(int_oid)), fg='green')
+    if click.confirm('[Question]: Do you want to lock the {0} Object?'.format(hex(int_oid))):
+        int_lock = True
+
+    if int_oid:
+        # We need to write the given certificate into the object
+        int_obj = optiga.Object(int_oid)
+
+        # Read the certificate, but don't add identity tags to it berfore writing back
+        split_tup = os.path.splitext(ntpath.basename(int_file.name))
+        if len(split_tup) != 2:
+            raise click.BadParameter('Bad filename. Exit')
+
+        if '.pem' == split_tup[1]:
+            file = int_file.read()
+            _, _, der_bytes = pem.unarmor(bytes(file, 'utf-8'))
+            int_obj.write(der_bytes)
+            click.secho('[Info]: Certificate {0} in DER Form has been writen into the {1} Object ID'.
+                        format(int_file.name, hex(int_oid)), fg='blue')
+            click.secho(file, fg='blue')
+        else:
+            raise click.BadParameter('only .pem files are supported as an input')
+        # Update metadata to allow internally to use this object
+        int_obj.meta = {'type': 'trust_anchor', 'execute': 'always'}
+        click.secho('[Info]: Object ID {0} has now \'trust_anchor\' data type and Execute Access Condition'
+                    ' set to \'always\''.format(hex(int_oid)), fg='blue')
+
+        # In case lock is requested advcance the lcso
+        if int_lock:
+            int_obj.meta = {'change': ['lcso', '<', 'operational']}
+            int_obj.meta = {'lcso': 'operational'}
+            click.secho('[Info]: Object ID {0} has been locked'.format(hex(int_oid)), fg='blue')
+
+        ac.append('int')
+        # Convert OID into an integer '0xe0e1' -> e0e1
+        # Split the number and add first and second byte to the list
+        ac.append('0x{:02x}'.format((int_oid & 0xff00) >> 8))
+        ac.append('0x{:02x}'.format(int_oid & 0x00ff))
+
+    click.secho('[2/7]: Confidentiality protection is when a secret used to encrypt the protected payload prepared on '
+                'the remote server. If selected it requires to know the secret so that this wizard can write it on the '
+                'chip', fg='green')
+    if click.confirm('[Question]: Do you want to enable Confidentiality protection?'):
+
+        ac.append('&&')
+
+        conf_id = click.prompt(click.style('3/7]: Please provide an Object ID; e.g. 0xf1d0, '
+                               'where the secret used to decrypt the payload should be stored', fg='green'),
+                               type=click.UNPROCESSED, value_proc=validate_id)
+
+        click.secho('[4/7]: Confidentiality protection selected. Data Object [{0}] is used to decrypt the payload of \n'
+                    'the incoming the protected update request. If you leave it unlocked it can be modified in '
+                    'the future.'.format(hex(conf_id)), fg='green')
+        if click.confirm('[Question]: Do you want to lock the {0} Object?'.format(hex(conf_id))):
+            conf_lock = True
+
+        conf_obj = optiga.Object(conf_id)
+
+        click.secho('[5/7]: This step requires from you to provide a file contains the secret used to '
+                    'decrypt the payload sent as part of the protected update.\n'
+                    'It should be a valid secret with the following content written in a text file. Example:'
+                    '010203040506..cceeff', fg='green')
+        conf_file = click.prompt('[Question]: Filename:', type=click.File('r'))
+
+        # In case lock is requested advance the lcso
+        if conf_lock:
+            conf_obj.meta = {'change': ['lcso', '<', 'operational']}
+            conf_obj.meta = {'lcso': 'operational'}
+            click.secho('[Info]: Object ID {0} has been locked'.format(hex(conf_id)), fg='blue')
+
+        # Read the shared secret and write it into the object
+        handle_dat_extension(conf_id, conf_file)
+        click.secho('[Info]: File {0} has been writen into the {1} Object ID'.format(conf_file.name, hex(conf_id)),
+                    fg='blue')
+        click.secho(conf_file.read(), fg='blue')
+        # Update metadata to allow internally to use this object
+        conf_obj.meta = {'type': 'update_secret', 'execute': 'always'}
+        click.secho('[Info]: Object ID {0} has now \'update_secret\' type and Execute Access Condition'
+                    ' set to \'always\''.format(hex(int_oid)), fg='blue')
+
+        ac.append('conf')
+        # Convert Confidentiality OID into an integer '0xf1d0' -> f1d0
+        # Split the number and add first and second byte to the list
+        ac.append('0x{:02x}'.format((conf_id & 0xff00) >> 8))
+        ac.append('0x{:02x}'.format(conf_id & 0x00ff))
+    else:
+        click.secho('[3/7]: Skipped.', fg='green')
+        click.secho('[4/7]: Skipped.', fg='green')
+        click.secho('[5/7]: Skipped.', fg='green')
+
+    click.secho('[6/7]: You need to select what should be updated.', fg='green')
+    choice = click.prompt('[Question]: Type 1 for data, 2 for metadata, or 3 for both')
+
+    if choice != '1' and choice != '2' and choice != '3':
+        raise click.BadParameter('[6/7]: you need to select either 1 for data, 2 for metadata or 3 for both')
+
+    if choice == '2' or choice == '3':
+        click.secho('[7/7]: Metadata update is selected. During metadata update it is possibly to flush the content of '
+                    'the object.', fg='green')
+        zero = click.confirm('[Question]: Do you want to flush {0} Object after the metadata update?'.
+                             format(hex(target_id)))
+
+    if choice == '2' or choice == '3':
+        if zero:
+            protected_update_meta = {'meta_update': ac, 'reset_type': ['lcso_to_creation', 'flushing']}
+        else:
+            protected_update_meta = {'meta_update': ac}
+
+    if choice == '1' or choice == '3':
+        change_ac = target_obj.meta['change']
+        change_ac.append('||')
+        change_ac += ac
+        protected_update_meta = {'change': change_ac}
+
+    try:
+        target_obj.meta = protected_update_meta
+        click.secho('[Info]: target Object ID {0} has now the following metadata:'.format(hex(target_id)), fg='blue')
+        dump = json.dumps(target_obj.meta, indent=4)
+        click.secho(dump, fg='blue')
+    except OSError:
+        click.secho('It is likely that you have exceeded the 44 bytes limit for the metadata. '
+                    'Existing rules consume {0} bytes. '
+                    'Try at first to reduce some rules using the \'object\' command.'.
+                    format(len(target_obj.read_raw_meta())), fg='red')
+
+
+# Todo: add key and data update as well
+@main.command('update', help='Use protected update feature')
+@click.pass_context
+@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, required=False,
+              metavar='<0x1234>',
+              help='Select an Object ID you would like to use')
+@click.option('--file', type=click.File('r'), default=None, required=False,
+              help='Provide a valid manifest + fragments file generated by the protected update data set tool')
+def update_parser(ctx, oid, file):
+    if oid != int(os.path.splitext(ntpath.basename(file.name))[0], base=16):
+        raise click.BadParameter('used id should be equal to the filename used for the protected update. Moreover the '
+                                 'manifest inside it is coupled with the given id and can\'t be taken from another file')
+    manifest, fragments = process_metadata_file(file)
+    try:
+        chip = optiga.Chip()
+        chip.protected_update(manifest, fragments)
+        click.echo("{0} Updated successfully".format(hex(oid)))
+        try:
+            obj = optiga.Object(oid)
+            click.echo("Pretty metadata:")
+            click.echo(json.dumps(obj.meta, indent=4))
+            click.echo("Data:")
+            click.echo(''.join('{:02x} '.format(x) for x in obj.read()))
+        except OSError:
+            pass
+
+    except OSError:
+        raise ValueError("{0} Update failed".format(hex(oid)))
 
 
 # optigatrust create-keys --out [file]
@@ -201,7 +514,7 @@ def objects_parser(ctx, oid, meta, inp, out, outform):
 @click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_ecc_id, prompt=True,
               default='0xe0e0', show_default=True, required=True,
               metavar='<0x1234>',
-              help='Select an Object ID you would like to use. Use 0xffff to read all')
+              help='Select an Object ID you would like to use.')
 @click.option('--rsa', is_flag=True,
               default=False, show_default=True, required=True,
               help='If selected an RSA key generation will be invoked')
@@ -249,54 +562,51 @@ def ec_parser(ctx, oid, rsa, curve, key_usage, key_size, pubout, privout):
         if privout is not None:
             click.echo('Generation completed')
 
-
-
-
 # optigatrust rsa --id 0xe0fc --sign [file]
 # optigatrust rsa --genkey --out [file]
 # optigatrust rsa --id 0xe0f0 --genkey --out [file]
 # optigatrust rsa --id 0xe0f0 --genkey --key_size 1024 --out [file]
-@main.command('rsa', help='Do RSA related operations using the OPTIGA Trust M')
-@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, prompt=True,
-              default='0xe0e0', show_default=True, required=True,
-              help='Select an Object ID you would like to use. Use 0xffff to read all')
-@click.option('--genkey', '-g', is_flag=True,
-              default=None, required=False,
-              help='Generate a new keypair either in a given Object ID or export it')
-@click.option('--sign', type=click.Path(exists=True),
-              is_flag=True,
-              default=None, required=False,
-              help='Sign data using a given Object ID')
-@click.option('--key_size', type=click.Choice(['1024', '2048']),
-              default=None, required=False,
-              help='Select which key_size should be used for the key pair generation')
-@click.option('--out', type=click.File('w'),
-              default=None, required=False,
-              help='Select the file where the output should be stored')
-def rsa_parser(ctx, oid, genkey, sign, key_size, out):
-    pass
-
-
-# optigatrust kdf --id 0xf1d0
-# optigatrust kdf --id 0xf1d0 --key_size 64
-# optigatrust kdf --id 0xf1d0 --key_size 64 --seed [file]
-# optigatrust kdf --id 0xf1d0 --key_size 64 --seed [file] --hash [sha256, sha384, sha512]
-# optigatrust kdf --id 0xf1d0 --key_size 64 --seed [file] --hash [sha256, sha384, sha512] --out [file]
-@main.command('kdf', help='Do Key Derivation using the OPTIGA Trust M')
-@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, prompt=True,
-              default='0xe0e0', show_default=True, required=True,
-              help='Select an Object ID you would like to use. Use 0xffff to read all')
-@click.option('--key_size', type=click.Choice(['1024', '2048']),
-              default=None, required=False,
-              help='Select which key_size should be used for the key pair generation')
-@click.option('--seed', '-g', type=click.Path(exists=True),
-              default=None, required=False,
-              help='Generate a new keypair either in a given Object ID or export it')
-@click.option('--hash', 'hs', type=click.Choice(['sha256', 'sha384', 'sha512']),
-              default=None, required=False,
-              help='Use a dedicated hash algorithm')
-@click.option('--out', type=click.File('w'),
-              default=None, required=False,
-              help='Select the file where the output should be stored')
-def kdf_parser(ctx, oid, key_size, seed, hs, out):
-    pass
+# @main.command('rsa', help='Do RSA related operations using the OPTIGA Trust M')
+# @click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, prompt=True,
+#               default='0xe0e0', show_default=True, required=True,
+#               help='Select an Object ID you would like to use. Use 0xffff to read all')
+# @click.option('--genkey', '-g', is_flag=True,
+#               default=None, required=False,
+#               help='Generate a new keypair either in a given Object ID or export it')
+# @click.option('--sign', type=click.Path(exists=True),
+#               is_flag=True,
+#               default=None, required=False,
+#               help='Sign data using a given Object ID')
+# @click.option('--key_size', type=click.Choice(['1024', '2048']),
+#               default=None, required=False,
+#               help='Select which key_size should be used for the key pair generation')
+# @click.option('--out', type=click.File('w'),
+#               default=None, required=False,
+#               help='Select the file where the output should be stored')
+# def rsa_parser(ctx, oid, genkey, sign, key_size, out):
+#     pass
+#
+#
+# # optigatrust kdf --id 0xf1d0
+# # optigatrust kdf --id 0xf1d0 --key_size 64
+# # optigatrust kdf --id 0xf1d0 --key_size 64 --seed [file]
+# # optigatrust kdf --id 0xf1d0 --key_size 64 --seed [file] --hash [sha256, sha384, sha512]
+# # optigatrust kdf --id 0xf1d0 --key_size 64 --seed [file] --hash [sha256, sha384, sha512] --out [file]
+# @main.command('kdf', help='Do Key Derivation using the OPTIGA Trust M')
+# @click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, prompt=True,
+#               default='0xe0e0', show_default=True, required=True,
+#               help='Select an Object ID you would like to use. Use 0xffff to read all')
+# @click.option('--key_size', type=click.Choice(['1024', '2048']),
+#               default=None, required=False,
+#               help='Select which key_size should be used for the key pair generation')
+# @click.option('--seed', '-g', type=click.Path(exists=True),
+#               default=None, required=False,
+#               help='Generate a new keypair either in a given Object ID or export it')
+# @click.option('--hash', 'hs', type=click.Choice(['sha256', 'sha384', 'sha512']),
+#               default=None, required=False,
+#               help='Use a dedicated hash algorithm')
+# @click.option('--out', type=click.File('w'),
+#               default=None, required=False,
+#               help='Select the file where the output should be stored')
+# def kdf_parser(ctx, oid, key_size, seed, hs, out):
+#     pass
