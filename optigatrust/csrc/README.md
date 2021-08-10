@@ -92,3 +92,8 @@ Scanning dependencies of target optigatrust-i2c-linux-armv7l
 [100%] Built target optigatrust-i2c-linux-armv7l
 ```
 </details>
+
+## Install recently compiled library into the system
+
+You can use `pip install .` from the root python-optiga-trust folder to install just compiled library into your system.
+If communication doesn't work for any reason, you might try to enable logging and recompile the source by changing the config line [here](https://github.com/Infineon/python-optiga-trust/blob/776bfc35b53ecedb88fcd164ab5880da3cc521ae/optigatrust/csrc/optiga-trust-m/optiga/include/optiga/optiga_lib_config_m_v3.h#L131)
