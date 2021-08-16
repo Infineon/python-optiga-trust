@@ -136,8 +136,7 @@ def get_handler():
     global _optiga_cddl
 
     if _optiga_cddl is None:
-        #supported_interfaces = ('libusb', 'uart', 'i2c')
-        supported_interfaces = ('uart', 'i2c')
+        supported_interfaces = ('libusb', 'uart', 'i2c')
         initialised = False
         errors = list()
         """
