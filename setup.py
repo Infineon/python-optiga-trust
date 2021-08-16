@@ -113,7 +113,7 @@ __package_data = {
     'optigatrust.csrc.lib': ['*.dll', '*.so', '*.ini'],
     'optigatrust.enums': ['*.xml'],
     'optigatrust.rules': [
-        'csrc/optiga-trust-x/pal/libusb/include/90-optigatrust.rules'
+        'csrc/optiga-trust-m/pal/libusb/include/90-optigatrust.rules'
     ]
 }
 
