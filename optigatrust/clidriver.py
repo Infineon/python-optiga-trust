@@ -64,13 +64,18 @@ def validate_id(ctx, param, value):
         raise click.BadParameter("Object ID doesn't exist. Please align with the Objects map")
 
 
-def validate_ecc_id(ctx, param, value):
+def validate_ecc_rsa_id(ctx, param, value):
     try:
         obj = objects.ECCKey(int(value, base=16))
         obj = obj.meta
         return int(value, base=16)
     except (ValueError, TypeError, OSError):
-        raise click.BadParameter("Object ID doesn't exist. Please align with the ECC Objects map")
+        try:
+            obj = objects.RSAKey(int(value, base=16))
+            obj = obj.meta
+            return int(value, base=16)
+        except (ValueError, TypeError, OSError):
+            raise click.BadParameter("Object ID doesn't exist. Please align with the ECC Objects map")
 
 
 def validate_extension(filename):
@@ -211,7 +216,7 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
 
         if click.confirm('Locking might be irreversible, would you like to prepare the object for a \n '
                          'protected update to be able to revert this?'):
-            click.echo("Please use prepare-update command first to prepare the object for a protected update")
+            click.echo("Please use the update-wizard command first to prepare the object for a protected update")
             exit(0)
 
         if click.confirm('Do you want to lock this object?\n'
@@ -405,7 +410,7 @@ def update_wizard(ctx, target_id, int_oid, int_file):
 
         conf_obj = optiga.Object(conf_id)
 
-        click.secho('[5/7]: This step requires from you to provide a file contains the secret used to '
+        click.secho('[5/7]: This step requires from you to provide a file which contains the secret used to '
                     'decrypt the payload sent as part of the protected update.\n'
                     'It should be a valid secret with the following content written in a text file. Example:'
                     '010203040506..cceeff', fg='green')
@@ -511,14 +516,14 @@ def update_parser(ctx, oid, file):
 # optigatrust create-keys --id 0xe0f0 --rsa --key_size 1024|2048 --out [file]
 @main.command('create-keys', help='Generate a keypair')
 @click.pass_context
-@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_ecc_id, prompt=True,
-              default='0xe0e0', show_default=True, required=True,
+@click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_ecc_rsa_id, prompt=True,
+              default='0xe0f1', show_default=True, required=True,
               metavar='<0x1234>',
               help='Select an Object ID you would like to use.')
 @click.option('--rsa', is_flag=True,
               default=False, show_default=True, required=True,
               help='If selected an RSA key generation will be invoked')
-@click.option('--curve', type=click.Choice(['secp256r1', 'secp384r1', 'secp512r1',
+@click.option('--curve', type=click.Choice(['secp256r1', 'secp384r1', 'secp521r1',
                                             'brainpool256r1', 'brainpool384r1', 'brainpool521r1']),
               default='secp256r1', required=True,
               help='Used during a key generation to define which curve to use')
@@ -534,7 +539,7 @@ def update_parser(ctx, oid, file):
 @click.option('--privout', type=click.File('w'),
               default=None, required=False,
               help='Select the file where the private key should be stored. In this case --id is ignored')
-def ec_parser(ctx, oid, rsa, curve, key_usage, key_size, pubout, privout):
+def create_keys(ctx, oid, rsa, curve, key_usage, key_size, pubout, privout):
     export = False
 
     if rsa:
@@ -548,16 +553,21 @@ def ec_parser(ctx, oid, rsa, curve, key_usage, key_size, pubout, privout):
         export = True
 
     public_key, private_key = crypto.generate_pair(key_object=obj, curve=curve,
-                                                   key_size=key_size, key_usage=key_usage, export=export)
+                                                   key_size=int(key_size), key_usage=key_usage, export=export)
     parsed_public_key = serialization.load_der_public_key(public_key, backend=default_backend())
     buffer = parsed_public_key.public_bytes(serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo)
     click.echo(message=buffer, file=pubout)
 
     if private_key is not None:
-        parsed_private_key = serialization.load_der_private_key(private_key, password=None, backend=default_backend())
-        private_buffer = parsed_private_key.private_bytes(serialization.Encoding.PEM,
-                                                          serialization.PrivateFormat.PKCS8,
-                                                          serialization.NoEncryption())
+        if rsa:
+            click.echo('No PEM output for the RSA Private Key possible. '
+                       'See https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Private-Key')
+            private_buffer = ''.join('{:02x} '.format(x) for x in private_key)
+        else:
+            parsed_private_key = serialization.load_der_private_key(private_key, password=None, backend=default_backend())
+            private_buffer = parsed_private_key.private_bytes(serialization.Encoding.PEM,
+                                                              serialization.PrivateFormat.PKCS8,
+                                                              serialization.NoEncryption())
         click.echo(message=private_buffer, file=privout)
         if privout is not None:
             click.echo('Generation completed')
