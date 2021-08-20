@@ -1,39 +1,21 @@
-# ============================================================================
-# The MIT License
-# 
-# Copyright (c) 2018 Infineon Technologies AG
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-# 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-# 
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE
-# ============================================================================
-from ctypes import *
+#!/usr/bin/env python
+"""This module implements all crypo related APIs of the optigatrust package """
+
+from ctypes import c_ubyte, c_ushort, c_byte, c_int, c_bool, c_void_p, byref, \
+    POINTER, Structure, memmove, addressof, c_uint
 import warnings
 import hashlib
 
-import optigatrust as optiga
-import optigatrust.objects as objects
 # Optiga doesn't produce the whole public key, to which other platforms used to.
 # We use an asn1 engine to append this info
-from cryptography.hazmat.primitives.asymmetric import ec, rsa
+from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-__all__  = [
+import optigatrust as optiga
+from optigatrust import objects
+
+__all__ = [
     'random',
     'generate_pair',
     'ecdsa_sign',
@@ -55,10 +37,8 @@ def _str2curve(curve_str, return_value=False):
     if curve_str in _map:
         if return_value:
             return _map[curve_str].value
-        else:
-            return _map[curve_str]
-    else:
-        raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
+        return _map[curve_str]
+    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
 
 
 def _native_to_pkcs(pkey, key=None, algorithm=None):
@@ -124,6 +104,7 @@ def _native_to_pkcs(pkey, key=None, algorithm=None):
         else:
             private_key = None
         return public_key, private_key
+    return None, None
 
 
 def _pkcs_to_native(pkey, algorithm=None):
@@ -167,12 +148,14 @@ def _pkcs_to_native(pkey, algorithm=None):
     return pkey[prefix_length:]
 
 
+# pylint: disable=missing-class-docstring disable=too-few-public-methods
 class PublicKeyFromHost(Structure):
     _fields_ = [("public_key", POINTER(c_ubyte)),
                 ("length", c_ushort),
                 ("key_type", c_ubyte)]
 
 
+# pylint: disable=too-few-public-methods
 class _Signature:
     def __init__(self, hash_alg: str, key_id: int, signature: bytes, algorithm: str):
         self.hash_alg = hash_alg
@@ -181,23 +164,25 @@ class _Signature:
         self.algorithm = algorithm
 
 
+# pylint: disable=too-few-public-methods
 class ECDSASignature(_Signature):
     def __init__(self, hash_alg, key_id, signature):
         signature_algorithm_id = '%s_%s' % (hash_alg, 'ecdsa')
         super().__init__(hash_alg, key_id, signature, signature_algorithm_id)
 
 
+# pylint: disable=too-few-public-methods
 class PKCS1v15Signature(_Signature):
     def __init__(self, hash_alg, keyid, signature):
         signature_algorithm_id = '%s_%s' % (hash_alg, 'rsa')
         super().__init__(hash_alg, keyid, signature, signature_algorithm_id)
 
 
-def random(n, trng=True):
+def random(number, trng=True):
     """
     This function generates a random number
 
-    :param n:
+    :param number:
         how much randomness to generate. Valid values are integers from 8 to 256
 
     :param trng:
@@ -210,24 +195,24 @@ def random(n, trng=True):
     :returns:
         Bytes object with randomness
     """
-    ot = optiga.Chip()
-    api = ot.api
+    chip = optiga.Chip()
+    api = chip.api
 
     api.exp_optiga_crypt_random.argtypes = c_byte, POINTER(c_ubyte), c_ushort
     api.exp_optiga_crypt_random.restype = c_int
-    p = (c_ubyte * n)()
+    ptr = (c_ubyte * number)()
 
     if trng is True:
-        ret = api.exp_optiga_crypt_random(ot.rng.TRNG.value, p, len(p))
+        ret = api.exp_optiga_crypt_random(chip.rng.TRNG.value, ptr, len(ptr))
     else:
-        ret = api.exp_optiga_crypt_random(ot.rng.DRNG.value, p, len(p))
+        ret = api.exp_optiga_crypt_random(chip.rng.DRNG.value, ptr, len(ptr))
 
     if ret == 0:
-        return bytes(p)
-    else:
-        return bytes(0)
+        return bytes(ptr)
+    return bytes(0)
 
 
+# pylint: disable=too-many-locals
 def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     opt = optiga.Chip()
     _allowed_key_usage = {
@@ -255,11 +240,11 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
                 )
             _key_usage.append(_allowed_key_usage[entry])
 
-    c = _str2curve(curve, return_value=True)
-    if c not in opt.curves_values:
+    _curve = _str2curve(curve, return_value=True)
+    if _curve not in opt.curves_values:
         raise TypeError(
             "object_id not found. \n\r Supported = {0},\n\r  "
-            "Provided = {1}".format(list(opt.curves_values), c))
+            "Provided = {1}".format(list(opt.curves_values), _curve))
 
     opt.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
         c_ubyte), POINTER(c_ushort)
@@ -275,7 +260,7 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     else:
         key = byref(c_ushort(key_object.id))
 
-    ret = opt.api.exp_optiga_crypt_ecc_generate_keypair(c, c_keyusage, int(export), key, pkey, byref(c_plen))
+    ret = opt.api.exp_optiga_crypt_ecc_generate_keypair(_curve, c_keyusage, int(export), key, pkey, byref(c_plen))
 
     if export:
         priv_key = (c_ubyte * _key_sizes[curve][1])()
@@ -291,13 +276,14 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
         if export:
             public_key, private_key = _native_to_pkcs(key=bytes(priv_key), pkey=bytes(pub_key), algorithm=curve)
             return public_key, private_key
-        else:
-            public_key, _ = _native_to_pkcs(key=None, pkey=bytes(pub_key), algorithm=curve)
-            return public_key, None
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+        public_key, _ = _native_to_pkcs(key=None, pkey=bytes(pub_key), algorithm=curve)
+        return public_key, None
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
+# pylint: disable=too-many-locals disable=too-many-branches
 def _generate_rsa_pair(key_object, key_size=1024, key_usage=None, export=False):
     handle = optiga.Chip()
     _allowed_key_usages = {
@@ -318,7 +304,6 @@ def _generate_rsa_pair(key_object, key_size=1024, key_usage=None, export=False):
                 )
             _key_usage.append(_allowed_key_usages[entry])
 
-    _bytes = None
     api = handle.api
 
     allowed_key_sizes = (1024, 2048)
@@ -366,8 +351,8 @@ def _generate_rsa_pair(key_object, key_size=1024, key_usage=None, export=False):
             _key = bytes(priv_key)
 
         return _pkey, _key
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
 def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=False):
@@ -407,12 +392,13 @@ def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=
     """
     if isinstance(key_object, objects.ECCKey):
         return _generate_ecc_pair(key_object=key_object, curve=curve, key_usage=key_usage, export=export)
-    elif isinstance(key_object, objects.RSAKey):
+
+    if isinstance(key_object, objects.RSAKey):
         return _generate_rsa_pair(key_object=key_object, key_size=key_size, key_usage=key_usage, export=export)
-    else:
-        raise ValueError(
-            'key_object type isn\'t supported'
-        )
+
+    raise ValueError(
+        'key_object type isn\'t supported'
+    )
 
 
 def ecdsa_sign(key_object, data):
@@ -467,22 +453,22 @@ def ecdsa_sign(key_object, data):
     # hash_algorithm = 'sha256'
     digest = (c_ubyte * param[1])(*param[0](_d).digest())
     # We reserve two extra bytes for nistp512r1 curve, shich has signature r/s values longer than a hash size
-    s = (c_ubyte * ((param[1] * 2 + 2) + 6))()
+    sign = (c_ubyte * ((param[1] * 2 + 2) + 6))()
     hash_algorithm = param[2]
 
-    c_slen = c_ubyte(len(s))
+    c_slen = c_ubyte(len(sign))
 
-    ret = api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), key_object.id, s, byref(c_slen))
+    ret = api.exp_optiga_crypt_ecdsa_sign(digest, len(digest), key_object.id, sign, byref(c_slen))
 
     if ret == 0:
         signature = (c_ubyte * (c_slen.value + 2))()
         signature[0] = 0x30
         signature[1] = c_slen.value
-        memmove(addressof(signature) + 2, s, c_slen.value)
+        memmove(addressof(signature) + 2, sign, c_slen.value)
 
         return ECDSASignature(hash_algorithm, key_object.id, bytes(signature))
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
 def ecdh(key_object, external_pkey, export=False):
@@ -542,12 +528,13 @@ def ecdh(key_object, external_pkey, export=False):
     # Extract the curve from the object metadata
     try:
         curve = key_object.meta['algorithm']
-    except KeyError:
-        raise ValueError('Given object does\'t have a key populated.')
+    except KeyError as no_meta_found:
+        raise ValueError('Given object does\'t have a key populated.') from no_meta_found
 
     api.exp_optiga_crypt_ecdh.argtypes = c_ushort, POINTER(PublicKeyFromHost), c_ubyte, POINTER(c_ubyte)
     api.exp_optiga_crypt_ecdsa_sign.restype = c_int
 
+    # pylint: disable=attribute-defined-outside-init
     pkey = PublicKeyFromHost()
     pkey.public_key = (c_ubyte * len(external_pkey))()
     memmove(pkey.public_key, external_pkey, len(external_pkey))
@@ -565,10 +552,9 @@ def ecdh(key_object, external_pkey, export=False):
     if ret == 0:
         if export:
             return bytes(shared_secret)
-        else:
-            return objects.AcquiredSession()
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+        return objects.AcquiredSession()
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
 def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
@@ -607,27 +593,27 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
 
     if hash_algorithm == 'sha256':
         digest = (c_ubyte * 32)(*hashlib.sha256(_d).digest())
-        s = (c_ubyte * 320)()
+        sign = (c_ubyte * 320)()
         # Signature schemes RSA SSA PKCS1-v1.5 with SHA256 digest
         sign_scheme = 0x01
     elif hash_algorithm == 'sha384':
         digest = (c_ubyte * 48)(*hashlib.sha384(_d).digest())
-        s = (c_ubyte * 320)()
+        sign = (c_ubyte * 320)()
         # Signature schemes RSA SSA PKCS1-v1.5 with SHA384 digest
         sign_scheme = 0x02
     else:
         raise ValueError('This key isze is not supported, you typed {0} supported are [\'sha256\', \'sha384\']'
                          .format(hash_algorithm))
-    c_slen = c_uint(len(s))
+    c_slen = c_uint(len(sign))
 
-    ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), key_object.id, s, byref(c_slen), 0)
+    ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), key_object.id, sign, byref(c_slen), 0)
 
     if ret == 0:
         signature = (c_ubyte * c_slen.value)()
-        memmove(addressof(signature), s, c_slen.value)
+        memmove(addressof(signature), sign, c_slen.value)
         return PKCS1v15Signature(hash_algorithm, key_object.id, bytes(signature))
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
 def hmac(key_object, data, hash_algorithm='sha256'):
@@ -670,11 +656,11 @@ def hmac(key_object, data, hash_algorithm='sha256'):
                     'Selected object doesn\'t have a proper setup.'
                     'Should have PRESHSEC type, you have {0}'.format(key_object.meta['type'])
                 )
-        except KeyError:
+        except KeyError as no_such_meta:
             raise ValueError(
                 'Selected object doesn\'t have a proper setup.'
                 'Should have PRESHSEC type'
-            )
+            ) from no_such_meta
     _hash_map = {
         'sha256': (0x20, 32),
         'sha384': (0x21, 48),
@@ -696,17 +682,18 @@ def hmac(key_object, data, hash_algorithm='sha256'):
 
     if ret == 0:
         return bytes(mac)
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
-def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', export=False):
+# pylint: disable=too-many-arguments disable=too-many-branches
+def tls_prf(obj, key_length, seed, label=None, hash_algorithm='sha256', export=False):  # noqa: C901
     """
     This function derives a key (TLS PRF) using the secret stored on OPTIGA
 
     .. note:: SHA384 and SH512 are only OPTIGA™ Trust M3 relevant
 
-    :param object:
+    :param obj:
         Key Object on the OPTIGA Chip, which should be used as a source of the private key storage.
         Can be one of the following classes
         :class:`~optigatrust.objects.AppData`, :class:`~optigatrust.objects.AcquiredSession`
@@ -738,22 +725,22 @@ def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', expor
         byte string with the key if requested, otherwise :class:`~optigatrust.objects.AcquiredSession`
     """
     api = optiga.Chip().api
-    if not isinstance(object, (objects.AppData, objects.AcquiredSession)):
+    if not isinstance(obj, (objects.AppData, objects.AcquiredSession)):
         raise TypeError(
-            'key_object should be either {0}, or {1} types'.format(objects.AppData,  objects.AcquiredSession)
+            'key_object should be either {0}, or {1} types'.format(objects.AppData, objects.AcquiredSession)
         )
-    if isinstance(object, objects.AppData):
+    if isinstance(obj, objects.AppData):
         try:
-            if object.meta['type'] != 'pre_sh_secret':
+            if obj.meta['type'] != 'pre_sh_secret':
                 raise ValueError(
                     'Selected object doesn\'t have a proper setup.'
-                    'Should have PRESHSEC type, you have {0}'.format(object.meta['type'])
+                    'Should have PRESHSEC type, you have {0}'.format(obj.meta['type'])
                 )
-        except KeyError:
+        except KeyError as no_meta_found:
             raise ValueError(
                 'Selected object doesn\'t have a proper setup.'
                 'Should have PRESHSEC type'
-            )
+            ) from no_meta_found
     _hash_map = {
         'sha256': 0x01,
         'sha384': 0x02,
@@ -768,6 +755,7 @@ def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', expor
         label_len = c_ushort(0)
     else:
         label_len = c_ushort(len(label))
+
     if seed is None:
         seed_len = c_ushort(0)
     else:
@@ -778,19 +766,20 @@ def tls_prf(object, key_length, seed, label=None, hash_algorithm='sha256', expor
     else:
         derived_key = None
 
-    ret = api.exp_optiga_crypt_tls_prf(_hash_map[hash_algorithm], object.id, label, label_len,
+    ret = api.exp_optiga_crypt_tls_prf(_hash_map[hash_algorithm], obj.id, label, label_len,
                                        seed, seed_len, key_length, int(export), derived_key)
 
     if ret == 0:
         if export:
             return bytes(derived_key)
-        else:
-            return objects.AcquiredSession()
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+        return objects.AcquiredSession()
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
 
-def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', export=False):
+# pylint: disable=too-many-arguments disable=too-many-branches
+def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', export=False):  # noqa: C901
     """
     This function derives a key (HKDF) using the secret stored on OPTIGA
 
@@ -839,11 +828,11 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
                     'Selected object doesn\'t have a proper setup.'
                     'Should have PRESHSEC type, you have {0}'.format(key_object.meta['type'])
                 )
-        except KeyError:
+        except KeyError as no_meta_found:
             raise ValueError(
                 'Selected object doesn\'t have a proper setup.'
                 'Should have PRESHSEC type'
-            )
+            ) from no_meta_found
     _hash_map = {
         'sha256': 0x08,
         'sha384': 0x09,
@@ -874,8 +863,7 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
     if ret == 0:
         if export:
             return bytes(derived_key)
-        else:
-            return objects.AcquiredSession()
-    else:
-        raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
+        return objects.AcquiredSession()
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))

@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+"""This module defines available HW Object dependencies of the optigatrust package """
+
+
 __all__ = [
     'charge',
     'm1',

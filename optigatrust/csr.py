@@ -1,29 +1,6 @@
-# ============================================================================
-# The MIT License
-# 
-# Copyright (c) 2015-2018 Will Bond <will@wbond.net>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy of
-# this software and associated documentation files (the "Software"), to deal in
-# the Software without restriction, including without limitation the rights to
-# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-# of the Software, and to permit persons to whom the Software is furnished to do
-# so, subject to the following conditions:
+#!/usr/bin/env python
+"""This module implements all Certificate Signing Request related APIs of the optigatrust package """
 
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-# This is a modified version of the original csrbuilder python module
-# A link ot the repository https://github.com/wbond/csrbuilder
-# Modifications are done with respect to signature methods
-# ============================================================================
 import inspect
 import re
 import textwrap
@@ -34,7 +11,6 @@ from optigatrust import objects
 from optigatrust import crypto
 
 int_types = (int,)
-str_cls = str
 
 __all__ = [
     'CSRBuilder',
@@ -77,7 +53,8 @@ def pem_armor_csr(certification_request):
     )
 
 
-class CSRBuilder(object):
+# pylint: disable=too-many-instance-attributes disable=missing-class-docstring
+class CSRBuilder():
     _subject = None
     _subject_public_key = None
     _hash_algo = None
@@ -102,6 +79,7 @@ class CSRBuilder(object):
 
         self.subject = subject
         self.subject_public_key = subject_public_key
+        # pylint: disable=invalid-name
         self.ca = False
 
         self._hash_algo = 'sha256'
@@ -157,6 +135,9 @@ class CSRBuilder(object):
 
     @_writer
     def subject_public_key(self, _value):
+        """
+        a BER/DER-encoded byte string
+        """
         self._subject_public_key = keys.PublicKeyInfo.load(_value)
 
     @_writer
@@ -176,6 +157,7 @@ class CSRBuilder(object):
 
         self._hash_algo = value
 
+    # pylint: disable=invalid-name
     @property
     def ca(self):
         """
@@ -188,6 +170,7 @@ class CSRBuilder(object):
 
         return self._basic_constraints['ca'].native
 
+    # pylint: disable=invalid-name
     @ca.setter
     def ca(self, value):
         if value is None:
@@ -407,7 +390,7 @@ class CSRBuilder(object):
             'ocsp_no_check': False,
         }.get(name, False)
 
-    def build(self, signing_key):
+    def build(self, signing_key):  # noqa: C901
         """
         Validates the certificate information, constructs an X.509 certificate and then signs it
         :param signing_key: An asn1crypto.keys.PrivateKeyInfo or oscrypto.asymmetric.PrivateKey object for the private
@@ -475,14 +458,12 @@ class CSRBuilder(object):
                 'Algorithm isn\'t supported, use either ecc or rsa'
             )
 
-        s = sign_func(signing_key, certification_request_info.dump())
-
         return csr.CertificationRequest({
             'certification_request_info': certification_request_info,
             'signature_algorithm': {
                 'algorithm': signature_algorithm_id,
             },
-            'signature': s.signature
+            'signature': sign_func(signing_key, certification_request_info.dump()).signature
         })
 
 

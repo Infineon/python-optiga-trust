@@ -1,40 +1,26 @@
-# ============================================================================
-# The MIT License
-#
-# Copyright (c) 2021 Infineon Technologies AG
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE
-# ============================================================================
+#!/usr/bin/env python
+"""This script implements a user friendly Command Line Interface of the optigatrust module """
+
 import os
+import sys
 import ntpath
-import click
-import optigatrust.version as optiga_version
-import optigatrust as optiga
 import json
 from ast import literal_eval
+import click
 
+# PEM files parser from the AS1 Crypto Library
 from asn1crypto import pem
-from optigatrust import objects, crypto, port
+
+# Functions to comvert back and forth private and public keys
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
 
+from optigatrust import objects, crypto, port
+import optigatrust as optiga
+import optigatrust.version as optiga_version
 
+
+# pylint: disable=missing-class-docstring disable=missing-function-docstring
 def command_required_option_from_option(require_name, require_map):
     class CommandOptionRequiredClass(click.Command):
 
@@ -48,23 +34,43 @@ def command_required_option_from_option(require_name, require_map):
                 raise click.ClickException(
                     "With {}={} must specify option --{}".format(
                         require_name, require, require_map[require]))
-            super(CommandOptionRequiredClass, self).invoke(ctx)
+            super().invoke(ctx)
 
     return CommandOptionRequiredClass
 
 
+# pylint: disable=unused-argument disable=missing-function-docstring
 def validate_id(ctx, param, value):
+    """
+    Check a given id can be initialised as an object
+
+    :param value:
+        a given Object ID
+
+    :raises:
+        - click.BadParameter - in case the given object id can't be initialised
+    """
     try:
         if value is None:
             return None
         obj = optiga.Object(int(value, base=16))
         obj = obj.meta
         return int(value, base=16)
-    except (ValueError, TypeError, OSError):
-        raise click.BadParameter("Object ID doesn't exist. Please align with the Objects map")
+    except (ValueError, TypeError, OSError) as no_object:
+        raise click.BadParameter("Object ID doesn't exist. Please align with the Objects map") from no_object
 
 
+# pylint: disable=unused-argument disable=missing-function-docstring
 def validate_ecc_rsa_id(ctx, param, value):
+    """
+    Check a given id can be initialised as an RSA or ECC key object
+
+    :param value:
+        a given Object ID
+
+    :raises:
+        - click.BadParameter - in case the given object id can't be initialised
+    """
     try:
         obj = objects.ECCKey(int(value, base=16))
         obj = obj.meta
@@ -74,11 +80,20 @@ def validate_ecc_rsa_id(ctx, param, value):
             obj = objects.RSAKey(int(value, base=16))
             obj = obj.meta
             return int(value, base=16)
-        except (ValueError, TypeError, OSError):
-            raise click.BadParameter("Object ID doesn't exist. Please align with the ECC Objects map")
+        except (ValueError, TypeError, OSError) as no_rsa:
+            raise click.BadParameter("Object ID doesn't exist. Please align with the ECC Objects map") from no_rsa
 
 
 def validate_extension(filename):
+    """
+    Check whether a given filename matches expected handlers
+
+    :param filename:
+        an path to the file including an extension
+
+    :raises:
+        - click.BadParameter - in case the given filename can't be parsed
+    """
     split_tup = os.path.splitext(ntpath.basename(filename))
     file_extension = split_tup[1]
     if file_extension not in ('.json', '.pem', '.dat'):
@@ -86,28 +101,61 @@ def validate_extension(filename):
 
 
 def handle_pem_extension(oid, _input):
+    """
+    Read a given file and write it into a given object as an X509 certificate
+
+    :param oid:
+        an integer value which should point to the correct Object ID
+
+    :param _input:
+        an opened file descriptor from where a data should be read, expected content is a PEM formatted certificate
+
+    :raises:
+        - click.BadParameter - in case the given filename can't be parsed
+    """
     try:
         cert = objects.X509(oid)
         cert.pem = _input.read()
-    except (ValueError, TypeError, OSError):
-        click.BadParameter(
+    except (ValueError, TypeError, OSError) as failed_to_init:
+        raise click.BadParameter(
             '[{0}]: File Content can\'t be parsed or written.\n {1}'.format(_input.name, _input.read())
-        )
+        ) from failed_to_init
 
 
 def handle_dat_extension(oid, _input):
+    """
+    Read a given file and write it into a given object
+
+    :param oid:
+        an integer value which should point to the correct Object ID
+
+    :param _input:
+        an opened file descriptor from where a data should be read, expected content is 00 01 02 03 04 ...
+    """
     obj = optiga.Object(oid)
     try:
         split_buffer = _input.read().split()
         data = bytes([int(i, base=16) for i in split_buffer])
         obj.write(data)
-    except (ValueError, TypeError, OSError):
-        click.BadParameter(
+    except (ValueError, TypeError, OSError) as failed_to_write:
+        raise click.BadParameter(
             '[{0}]: File Content can\'t be parsed or written.\n {1}'.format(_input.name, _input.read())
-        )
+        ) from failed_to_write
 
 
 def insert_newlines(string, every=64):
+    """
+    This function inserts into a given string a newline every given character
+
+    :param string:
+        a string which should be changed
+
+    :param every:
+        an argument which defines every which character a newline should be put
+
+    :returns:
+        a new string with newlines
+    """
     lines = []
     for i in range(0, len(string), every):
         lines.append(string[i:i + every])
@@ -115,6 +163,15 @@ def insert_newlines(string, every=64):
 
 
 def process_metadata_file(file):
+    """
+    This function processes a given exteranlly generated file and extracts data from c structs
+
+    :param file:
+        a file descriptor
+
+    :returns:
+        manifest, fragments - a byte type and a list of byte- objects with the data to be sent to the chip
+    """
     data = file.read()
 
     # Find manifest + '=' '{'
@@ -139,14 +196,16 @@ def process_metadata_file(file):
                 fragment_data[num] = int(elem[:-1], base=16)
 
             _fragments.append(bytearray(fragment_data))
+
+            return _manifest, _fragments
         except ValueError:
             return _manifest, _fragments
 
 
+# pylint: disable=missing-function-docstring
 @click.group()
 @click.version_option(optiga_version.__version__)
-@click.pass_context
-def main(ctx):
+def main():
     pass
 
 
@@ -154,8 +213,9 @@ def main(ctx):
 # optigatrust object --id 0xe0f0 --read --out [file]
 # optigatrust object --id 0xe0f0 --read --meta
 # optigatrust object --id 0xe0f0 --in [file]
+# pylint: disable=redefined-builtin disable=too-many-arguments disable=too-many-locals
+# pylint: disable=too-many-branches disable=too-many-statements disable=missing-function-docstring
 @main.command('object', help='Manages objects data and metadata')
-@click.pass_context
 @click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, required=False,
               metavar='<0x1234>',
               help='Select an Object ID you would like to use.')
@@ -185,7 +245,7 @@ def main(ctx):
                     2) .dat - file format with hexadecimal string (given as a text); e.g. 00 01 02 03...
                     3) .pem - file format with valid X.509 Certificate 
                     
-                    """
+                    """  # noqa: W293,W291
               )
 @click.option('--out', type=click.File('w'),
               default=None, required=False,
@@ -193,7 +253,7 @@ def main(ctx):
 @click.option('--outform', type=click.Choice(['PEM', 'DER', 'C', 'DAT']),
               default=None, required=False,
               help='Define which output type to use')
-def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
+def object_parser(oid, lock, unlock, export_all, meta, inp, out, outform):  # noqa: C901
     buffer = ''
     output = out
 
@@ -205,7 +265,7 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
 
         click.echo(message=buffer, file=output)
         click.echo("Export Completed")
-        exit(0)
+        sys.exit(0)
 
     # Todo Test lock
     if lock:
@@ -217,7 +277,7 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
         if click.confirm('Locking might be irreversible, would you like to prepare the object for a \n '
                          'protected update to be able to revert this?'):
             click.echo("Please use the update-wizard command first to prepare the object for a protected update")
-            exit(0)
+            sys.exit(0)
 
         if click.confirm('Do you want to lock this object?\n'
                          'This action is going to modify the "Change" Object Access Condition as well as '
@@ -227,9 +287,9 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
                 click.echo('New metadata:')
                 buffer = json.dumps(obj.meta, indent=4)
                 click.echo(message=buffer, file=output)
-            except OSError:
-                raise click.UsageError('Lock is not possible')
-        exit(0)
+            except OSError as no_meta:
+                raise click.UsageError('Lock is not possible') from no_meta
+        sys.exit(0)
 
     # Todo Test unlock
     if unlock:
@@ -247,9 +307,9 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
                                            'by the protected update data set tool')
                 manifest, fragments = process_metadata_file(inp)
                 chip.protected_update(manifest, fragments)
-            except OSError:
-                raise click.UsageError('Unlock is not possible')
-        exit(0)
+            except OSError as not_updated:
+                raise click.UsageError('Unlock is not possible') from not_updated
+        sys.exit(0)
 
     # out will be either stdout or a file
     # so if metadata isn't requested we form a valid output for a file
@@ -270,7 +330,6 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
             raise click.BadParameter('PEM is supported only for objects more than 1.5 kBytes. '
                                      'Original error: {0}'.format(err))
     elif outform == 'DER':
-        obj = optiga.Object(oid)
         try:
             cert = objects.X509(oid)
             buffer = cert.der
@@ -318,22 +377,23 @@ def object_parser(ctx, oid, lock, unlock, export_all, meta, inp, out, outform):
     click.echo(message=buffer, file=output)
 
 
+# pylint: disable=too-many-arguments disable=too-many-locals
+# pylint: disable=too-many-branches disable=too-many-statements disable=missing-function-docstring
 @main.command('update-wizard', help='Guide through the protected update preparation for a specific Object ID')
-@click.pass_context
 @click.option('--target-id', type=click.UNPROCESSED, callback=validate_id, required=True,
               metavar='<0x1234>',
               help='Select an Object ID you would like to prepare a protected update for')
 @click.option('--int-id', 'int_oid', type=click.UNPROCESSED, callback=validate_id, required=True,
               metavar='<0x1234>',
-              help='define Integrity (Int) enabled for the protected update.'
-                   'In layman terms, define an Object ID where a valid X.509 certificate should be stored. '
-                   'This certificate will be then used to verify a signed payload from an incoming object '
-                   'update request from a remote server.')
+              help=("define Integrity (Int) enabled for the protected update.\n"
+                    "In layman terms, define an Object ID where a valid X.509 certificate should be stored. \n"
+                    "This certificate will be then used to verify a signed payload from an incoming object \n"
+                    "update request from a remote server."))
 @click.option('--int-file', type=click.File('r'), default=None, required=True,
               help='Provide a valid X.509 certificate encoded as a PEM file (.pem)')
-def update_wizard(ctx, target_id, int_oid, int_file):
+def update_wizard(target_id, int_oid, int_file):  # noqa: C901
     # Access Conditions
-    ac = []
+    conditions = []
     conf_lock = False
     int_lock = False
     zero = False
@@ -365,7 +425,7 @@ def update_wizard(ctx, target_id, int_oid, int_file):
         if len(split_tup) != 2:
             raise click.BadParameter('Bad filename. Exit')
 
-        if '.pem' == split_tup[1]:
+        if split_tup[1] == '.pem':
             file = int_file.read()
             _, _, der_bytes = pem.unarmor(bytes(file, 'utf-8'))
             int_obj.write(der_bytes)
@@ -385,18 +445,18 @@ def update_wizard(ctx, target_id, int_oid, int_file):
             int_obj.meta = {'lcso': 'operational'}
             click.secho('[Info]: Object ID {0} has been locked'.format(hex(int_oid)), fg='blue')
 
-        ac.append('int')
+        conditions.append('int')
         # Convert OID into an integer '0xe0e1' -> e0e1
         # Split the number and add first and second byte to the list
-        ac.append('0x{:02x}'.format((int_oid & 0xff00) >> 8))
-        ac.append('0x{:02x}'.format(int_oid & 0x00ff))
+        conditions.append('0x{:02x}'.format((int_oid & 0xff00) >> 8))
+        conditions.append('0x{:02x}'.format(int_oid & 0x00ff))
 
     click.secho('[2/7]: Confidentiality protection is when a secret used to encrypt the protected payload prepared on '
                 'the remote server. If selected it requires to know the secret so that this wizard can write it on the '
                 'chip', fg='green')
     if click.confirm('[Question]: Do you want to enable Confidentiality protection?'):
 
-        ac.append('&&')
+        conditions.append('&&')
 
         conf_id = click.prompt(click.style('3/7]: Please provide an Object ID; e.g. 0xf1d0, '
                                'where the secret used to decrypt the payload should be stored', fg='green'),
@@ -432,11 +492,11 @@ def update_wizard(ctx, target_id, int_oid, int_file):
         click.secho('[Info]: Object ID {0} has now \'update_secret\' type and Execute Access Condition'
                     ' set to \'always\''.format(hex(int_oid)), fg='blue')
 
-        ac.append('conf')
+        conditions.append('conf')
         # Convert Confidentiality OID into an integer '0xf1d0' -> f1d0
         # Split the number and add first and second byte to the list
-        ac.append('0x{:02x}'.format((conf_id & 0xff00) >> 8))
-        ac.append('0x{:02x}'.format(conf_id & 0x00ff))
+        conditions.append('0x{:02x}'.format((conf_id & 0xff00) >> 8))
+        conditions.append('0x{:02x}'.format(conf_id & 0x00ff))
     else:
         click.secho('[3/7]: Skipped.', fg='green')
         click.secho('[4/7]: Skipped.', fg='green')
@@ -445,25 +505,25 @@ def update_wizard(ctx, target_id, int_oid, int_file):
     click.secho('[6/7]: You need to select what should be updated.', fg='green')
     choice = click.prompt('[Question]: Type 1 for data, 2 for metadata, or 3 for both')
 
-    if choice != '1' and choice != '2' and choice != '3':
+    if choice not in ('1', '2', '3'):
         raise click.BadParameter('[6/7]: you need to select either 1 for data, 2 for metadata or 3 for both')
 
-    if choice == '2' or choice == '3':
+    if choice in ('2', '3'):
         click.secho('[7/7]: Metadata update is selected. During metadata update it is possibly to flush the content of '
                     'the object.', fg='green')
         zero = click.confirm('[Question]: Do you want to flush {0} Object after the metadata update?'.
                              format(hex(target_id)))
 
-    if choice == '2' or choice == '3':
+    if choice in ('2', '3'):
         if zero:
-            protected_update_meta = {'meta_update': ac, 'reset_type': ['lcso_to_creation', 'flushing']}
+            protected_update_meta = {'meta_update': conditions, 'reset_type': ['lcso_to_creation', 'flushing']}
         else:
-            protected_update_meta = {'meta_update': ac}
+            protected_update_meta = {'meta_update': conditions}
 
-    if choice == '1' or choice == '3':
+    if choice in ('1', '3'):
         change_ac = target_obj.meta['change']
         change_ac.append('||')
-        change_ac += ac
+        change_ac += conditions
         protected_update_meta = {'change': change_ac}
 
     try:
@@ -479,14 +539,15 @@ def update_wizard(ctx, target_id, int_oid, int_file):
 
 
 # Todo: add key and data update as well
+# pylint: disable=too-many-arguments disable=too-many-locals
+# pylint: disable=too-many-branches disable=too-many-statements disable=missing-function-docstring
 @main.command('update', help='Use protected update feature')
-@click.pass_context
 @click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_id, required=False,
               metavar='<0x1234>',
               help='Select an Object ID you would like to use')
 @click.option('--file', type=click.File('r'), default=None, required=False,
               help='Provide a valid manifest + fragments file generated by the protected update data set tool')
-def update_parser(ctx, oid, file):
+def update_parser(oid, file):
     if oid != int(os.path.splitext(ntpath.basename(file.name))[0], base=16):
         raise click.BadParameter('used id should be equal to the filename used for the protected update. Moreover the '
                                  'manifest inside it is coupled with the given id and can\'t be taken from another file')
@@ -503,9 +564,8 @@ def update_parser(ctx, oid, file):
             click.echo(''.join('{:02x} '.format(x) for x in obj.read()))
         except OSError:
             pass
-
-    except OSError:
-        raise ValueError("{0} Update failed".format(hex(oid)))
+    except OSError as not_updated:
+        raise ValueError("{0} Update failed".format(hex(oid))) from not_updated
 
 
 # optigatrust create-keys --out [file]
@@ -514,8 +574,9 @@ def update_parser(ctx, oid, file):
 # optigatrust create-keys --id 0xe0f0 --curve secp256r1 --out [file]
 # optigatrust create-keys --id 0xe0f0 --rsa --out [file]
 # optigatrust create-keys --id 0xe0f0 --rsa --key_size 1024|2048 --out [file]
+# pylint: disable=too-many-arguments disable=too-many-locals
+# pylint: disable=too-many-branches disable=too-many-statements disable=missing-function-docstring
 @main.command('create-keys', help='Generate a keypair')
-@click.pass_context
 @click.option('--id', 'oid', type=click.UNPROCESSED, callback=validate_ecc_rsa_id, prompt=True,
               default='0xe0f1', show_default=True, required=True,
               metavar='<0x1234>',
@@ -539,7 +600,7 @@ def update_parser(ctx, oid, file):
 @click.option('--privout', type=click.File('w'),
               default=None, required=False,
               help='Select the file where the private key should be stored. In this case --id is ignored')
-def create_keys(ctx, oid, rsa, curve, key_usage, key_size, pubout, privout):
+def create_keys(oid, rsa, curve, key_usage, key_size, pubout, privout):
     export = False
 
     if rsa:

@@ -1,4 +1,5 @@
-# coding: utf-8
+#!/usr/bin/env python
+"""Library version"""
 
 __version_info__ = (1, 2, 2)
 

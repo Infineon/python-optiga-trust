@@ -1,26 +1,5 @@
-# ============================================================================
-# The MIT License
-#
-# Copyright (c) 2018 Infineon Technologies AG
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE
-# ============================================================================
+#!/usr/bin/env python
+"""This module implements data/metadata import and export functions """
 import os
 import re
 import json
@@ -79,7 +58,7 @@ def to_json():
     output = dict()
     # Read metadata from available keys
     for oid in opt.key_id_values:
-        #print('Reading: {0}'.format(hex(oid)))
+        # print('Reading: {0}'.format(hex(oid)))
         key = optiga.Object(oid)
         raw_meta = key.read_raw_meta().hex()
         if len(raw_meta) == 0:
@@ -91,7 +70,7 @@ def to_json():
         del key
 
     for oid in opt.object_id_values:
-        #print('Reading: {0}'.format(hex(oid)))
+        # print('Reading: {0}'.format(hex(oid)))
         key = optiga.Object(oid)
         raw_meta = key.read_raw_meta().hex()
         try:
@@ -224,8 +203,8 @@ def from_json_path(path):
         - TypeError - when any of the parameters are of the wrong type
         - OSError - when an error is returned by the chip initialisation library
     """
-    with open(path, 'r', encoding='utf8') as f:
-        supermeta = json.loads(f.read())
+    with open(path, 'r', encoding='utf8') as file:
+        supermeta = json.loads(file.read())
 
     from_json(supermeta)
 
@@ -312,13 +291,13 @@ def to_otc(path):
     meta = to_json()
     filepath = os.path.normpath(os.path.abspath(os.path.join(path, 'OPTIGA_Trust.xml')))
     # OTC understands only UTF-8, so the file should be encoded in it
-    with open(filepath, 'w+', encoding='utf8') as f:
+    with open(filepath, 'w+', encoding='utf8') as file:
         supermeta = _to_xml(meta)
-        f.write(supermeta)
+        file.write(supermeta)
 
     for key, value in meta.items():
         if 'data' in value:
             if 'used_size' in value['pretty_metadata']:
                 formatted_data = re.sub("(.{64})", "\\1\n", value['data'].upper(), 0, re.DOTALL)
-                with open('{0}/{1}.dat'.format(path, key.upper()), 'w+', encoding='utf-8') as f:
-                    f.write(formatted_data)
+                with open('{0}/{1}.dat'.format(path, key.upper()), 'w+', encoding='utf-8') as file:
+                    file.write(formatted_data)

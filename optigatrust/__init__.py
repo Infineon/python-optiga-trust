@@ -1,26 +1,8 @@
-# ============================================================================
-# The MIT License
-#
-# Copyright (c) 2018 Infineon Technologies AG
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE
-# ============================================================================
+#!/usr/bin/env python
+"""This module defines chip and object related base classes of the optigatrust package """
+# pylint: disable=too-many-lines
+# for the time-being this file is large, a major restructure is required
+
 from collections import namedtuple
 import warnings
 from ctypes import c_int, c_ushort, c_ubyte, POINTER, byref, memmove
@@ -45,7 +27,6 @@ __all__ = [
 
 
 UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
-_optiga_cddl = None
 
 
 def _lookup_optiga(api):
@@ -54,14 +35,14 @@ def _lookup_optiga(api):
     api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
     api.exp_optiga_util_read_metadata.restype = c_int
 
-    d = (c_ubyte * 1700)()
+    c_d = (c_ubyte * 1700)()
     c_dlen = c_ushort(1700)
 
-    ret = api.exp_optiga_util_read_data(c_ushort(0xE0C2), 0, d, byref(c_dlen))
+    ret = api.exp_optiga_util_read_data(c_ushort(0xE0C2), 0, c_d, byref(c_dlen))
 
-    if ret == 0 and not all(_d == 0 for _d in list(bytes(d))):
+    if ret == 0 and not all(_d == 0 for _d in list(bytes(c_d))):
         data = (c_ubyte * c_dlen.value)()
-        memmove(data, d, c_dlen.value)
+        memmove(data, c_d, c_dlen.value)
         _bytes = bytearray(data)
     else:
         _bytes = bytearray(0)
@@ -70,25 +51,30 @@ def _lookup_optiga(api):
 
     # Trust M1 or Charge
     if _fw_build in {0x501, 0x624, 0x751, 0x802, 0x809}:
-        ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0fc), d, byref(c_dlen))
+        ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0fc), data, byref(c_dlen))
         if ret != 0:
             # it means that we work with OPTIGA Trust Charge
-            return m1, 'OPTIGA™ Trust Charge V1 (SLS32AIA020U2/3)'
-        else:
-            return m1, 'OPTIGA™ Trust M V1 (SLS32AIA010MH/S)'
+            return charge, 'OPTIGA™ Trust Charge V1 (SLS32AIA020U2/3)'
+
+        return m1, 'OPTIGA™ Trust M V1 (SLS32AIA010MH/S)'
     # Trust M2 ID2 or M3
     if _fw_build in {0x2440}:
-        ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0f1), d, byref(c_dlen))
+        ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0f1), data, byref(c_dlen))
         if ret != 0:
             # it means that we work with OPTIGA Trust M2 ID2
-            return m3, 'OPTIGA™ Trust M2 ID2 (SLS32AIA010I2/3)'
-        else:
-            return m3, 'OPTIGA™ Trust M V3 (SLS32AIA010ML/K)'
+            return m2id2, 'OPTIGA™ Trust M2 ID2 (SLS32AIA010I2/3)'
 
-    elif _fw_build in {0x510, 0x715, 0x1048, 0x1112, 0x1118}:
+        return m3, 'OPTIGA™ Trust M V3 (SLS32AIA010ML/K)'
+
+    if _fw_build in {0x510, 0x715, 0x1048, 0x1112, 0x1118}:
         return x, 'OPTIGA™ Trust X (SLS32AIA020X2/4)'
 
+    return None, ''
 
+
+# pylint: disable=too-many-instance-attributes disable=no-self-use
+# 14 is a reasonable amount as it represents a real amount of properties.
+# Parameters are related to the chip and don't use self, but shouldn't be distinct functions
 class Chip:
     """
     A class used to represent the whole OPTIGA Trust Chip
@@ -202,7 +188,7 @@ class Chip:
             raise ValueError(
                 'Wrong lifecycle state. Expected {0}, your provided {1}'.format(lifecycle_states, val)
             )
-        for code, state in lifecycle_states.items():
+        for _, state in lifecycle_states.items():
             if state == val:
                 Object(0xe0c0).write(bytes(state))
 
@@ -522,16 +508,13 @@ def _parse_access_conditions(tag_size, meta_itr):
         if _id in _access_conditions_ids_swaped:
             # Conf, Int, auto and luc have as the last two bytes a reference to the oid used for the expression
             # it is just another OID from the system
-            if _id == _access_conditions_ids['conf'] \
-                    or _id == _access_conditions_ids['int'] \
-                    or _id == _access_conditions_ids['auto'] \
-                    or _id == _access_conditions_ids['luc']:
+            if _id in (_access_conditions_ids['conf'], _access_conditions_ids['int'],
+                       _access_conditions_ids['auto'], _access_conditions_ids['luc']):
                 access_conditions.append(_access_conditions_ids_swaped[_id])
                 access_conditions.append(hex(next(meta_itr)))
                 access_conditions.append(hex(next(meta_itr)))
                 i += 2
-            elif _id == _access_conditions_ids['sec_sta_a'] \
-                    or _id == _access_conditions_ids['sec_sta_g']:
+            elif _id in (_access_conditions_ids['sec_sta_a'], _access_conditions_ids['sec_sta_g']):
                 access_conditions.append(_access_conditions_ids_swaped[_id])
                 access_conditions.append(hex(next(meta_itr)))
                 i += 1
@@ -548,6 +531,8 @@ def _parse_access_conditions(tag_size, meta_itr):
     return access_conditions
 
 
+# pylint: disable=unused-argument
+# we keep it for consistent API
 def _parse_lifecycle_state(tag_size, meta_itr):
     lcso = next(meta_itr)
     if lcso not in lifecycle_states:
@@ -557,6 +542,8 @@ def _parse_lifecycle_state(tag_size, meta_itr):
     return lifecycle_states[lcso]
 
 
+# pylint: disable=unused-argument
+# we keep it for consistent API
 def _parse_key_usage(tag_size: int, meta_itr) -> list:
     key_usage_bytes = next(meta_itr)
     tag_data = list()
@@ -572,6 +559,8 @@ def _parse_key_usage(tag_size: int, meta_itr) -> list:
     return tag_data
 
 
+# pylint: disable=unused-argument
+# we keep it for consistent API
 def _parse_algorithm(tag_size, meta_itr):
     algorithm = next(meta_itr)
     if algorithm not in _algorithms_swaped:
@@ -581,6 +570,8 @@ def _parse_algorithm(tag_size, meta_itr):
     return _algorithms_swaped[algorithm]
 
 
+# pylint: disable=unused-argument
+# we keep it for consistent API
 def _parse_reset_type(tag_size, meta_itr):
     reset_type_bytes = next(meta_itr)
     tag_data = list()
@@ -602,6 +593,8 @@ def _parse_reset_type(tag_size, meta_itr):
     return tag_data
 
 
+# pylint: disable=unused-argument
+# we keep it for consistent API
 def _parse_type(tag_size, meta_itr):
     object_type = next(meta_itr)
     if object_type not in _data_object_types_swaped:
@@ -717,13 +710,13 @@ def _prepare_access_conditions(key, value: list) -> list:
     # we would like to skip some of values
     value_iter = iter(value)
     for element in value_iter:
-        if element == 'int' or element == 'conf' or element == 'auto' or element == 'luc':
+        if element in ('int', 'conf', 'auto', 'luc'):
             _meta = [
                 _access_conditions_ids[element],
                 int(next(value_iter), 16),
                 int(next(value_iter), 16),
             ]
-        elif element == 'sec_sta_g' or element == 'sec_sta_a':
+        elif element in ('sec_sta_g', 'sec_sta_a'):
             _meta = [
                 _access_conditions_ids[element],
                 int(next(value_iter), 16)
@@ -827,11 +820,11 @@ def _prepare_meta_and_size(key, value) -> list:
     # This is how the result should look like
     # key  size  value
     # Used size and max size tags can't be send to the chip, so ignore them with a warning
-    if key == 'used_size' or key == 'max_size' or key == 'algorithm':
+    if key in ('used_size', 'max_size', 'algorithm'):
         print('Tag \'{0}\' cannot be defined by a user. Skip.'.format(key))
         return list()
     # Parse each key, and construct a
-    elif key == 'type':
+    if key == 'type':
         meta = _prepare_type(key, value)
     elif key == 'lcso':
         meta = _prepare_lcso(key, value)
@@ -920,6 +913,8 @@ class Object:
     :type updated: bool
     """
 
+    # pylint: disable=invalid-name
+    # id is a valid name here
     def __init__(self, object_id):
         """
         This class
@@ -959,39 +954,14 @@ class Object:
         self.write_raw_meta(meta)
 
     @property
-    def meta(self):
-        """ A dictionary of the metadata present right now on the chip for the given object. It is writable,
-        so user can update the metadata assigning the value to it. Example return ::
-
-            {
-                "lcso": "creation",
-                "change": [
-                    "lcso",
-                    "<",
-                    "operational"
-                ],
-                "execute": "always",
-                "algorithm": "secp384r1",
-                "key_usage": "0x21"
-            }
-        """
-        _array_meta = self.read_raw_meta()
-        return _parse_raw_meta(_array_meta)
-
-    @meta.setter
-    def meta(self, new_meta: dict):
-        meta = _prepare_raw_meta(new_meta)
-        self.write_raw_meta(meta)
-
-    @property
     def used_size(self):
         """ Every object on the chip which can store data should have used_size property. Cannot be updated.
         """
         if 'used_size' in self.meta:
             return self.meta['used_size']
-        else:
-            warnings.warn("Object doesn't have used_size property.")
-            return None
+
+        warnings.warn("Object doesn't have used_size property.")
+        return None
 
     @property
     def max_size(self):
@@ -999,9 +969,9 @@ class Object:
         """
         if 'max_size' in self.meta:
             return self.meta['max_size']
-        else:
-            warnings.warn("Object doesn't have max_size property.")
-            return None
+
+        warnings.warn("Object doesn't have max_size property.")
+        return None
 
     def read(self, offset=0, force=False) -> bytearray:
         """

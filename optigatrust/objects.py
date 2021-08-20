@@ -1,29 +1,10 @@
-# ============================================================================
-# The MIT License
-#
-# Copyright (c) 2018 Infineon Technologies AG
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE
-# ============================================================================
-import optigatrust as optiga
+#!/usr/bin/env python
+"""This module implements all Object manipulation related APIs of the optigatrust package """
+
 from asn1crypto import x509 as asn1_x509
 from asn1crypto import pem as asn1_pem
+
+import optigatrust as optiga
 
 __all__ = [
     'AppData',
@@ -40,9 +21,9 @@ class AppData(optiga.Object):
     """
     A class used to represent an Application Data object on the OPTIGA Trust Chip.
     """
-    pass
 
 
+# pylint: disable=too-few-public-methods
 class AcquiredSession:
     """
     A class used to represent a session object on the OPTIGA Trust Chip. This is a pseudo object,
@@ -50,34 +31,39 @@ class AcquiredSession:
     """
     def __init__(self):
         self.meta = None
+        # pylint: disable=invalid-name
         self.id = 0x0000
 
 
+# pylint: disable=too-few-public-methods
 class Session:
     """
     A class used to represent a session object on the OPTIGA Trust Chip.
     """
     def __init__(self, key_id: int):
         self.meta = None
+        # pylint: disable=invalid-name
         self.id = key_id
 
 
+# pylint: disable=too-few-public-methods
 class AESKey(optiga.Object):
     """
     A class used to represent an aes key object on the OPTIGA Trust Chip
 
     """
     def __init__(self):
-        super(AESKey, self).__init__(0xe200)
+        super().__init__(0xe200)
 
 
+# pylint: disable=too-few-public-methods
 class ECCKey(optiga.Object):
     """
     A class used to represent an ecc key object on the OPTIGA Trust Chip
 
     """
     def __init__(self, key_id: int):
-        super(ECCKey, self).__init__(key_id)
+        super().__init__(key_id)
 
         id_ref = self._optiga.key_id
         if key_id not in (id_ref.ECC_KEY_E0F0.value, id_ref.ECC_KEY_E0F1.value, id_ref.ECC_KEY_E0F2.value,
@@ -97,12 +83,12 @@ class RSAKey(optiga.Object):
 
     """
     def __init__(self, key_id: int):
-        if key_id != 0xe0fc and key_id != 0xe0fd:
+        if key_id not in (0xe0fc, 0xe0fd):
             raise ValueError(
                 'key_id isn\'t supported should be either 0xe0fc, or 0xe0fd, you provided {0}'.format(hex(key_id))
             )
         self.key_size = None
-        super(RSAKey, self).__init__(key_id)
+        super().__init__(key_id)
 
 
 def _append_length(data, last=False):
@@ -125,8 +111,8 @@ def _append_length(data, last=False):
     return data_with_length
 
 
-def _break_apart(f, sep, step):
-    return sep.join(f[n:n + step] for n in range(0, len(f), step))
+def _break_apart(string, sep, step):
+    return sep.join(string[n:n + step] for n in range(0, len(string), step))
 
 
 class X509(optiga.Object):
@@ -139,7 +125,7 @@ class X509(optiga.Object):
         """
         :param cert_id: One of supported object Ids assigned for certificates
         """
-        super(X509, self).__init__(cert_id)
+        super().__init__(cert_id)
         self._der = self._read()
 
     def __str__(self):
@@ -197,10 +183,10 @@ class X509(optiga.Object):
             tbs_certificate = cert['tbs_certificate']
             subject_public_key_info = tbs_certificate['subject_public_key_info']
             subject_public_key = subject_public_key_info['public_key'].native.hex()
-        except TypeError:
-            print('Failed to parse the certificate. It\'s either empty or not supported.')
-        else:
+
             return subject_public_key
+        except TypeError as fail_to_parse:
+            raise TypeError('Failed to parse the certificate. It\'s either empty or not supported.') from fail_to_parse
 
     @property
     def signature(self):
@@ -210,10 +196,9 @@ class X509(optiga.Object):
         """
         try:
             cert = asn1_x509.Certificate.load(self.der)
-        except TypeError:
-            print('Failed to parse the certificate. It\'s either empty or not supported.')
-        else:
             return cert['signature_value'].native.hex()
+        except TypeError as fail_to_parse:
+            raise TypeError('Failed to parse the certificate. It\'s either empty or not supported.') from fail_to_parse
 
     def _update(self, cert: str or bytes or bytearray):
         """
@@ -245,7 +230,7 @@ class X509(optiga.Object):
         if isinstance(cert, str):
             cert = str.encode(cert)
 
-        object_name, headers, der_cert = asn1_pem.unarmor(cert)
+        _, _, der_cert = asn1_pem.unarmor(cert)
 
         if der_cert[0] != 0x30:
             raise ValueError(
@@ -317,5 +302,4 @@ class X509(optiga.Object):
 
         if to_pem:
             return asn1_pem.armor('CERTIFICATE', der_cert)
-        else:
-            return bytes(der_cert)
+        return bytes(der_cert)
