@@ -20,6 +20,11 @@ __all__ = [
     'generate_pair',
     'ecdsa_sign',
     'ecdh',
+    'pkcs1v15_encrypt',
+    'pkcs1v15_sign',
+    'hmac',
+    'tls_prf',
+    'hkdf',
     'ECDSASignature',
     'PKCS1v15Signature',
 ]
@@ -580,6 +585,11 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
     """
     api = optiga.Chip().api
 
+    if not isinstance(key_object, objects.RSAKey):
+        raise TypeError(
+            'key_object is not supported. You provided {0}, expected {1}'.format(type(key_object), objects.RSAKey)
+        )
+
     if not isinstance(data, bytes) and not isinstance(data, bytearray):
         if isinstance(data, str):
             _d = bytes(data.encode())
@@ -612,6 +622,93 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
         signature = (c_ubyte * c_slen.value)()
         memmove(addressof(signature), sign, c_slen.value)
         return PKCS1v15Signature(hash_algorithm, key_object.id, bytes(signature))
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def pkcs1v15_encrypt(data, pkey, exp_size='1024'):
+    """
+    This function signs given data based on the provided RsaKey object
+
+    :param data:
+        Data in bytes, str or bytearray to sign
+
+    :param pkey:
+        Public key in bytes or bytearray from the user.
+        Alternatively you can provide a :class:`~optigatrust.objects.X509` or :class:`~optigatrust.objects.AppData`
+        object
+
+    :param exp_size:
+        Exponent size should be either '1024' or '2048'
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        bytes or None
+    """
+    api = optiga.Chip().api
+
+    if not isinstance(pkey, (int, bytes, bytearray)):
+        raise TypeError(
+            'pkey is not supported. You provided {0}, expected {1}, {2}, or {3}'.
+                format(type(pkey), int, bytes, bytearray)
+        )
+
+    if not isinstance(data, (bytes, bytearray)):
+        if isinstance(data, str):
+            _d = bytes(data.encode())
+            warnings.warn("data will be converted to bytes type before signing")
+        else:
+            raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
+    else:
+        _d = data
+
+    if exp_size not in {'1024', '2048'}:
+        raise ValueError('This exponent size is not supported, you typed {0} supported are [\'1024\', \'2048\']'
+                         .format(exp_size))
+
+    api.optiga_crypt_rsa_encrypt_message.restype = c_int
+
+    encrypt_scheme = 0x11
+
+    data_to_encrypt = (c_ubyte * len(_d))(*_d)
+
+    if isinstance(pkey, int):
+        _pkey = c_int(pkey)
+        _type = 0x00
+    else:
+        if pkey[0] != 0x03:
+            raise ValueError(
+                'See https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Public-Key.\n'
+                'Your key has unsupported format: \n{0}'.format(''.join('{:02x} '.format(x) for x in pkey))
+            )
+        # pylint: disable=attribute-defined-outside-init
+        _pkey = PublicKeyFromHost()
+        _pkey.public_key = (c_ubyte * len(pkey))()
+        memmove(_pkey.public_key, pkey, len(pkey))
+        _pkey.length = len(pkey)
+        if exp_size == '1024':
+            _pkey.key_type = 0x41
+        elif exp_size == '2048':
+            _pkey.key_type = 0x42
+        else:
+            _pkey.key_type = 0x00
+        _type = 0x01
+
+    ctext = (c_ubyte * 500)()
+    c_ctlen = c_uint(500)
+
+    ret = api.exp_optiga_crypt_rsa_encrypt_message(encrypt_scheme, data_to_encrypt, len(data_to_encrypt),
+                                                   None, c_ushort(0),
+                                                   _type, byref(_pkey),
+                                                   ctext, byref(c_ctlen))
+
+    if ret == 0:
+        cipher_text = (c_ubyte * c_ctlen.value)()
+        memmove(addressof(cipher_text), ctext, c_ctlen.value)
+        return bytes(cipher_text)
 
     raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
 
