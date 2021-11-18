@@ -5,9 +5,7 @@
 
 from collections import namedtuple
 import warnings
-from ctypes import c_int, c_ushort, c_ubyte, POINTER, byref, memmove
 
-from optigatrust.enums import x, m1, m3, m2id2, charge
 from .version import __version__, __version_info__
 from . import _backend
 
@@ -27,49 +25,6 @@ __all__ = [
 
 
 UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
-
-
-def _lookup_optiga(api):
-    api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-    api.exp_optiga_util_read_data.restype = c_int
-    api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-    api.exp_optiga_util_read_metadata.restype = c_int
-
-    c_d = (c_ubyte * 1700)()
-    c_dlen = c_ushort(1700)
-
-    ret = api.exp_optiga_util_read_data(c_ushort(0xE0C2), 0, c_d, byref(c_dlen))
-
-    if ret == 0 and not all(_d == 0 for _d in list(bytes(c_d))):
-        data = (c_ubyte * c_dlen.value)()
-        memmove(data, c_d, c_dlen.value)
-        _bytes = bytearray(data)
-    else:
-        _bytes = bytearray(0)
-
-    _fw_build = int.from_bytes(_bytes[25:27], byteorder='big')
-
-    # Trust M1 or Charge
-    if _fw_build in {0x501, 0x624, 0x751, 0x802, 0x809}:
-        ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0fc), data, byref(c_dlen))
-        if ret != 0:
-            # it means that we work with OPTIGA Trust Charge
-            return charge, 'OPTIGA™ Trust Charge V1 (SLS32AIA020U2/3)'
-
-        return m1, 'OPTIGA™ Trust M V1 (SLS32AIA010MH/S)'
-    # Trust M2 ID2 or M3
-    if _fw_build in {0x2440}:
-        ret = api.exp_optiga_util_read_metadata(c_ushort(0xe0f1), data, byref(c_dlen))
-        if ret != 0:
-            # it means that we work with OPTIGA Trust M2 ID2
-            return m2id2, 'OPTIGA™ Trust M2 ID2 (SLS32AIA010I2/3)'
-
-        return m3, 'OPTIGA™ Trust M V3 (SLS32AIA010ML/K)'
-
-    if _fw_build in {0x510, 0x715, 0x1048, 0x1112, 0x1118}:
-        return x, 'OPTIGA™ Trust X (SLS32AIA020X2/4)'
-
-    return None, ''
 
 
 # pylint: disable=too-many-instance-attributes disable=no-self-use
@@ -99,7 +54,7 @@ class Chip:
         optiga_cddl = _backend.get_handler()
 
         self.api = optiga_cddl
-        consts, name = _lookup_optiga(optiga_cddl)
+        consts, name = _backend.lookup_optiga(optiga_cddl)
         self._name = name
         self.object_id = consts.ObjectId
         self.object_id_values = set(item.value for item in self.object_id)
@@ -992,7 +947,6 @@ class Object:
         :return:
             byte string
         """
-        api = self._optiga.api
 
         if offset > 1700:
             raise ValueError("offset should be less than the limit of 1700 bytes")
@@ -1003,22 +957,7 @@ class Object:
                     "object_id not found. \n\r Supported = {0},\n\r  "
                     "Provided = {1}".format(list(hex(self._optiga.object_id)), self.id))
 
-        api.exp_optiga_util_read_data.argtypes = c_ushort, c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-        api.exp_optiga_util_read_data.restype = c_int
-
-        d = (c_ubyte * 1700)()
-        c_dlen = c_ushort(1700)
-
-        ret = api.exp_optiga_util_read_data(c_ushort(self.id), offset, d, byref(c_dlen))
-
-        if ret == 0:
-            data = (c_ubyte * c_dlen.value)()
-            memmove(data, d, c_dlen.value)
-            _bytes = bytearray(data)
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
-
-        return _bytes
+        return _backend.read_data(self._optiga.api, self.id, offset)
 
     def write(self, data, offset=0):
         """
@@ -1036,8 +975,6 @@ class Object:
             - TypeError - when any of the parameters are of the wrong type
             - OSError - when an error is returned by the chip initialisation library
         """
-        api = self._optiga.api
-
         if not isinstance(data, bytes) and not isinstance(data, bytearray):
             raise TypeError("data should be bytes type")
 
@@ -1052,15 +989,7 @@ class Object:
         if offset > 1700:
             raise ValueError("offset should be less than the limit of 1700 bytes")
 
-        api.exp_optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
-        api.exp_optiga_util_write_data.restype = c_int
-
-        _data = (c_ubyte * len(data))(*data)
-
-        ret = api.exp_optiga_util_write_data(c_ushort(self.id), 0x40, offset, _data, len(data))
-
-        if ret != 0:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+        _backend.write_data(self._optiga.api, self.id, offset, data)
 
         self.updated = True
 
@@ -1076,8 +1005,6 @@ class Object:
         :returns:
             byte string
         """
-        api = self._optiga.api
-
         if (self.id not in self._optiga.object_id_values) and (self.id not in self._optiga.key_id_values):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
@@ -1086,22 +1013,7 @@ class Object:
                     self.id)
             )
 
-        api.exp_optiga_util_read_metadata.argtypes = c_ushort, POINTER(c_ubyte), POINTER(c_ushort)
-        api.exp_optiga_util_read_metadata.restype = c_int
-
-        d = (c_ubyte * 100)()
-        c_dlen = c_ushort(100)
-
-        ret = api.exp_optiga_util_read_metadata(c_ushort(self.id), d, byref(c_dlen))
-
-        if ret == 0:
-            data = (c_ubyte * c_dlen.value)()
-            memmove(data, d, c_dlen.value)
-            _bytes = bytearray(data)
-        else:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
-
-        return _bytes
+        return _backend.read_meta(self._optiga.api, self.id)
 
     def write_raw_meta(self, data):
         """
@@ -1115,8 +1027,6 @@ class Object:
             - TypeError - when any of the parameters are of the wrong type
             - OSError - when an error is returned by the chip initialisation library
         """
-        api = self._optiga.api
-
         if not isinstance(data, bytes) and not isinstance(data, bytearray):
             raise TypeError("data should be bytes type")
 
@@ -1128,14 +1038,6 @@ class Object:
                     self.id)
             )
 
-        _data = (c_ubyte * len(data))(*data)
-
-        api.exp_optiga_util_write_metadata.argtypes = c_ushort, POINTER(c_ubyte), c_ubyte
-        api.exp_optiga_util_write_metadata.restype = c_int
-
-        ret = api.exp_optiga_util_write_metadata(c_ushort(self.id), _data, len(_data))
-
-        if ret != 0:
-            raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+        _backend.write_meta(self._optiga.api, self.id, data)
 
         self.updated = True

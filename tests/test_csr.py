@@ -28,7 +28,6 @@ def test_csr_ecc(ki):
 ])
 def test_csr_ok_rsa(ki):
 	csr_key_obj = objects.RSAKey(0xe0fc)
-	print(csr_key_obj)
 	pkey, _ = crypto.generate_pair(key_object=csr_key_obj, key_size=ki)
 
 	builder = CSRBuilder(
