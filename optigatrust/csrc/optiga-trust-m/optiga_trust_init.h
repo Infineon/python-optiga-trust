@@ -84,7 +84,7 @@ LIBRARY_EXPORTS optiga_lib_status_t exp_optiga_crypt_ecdsa_verify(const uint8_t 
 
 LIBRARY_EXPORTS optiga_lib_status_t exp_optiga_crypt_ecdh(optiga_key_id_t private_key, public_key_from_host_t * public_key, bool_t export_to_host, uint8_t * shared_secret);
 
-LIBRARY_EXPORTS optiga_lib_status_t exp_optiga_crypt_tls_prf(uint16_t secret, const uint8_t * label, uint16_t label_length, const uint8_t * seed, uint16_t seed_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key);
+LIBRARY_EXPORTS optiga_lib_status_t exp_optiga_crypt_tls_prf(optiga_tls_prf_type_t type, uint16_t secret, const uint8_t * label, uint16_t label_length, const uint8_t * seed, uint16_t seed_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key);
 
 LIBRARY_EXPORTS optiga_lib_status_t exp_optiga_crypt_hkdf(optiga_hkdf_type_t type, uint16_t secret, const uint8_t * salt, uint16_t salt_length, const uint8_t * info, uint16_t info_length, uint16_t derived_key_length, bool_t export_to_host, uint8_t * derived_key);
 
