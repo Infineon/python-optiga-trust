@@ -10,8 +10,8 @@ import optigatrust as optiga
 
 pytest.onek, pytest.onek_fail, pytest.twok, pytest.twok_fail = None, None, None, None
 k1, k2 = None, None
-pytest.tbs_str = b'Test String to Sign'
-pytest.tbs_str_fail = b'FAILED Test String to Sign'
+pytest.tbs_str = bytes('Test String to Sign'.encode())
+pytest.tbs_str_fail = bytes('FAILED Test String to Sign'.encode())
 pytest.test_dir = os.path.dirname(__file__)
 
 
@@ -253,3 +253,34 @@ def test_pkcs1v15_encrypt_2048_oid_fail():
 		crypto.pkcs1v15_encrypt(pytest.tbs_str, cert_obj_id, exp_size='2048')
 	new_cert.write(old_content)
 
+
+def test_pkcs1v15_encrypt_decrypt_1024_oid():
+	# Prepare the setup
+	key_id = 0xe0fc
+	key_obj = objects.RSAKey(key_id)
+	pkey, _ = crypto.generate_pair(key_obj, key_usage=['encryption'], key_size=1024)
+
+	# Encrypt the data using just generated Public Key
+	ctext = crypto.pkcs1v15_encrypt(pytest.tbs_str, pkey[18:], exp_size='1024')
+
+	# Decrypt the cipher text with the private key stored on the chip
+	ptext = crypto.pkcs1v15_decrypt(ctext, key_id)
+
+	# Assert the result
+	assert pytest.tbs_str == ptext
+
+
+def test_pkcs1v15_encrypt_decrypt_2048_oid():
+	# Prepare the setup
+	key_id = 0xe0fc
+	key_obj = objects.RSAKey(key_id)
+	pkey, _ = crypto.generate_pair(key_obj, key_usage=['encryption'], key_size=2048)
+
+	# Encrypt the data using just generated Public Key
+	ctext = crypto.pkcs1v15_encrypt(pytest.tbs_str, pkey[19:], exp_size='2048')
+
+	# Decrypt the cipher text with the private key stored on the chip
+	ptext = crypto.pkcs1v15_decrypt(ctext, key_id)
+
+	# Assert the result
+	assert pytest.tbs_str == ptext
