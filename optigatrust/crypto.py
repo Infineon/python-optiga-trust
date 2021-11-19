@@ -21,6 +21,7 @@ __all__ = [
     'ecdsa_sign',
     'ecdh',
     'pkcs1v15_encrypt',
+    'pkcs1v15_decrypt',
     'pkcs1v15_sign',
     'hmac',
     'tls_prf',
@@ -628,21 +629,24 @@ def pkcs1v15_sign(key_object, data, hash_algorithm='sha256'):
 
 def pkcs1v15_encrypt(data, pkey, exp_size='1024'):
     """
-    This function signs given data based on the provided RsaKey object
+    This function encrypts given data with either provided public key, or by extracting the key from the provisioned
+    certificate. The certificate should be DER encoded and stored on the chip. The corresponding data object should
+    start with 0x30. The keyUsage should be either keyEncipherment, or dataEncipherment
 
     :param data:
         Data in bytes, str or bytearray to sign
 
     :param pkey:
         Public key in bytes or bytearray from the user.
-        Alternatively you can provide a :class:`~optigatrust.objects.X509` or :class:`~optigatrust.objects.AppData`
-        object
+        Alternatively you can provide an integer pointing to the certificate id stored on the OPTIGA.
+        The device will parse stored certificate and extract the public key from there.
 
     :param exp_size:
         Exponent size should be either '1024' or '2048'
 
     :raises:
         - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the given parameters don't have an expected value
         - OSError - when an error is returned by the core initialisation library
 
     :returns:
@@ -661,7 +665,8 @@ def pkcs1v15_encrypt(data, pkey, exp_size='1024'):
             _d = bytes(data.encode())
             warnings.warn("data will be converted to bytes type before signing")
         else:
-            raise TypeError('Data to sign should be either bytes or str type, you gave {0}'.format(type(data)))
+            raise TypeError('Data to encrypt should be either bytes, bytearray or str type, '
+                            'you provided {0}'.format(type(data)))
     else:
         _d = data
 
@@ -708,6 +713,61 @@ def pkcs1v15_encrypt(data, pkey, exp_size='1024'):
     if ret == 0:
         cipher_text = (c_ubyte * c_ctlen.value)()
         memmove(addressof(cipher_text), ctext, c_ctlen.value)
+        return bytes(cipher_text)
+
+    raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def pkcs1v15_decrypt(ciphertext, key_id):
+    """
+    This function encrypts given data with either provided public key, or by extracting the key from the provisioned
+    certificate. The certificate should be DER encoded and stored on the chip. The corresponding data object should
+    start with 0x30. The keyUsage should be either keyEncipherment, or dataEncipherment
+
+    :param ciphertext:
+        Encrypted message in bytes or bytearray
+
+    :param key_id:
+        Private key stored on the OPTIGA device, should be integer. The private key will be used
+        to decrypt given encrypted data.
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the given parameters don't have an expected value
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        bytes or None
+    """
+    api = optiga.Chip().api
+
+    if not isinstance(ciphertext, (bytes, bytearray)):
+        raise TypeError('Data to decrypt should be either bytes or bytearray type, '
+                        'you provided {0}'.format(type(ciphertext)))
+    else:
+        ct = ciphertext
+
+    if not isinstance(key_id, int):
+        raise TypeError(
+            'key is not supported. You provided {0}, expected {1}'.
+                format(type(key_id), int)
+        )
+
+    encrypt_scheme = 0x11
+
+    data_to_decrypt = (c_ubyte * len(ct))(*ct)
+
+    plaintext = (c_ubyte * 500)()
+    c_ptlen   = c_uint(500)
+
+    ret = api.exp_optiga_crypt_rsa_decrypt_and_export(encrypt_scheme, data_to_decrypt, len(data_to_decrypt),
+                                                      None, c_ushort(0),
+                                                      key_id,
+                                                      plaintext, byref(c_ptlen))
+
+    if ret == 0:
+        cipher_text = (c_ubyte * c_ptlen.value)()
+        memmove(addressof(cipher_text), plaintext, c_ptlen.value)
         return bytes(cipher_text)
 
     raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
