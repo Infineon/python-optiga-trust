@@ -2,6 +2,7 @@ if(UNIX)
 	set(TARGET_I2C_SHLIB ${PROJECT_NAME}-i2c-linux-${CMAKE_SYSTEM_PROCESSOR})
 
 	set(TRUSTM_I2C_SRCS 
+		${TRUSTM_PATH}/optiga/comms/optiga_comms_ifx_i2c.c
 		${TRUSTM_PATH}/pal/linux/pal.c
 		${TRUSTM_PATH}/pal/linux/pal_gpio.c
 		${TRUSTM_PATH}/pal/linux/pal_i2c.c

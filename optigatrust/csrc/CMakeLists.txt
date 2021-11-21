@@ -16,11 +16,11 @@ set(TRUSTM_CORE_SRCS
     ${TRUSTM_PATH}/optiga/comms/ifx_i2c/ifx_i2c_config.c
     ${TRUSTM_PATH}/optiga/comms/ifx_i2c/ifx_i2c_data_link_layer.c
     ${TRUSTM_PATH}/optiga/comms/ifx_i2c/ifx_i2c_physical_layer.c
-	${TRUSTM_PATH}/optiga/comms/ifx_i2c/ifx_i2c_presentation_layer.c
+    ${TRUSTM_PATH}/optiga/comms/ifx_i2c/ifx_i2c_presentation_layer.c
     ${TRUSTM_PATH}/optiga/comms/ifx_i2c/ifx_i2c_transport_layer.c
-	${TRUSTM_PATH}/optiga/comms/optiga_comms_ifx_i2c.c
     ${TRUSTM_PATH}/optiga_trust_init.c
 )
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/${TRUSTM_PATH}/linux_i2c.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/${TRUSTM_PATH}/linux_libusb.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/${TRUSTM_PATH}/linux_uart.cmake)

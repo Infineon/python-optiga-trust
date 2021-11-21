@@ -9,7 +9,8 @@ if(UNIX)
 
 	set(TARGET_LIBUSB_SHLIB ${PROJECT_NAME}-libusb-linux-${CMAKE_SYSTEM_PROCESSOR})
 
-	set(TRUSTM_LIBUSB_SRCS 
+	set(TRUSTM_LIBUSB_SRCS
+		${TRUSTM_PATH}/optiga/comms/optiga_comms_ifx_i2c.c
 		${TRUSTM_PATH}/pal/libusb/pal_common.c
 		${TRUSTM_PATH}/pal/libusb/pal.c
 		${TRUSTM_PATH}/pal/libusb/pal_gpio.c

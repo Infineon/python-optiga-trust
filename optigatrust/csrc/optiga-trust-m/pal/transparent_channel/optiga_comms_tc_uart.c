@@ -80,6 +80,35 @@ optiga_lib_status_t optiga_comms_set_callback_context(optiga_comms_t * p_optiga_
 }
 
 
+uint16_t calc_crc16_byte(uint16_t seed, uint8_t byte)
+{
+	uint16_t h1;
+	uint16_t h2;
+	uint16_t h3;
+	uint16_t h4;
+
+	h1 = (seed ^ byte) & 0xFF;
+	h2 = h1 & 0x0F;
+	h3 = ((uint16_t)(h2 << 4)) ^ h1;
+	h4 = h3 >> 4;
+
+	return ((uint16_t)((((uint16_t)((((uint16_t)(h3 << 1)) ^ h4) << 4)) ^ h2) << 3)) ^ h4 ^ (seed >> 8);
+}
+
+uint16_t calc_crc16(const uint8_t* p_data, uint16_t data_len)
+{
+	uint16_t i;
+	uint16_t crc = 0;
+
+	for (i = 0; i < data_len; i++)
+	{
+		crc = calc_crc16_byte(crc, p_data[i]);
+	}
+
+	return (crc);
+}
+
+
 optiga_comms_t * optiga_comms_create(callback_handler_t callback, void * context)
 {
 	optiga_comms_t * p_optiga_comms = (optiga_comms_t *)calloc(sizeof(optiga_comms_t), 1);
@@ -165,6 +194,38 @@ optiga_lib_status_t optiga_comms_reset(optiga_comms_t *p_ctx, uint8_t reset_type
 	return api_status;
 }
 
+
+/**
+*  \brief This API reads the whole expected message from the file
+*
+* \param[in]     com_handle   COM port handle
+* \param[in,out] buffer       Buffer to store read data
+* \param[in]     size         size of the buffer
+*
+* \retval  0
+* \retval  Length of the message
+*/
+static int ReadFileAll(HANDLE com_handle, uint8_t* buffer, size_t size)
+{
+	size_t received = 0;
+	BOOL bool_status;
+	int NoBytesRead;
+	while (received < size)
+	{
+		bool_status = ReadFile(com_handle, buffer, size, (LPDWORD)&NoBytesRead, NULL);
+		if (0 == bool_status)
+		{
+			printf("COM port read failed\n");
+			printf("Error is %d", GetLastError());
+			received = 0;
+			break;
+		}
+		received += NoBytesRead;
+	}
+	return received;
+}
+
+
 /**
  * \brief   This API sends a command and receives a response.
  *
@@ -199,51 +260,97 @@ optiga_lib_status_t optiga_comms_transceive(optiga_comms_t * p_ctx,
 	uint32_t index = 0;
 	uint8_t failure_status[] = {0xff,0xff}; 
 	uint8_t max_transmit_frame[MAX_TRANSMIT_FRAME_SIZE];
+	uint16_t crc16 = 0x0000;;
+	uint8_t start_seq[] = { 0xbe, 0xef, 0xde, 0xad };
+
+	/*
+	 * The communication protocol is pretty straightforward
+	 * Start Sequence 4 bytes [0xbeefdead] + Length 2 bytes [nnnn] + actual packet with nnnn bytes [xxx ... xxxx] + crc16 2 bytes
+	 */
 
 	do
 	{
-		/*printf ("\ntransceive : send length %d\n", tx_data_length);
-		for (int i = 0; i < tx_data_length; i++)
-			printf("%02X:", p_tx_data[i]);
-		printf("\n");*/
-		// Form data frame : [tx_data_length byte 1][tx_data_length byte 2][copied p_tx_data which is less than MAX_TRANSMIT_FRAME_SIZE]
-		max_transmit_frame[0] = (uint8_t)(tx_data_length >> 8);
-		max_transmit_frame[1] = (uint8_t)(tx_data_length);
-		memcpy(max_transmit_frame + 2, p_tx_data, tx_data_length);
+		// Prepare the Start sequence
+		max_transmit_frame[0] = 0xbe;
+		max_transmit_frame[1] = 0xef;
+		max_transmit_frame[2] = 0xde;
+		max_transmit_frame[3] = 0xad;
+		// Prepare the length
+		max_transmit_frame[4] = (uint8_t)(tx_data_length >> 8);
+		max_transmit_frame[5] = (uint8_t)(tx_data_length);
+		// Prepare the actual chip response
+		memcpy(&max_transmit_frame[6], p_tx_data, tx_data_length);
+		// Calculate the CRC and add it to the message
+		crc16 = 0x0000;
+		crc16 = calc_crc16(max_transmit_frame, tx_data_length + 6);
+		// Send the message to the recepient
+		max_transmit_frame[6 + tx_data_length] = (uint8_t)(crc16 >> 8);
+		max_transmit_frame[7 + tx_data_length] = (uint8_t)(crc16 & 0x00ff);
 
-		//Write Data
-		bool_status = WriteFile(COMM_CTX->com_handle, max_transmit_frame, MAX_TRANSMIT_FRAME_SIZE, (LPDWORD)&number_of_bytes_written, NULL);
+		//Write Data to the peer
+		bool_status = WriteFile(COMM_CTX->com_handle, max_transmit_frame, tx_data_length + 8, (LPDWORD)&number_of_bytes_written, NULL);
 		if (0 == bool_status)
 		{
-			printf ("\n!!!COM port write failed");
+			printf ("COM port write failed\n");
 			printf("Error is %d", GetLastError());
 			break;
 		}
 
-		bool_status = ReadFile(COMM_CTX->com_handle, &byte_of_data, MAX_TRANSMIT_FRAME_SIZE, (LPDWORD)&NoBytesRead, NULL);
-		if (0 == bool_status)
+		// Receive at first only the start sequence and the length
+		NoBytesRead = ReadFileAll(COMM_CTX->com_handle, &byte_of_data, 6);
+		if (0 == NoBytesRead)
 		{
-			printf("\n!!!COM port read failed");
+			printf("COM port read failed\n");
 			printf("Error is %d", GetLastError());
+			break;
+		}
+
+		// Compare whether the start sequence is ok
+		if (memcmp(start_seq, byte_of_data, 4) == 0)
+		{
+			// If ok, calculate the expected packet
+			*p_rx_data_len = (uint16_t)((byte_of_data[4] << 8) | (byte_of_data[5]));
+		}
+		else
+		{
+			printf("No Start Sequence found\n");
 			break;
 		}
 
 		// Unpack data and return
-		*p_rx_data_len = (uint16_t)((byte_of_data[0] << 8) | (byte_of_data[1]));
-		if (*p_rx_data_len == 2 && !strncmp((const char*)failure_status,(const char*)&byte_of_data[2], 2))
+		if (*p_rx_data_len == 0xffff)
 		{
-			//printf ("\n!!!Receive error");
-			//printf ("\n!!!receive length = %d", *p_rx_data_len);
-			//printf ("\n!!!failrue status = %04X", failure_status);
+			printf ("Receive error\n");
 			api_status = OPTIGA_COMMS_ERROR;
 		}
 		else
 		{
-			memcpy(p_rx_data, byte_of_data + 2, * p_rx_data_len);
-			//printf("\nreceive length = %d\n", *p_rx_data_len);
-			//for (int i = 0; i < *p_rx_data_len; i++)
-			//	printf("%02X:", p_rx_data[i]);
-			//printf("\n");
+			if (*p_rx_data_len > (MAX_TRANSMIT_FRAME_SIZE - 8))
+			{
+				printf("Receive error. Frame too big %02X\n", *p_rx_data_len);
+				break;
+			}
+
+			// receive the rest of the message using the calculated packet size + 2 bytes for the crc16
+			NoBytesRead = ReadFileAll(COMM_CTX->com_handle, &byte_of_data[6], *p_rx_data_len + 2);
+			if (0 == NoBytesRead)
+			{
+				printf("COM port read failed\n");
+				printf("Error is %d\n", GetLastError());
+				break;
+			}
+
+			memcpy(p_rx_data, &byte_of_data[6], *p_rx_data_len);
+			// Calculate the CRC16
+			crc16 = 0x0000;
+			crc16 = (uint16_t)((byte_of_data[6 + *p_rx_data_len] << 8) | (byte_of_data[7 + *p_rx_data_len]));
+			// Check whether the CRC is correct
+			if (crc16 != calc_crc16(byte_of_data, *p_rx_data_len + 6))
+			{
+				printf("Receive error. Invalid CRC16\n");
+				break;
+			}
+
 			api_status = OPTIGA_COMMS_SUCCESS;
 		}
 	} while (0);
