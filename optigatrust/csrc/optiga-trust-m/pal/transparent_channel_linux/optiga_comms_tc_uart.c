@@ -332,8 +332,8 @@ optiga_lib_status_t optiga_comms_transceive(optiga_comms_t *p_ctx,
     number_of_bytes_written = read_port(((com_context_t *)p_ctx->p_comms_ctx)->fd, byte_of_data, 6);
     if (number_of_bytes_written != 6)
     {
-      printf("COM port read failed\n");
-      printf("Error is %d\n", number_of_bytes_written);
+      printf("COM port read 1 failed\n");
+      fprintf(stderr, "%s\n", strerror(errno));
       break;
     }
 
@@ -367,8 +367,8 @@ optiga_lib_status_t optiga_comms_transceive(optiga_comms_t *p_ctx,
       number_of_bytes_written = read_port(((com_context_t *)p_ctx->p_comms_ctx)->fd, &byte_of_data[6], *p_rx_data_len + 2);
       if (number_of_bytes_written != (*p_rx_data_len + 2))
       {
-        printf("COM port read failed\n");
-        printf("Error is %d\n", number_of_bytes_written);
+        printf("COM port read 2 failed\n");
+        fprintf(stderr, "%s\n", strerror(errno));
         break;
       }
 
