@@ -139,7 +139,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include;$(SolutionDir)optiga-trust-m\optiga\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;__WIN32__;_WINDLL;OPTIGA_SYNC_COMMS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;_OPTIGA_EXPORTS_DLLEXPORT_H_;__WIN32__;_WINDLL;OPTIGA_SYNC_COMMS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)optiga-trust-m\pal\libusb\include\ms64\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
