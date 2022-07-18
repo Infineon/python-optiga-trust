@@ -30,21 +30,34 @@ __all__ = [
     'PKCS1v15Signature',
 ]
 
+curves_map = {
+    'secp256r1': optiga.enums.m3.Curves.SEC_P256R1,
+    'secp384r1': optiga.enums.m3.Curves.SEC_P384R1,
+    'secp521r1': optiga.enums.m3.Curves.SEC_P521R1,
+    'brainpoolp256r1': optiga.enums.m3.Curves.BRAINPOOL_P256R1,
+    'brainpoolp384r1': optiga.enums.m3.Curves.BRAINPOOL_P384R1,
+    'brainpoolp512r1': optiga.enums.m3.Curves.BRAINPOOL_P512R1
+}
+
 
 def _str2curve(curve_str, return_value=False):
-    _map = {
-        'secp256r1': optiga.enums.m3.Curves.SEC_P256R1,
-        'secp384r1': optiga.enums.m3.Curves.SEC_P384R1,
-        'secp521r1': optiga.enums.m3.Curves.SEC_P521R1,
-        'brainpoolp256r1': optiga.enums.m3.Curves.BRAINPOOL_P256R1,
-        'brainpoolp384r1': optiga.enums.m3.Curves.BRAINPOOL_P384R1,
-        'brainpoolp512r1': optiga.enums.m3.Curves.BRAINPOOL_P512R1
-    }
-    if curve_str in _map:
+    global curves_map
+
+    if curve_str in curves_map:
         if return_value:
-            return _map[curve_str].value
-        return _map[curve_str]
-    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
+            return curves_map[curve_str].value
+        return curves_map[curve_str]
+    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, curves_map.keys()))
+
+
+def _curve2str(curve):
+    global curves_map
+
+    for entry in curves_map:
+        if curve == curves_map[entry]:
+            return entry
+
+    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve, curves_map.keys()))
 
 
 def _native_to_pkcs(pkey, key=None, algorithm=None):
@@ -250,11 +263,7 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     if _curve not in opt.curves_values:
         raise TypeError(
             "object_id not found. \n\r Supported = {0},\n\r  "
-            "Provided = {1}".format(list(opt.curves_values), _curve))
-
-    opt.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
-        c_ubyte), POINTER(c_ushort)
-    opt.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
+            "Provided = {1}".format(map(_curve2str,list(opt.curves), curve)))
 
     c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
     pkey = (c_ubyte * _key_sizes[curve][0])()

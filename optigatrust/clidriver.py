@@ -71,15 +71,22 @@ def validate_ecc_rsa_id(ctx, param, value):
     :raises:
         - click.BadParameter - in case the given object id can't be initialised
     """
+    if isinstance(value, str):
+        id = int(value, base=16)
+    elif isinstance(value, int):
+        id = value
+    else:
+        raise click.BadParameter("Object ID doesn't exist. Please align with the format, should be 0x0ef1")
+
     try:
-        obj = objects.ECCKey(int(value, base=16))
+        obj = objects.ECCKey(id)
         obj = obj.meta
-        return int(value, base=16)
+        return id
     except (ValueError, TypeError, OSError):
         try:
-            obj = objects.RSAKey(int(value, base=16))
+            obj = objects.RSAKey(id)
             obj = obj.meta
-            return int(value, base=16)
+            return id
         except (ValueError, TypeError, OSError) as no_rsa:
             raise click.BadParameter("Object ID doesn't exist. Please align with the ECC Objects map") from no_rsa
 
@@ -582,17 +589,17 @@ def update_parser(oid, file):
               metavar='<0x1234>',
               help='Select an Object ID you would like to use.')
 @click.option('--rsa', is_flag=True,
-              default=False, show_default=True, required=True,
+              default=False, show_default=True, required=False,
               help='If selected an RSA key generation will be invoked')
 @click.option('--curve', type=click.Choice(['secp256r1', 'secp384r1', 'secp521r1',
-                                            'brainpool256r1', 'brainpool384r1', 'brainpool521r1']),
-              default='secp256r1', required=True,
+                                            'brainpoolp256r1', 'brainpoolp384r1', 'brainpoolp512r1']),
+              default='secp256r1', required=False,
               help='Used during a key generation to define which curve to use')
 @click.option('--key_usage', type=click.Choice(['key_agreement', 'authentication', 'encryption', 'signature']),
-              default=['signature'], required=True, multiple=True,
+              default=['signature'], required=False, multiple=True,
               help='Define how the key should be used on the secure element')
 @click.option('--key_size', type=click.Choice(['1024', '2048']),
-              default='1024', required=True,
+              default='1024', required=False,
               help='In case the --rsa option is defined it defines the key size in bits')
 @click.option('--pubout', type=click.File('w'),
               default=None, required=False,
@@ -608,7 +615,7 @@ def create_keys(oid, rsa, curve, key_usage, key_size, pubout, privout):
         curve = None
     else:
         obj = objects.ECCKey(oid)
-        key_size = None
+        key_size = '1024'
 
     if privout is not None:
         export = True
