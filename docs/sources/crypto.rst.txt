@@ -93,7 +93,7 @@ Store the shared secret internally on the chip
     # Don't export the shared secret, but store internally
     session_object = optiga_ec.ecdh(key_object, peer_public_key)
 
-Use a different curve - 'brainpool256r1'
+Use a different curve - 'brainpoolp256r1'
 
 ::
 
