@@ -7,6 +7,7 @@ import ntpath
 import json
 from ast import literal_eval
 import click
+import time
 
 # PEM files parser from the AS1 Crypto Library
 from asn1crypto import pem
@@ -231,7 +232,7 @@ def main():
                    'This action can be reversed only in special cases. See Metadata Update.')
 @click.option('--unlock', is_flag=True, default=False, required=False,
               help='Unlock a given Object by running a protected update. ')
-@click.option('--export-all', is_flag=True, default=False, required=False,
+@click.option('--export', is_flag=True, default=False, required=False,
               help='Export data and metadata from all the objects from the connected device.')
 @click.option('--meta', is_flag=True,
               default=False, required=False,
@@ -260,25 +261,40 @@ def main():
 @click.option('--outform', type=click.Choice(['PEM', 'DER', 'C', 'DAT']),
               default=None, required=False,
               help='Define which output type to use')
-def object_parser(oid, lock, unlock, export_all, meta, inp, out, outform):  # noqa: C901
+def object_parser(oid, lock, unlock, export, meta, inp, out, outform):  # noqa: C901
     buffer = ''
     output = out
 
-    if export_all:
+    if export:
         click.echo("Warning, export might take a few minutes to complete")
         if oid or lock or meta or inp or outform:
             raise click.BadParameter('with the --export_all option only --out is allowed')
-        buffer = json.dumps(port.to_json(), indent=4)
+
+        chip_handler = optiga.Chip()
+        chip_uid = chip_handler.uid
+        unique_path = '{chip}_{uid}_{data}_{time}'.format(chip=chip_handler.name,
+                                                          uid=chip_uid.fw_build + chip_uid.x_coord + chip_uid.y_coord,
+                                                          data=time.strftime("%Y%m%d"),
+                                                          time=time.strftime("%H%M%S")
+                                                          )
+        unique_path = unique_path.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
+        try:
+            os.mkdir(unique_path)
+        except OSError:
+            print("Creation of the directory %s failed" % unique_path)
+        else:
+            print("Starting export to the directory: %s " % unique_path)
+        buffer = port.to_otc(unique_path)
 
         click.echo(message=buffer, file=output)
-        click.echo("Export Completed")
+        click.echo("Export Completed. Now you can open it with the OTC Tool")
         sys.exit(0)
 
     # Todo Test lock
     if lock:
         obj = optiga.Object(oid)
 
-        if export_all or meta or inp or out or outform:
+        if export or meta or inp or out or outform:
             raise click.BadParameter('with the --lock option only --id is allowed')
 
         if click.confirm('Locking might be irreversible, would you like to prepare the object for a \n '
@@ -302,7 +318,7 @@ def object_parser(oid, lock, unlock, export_all, meta, inp, out, outform):  # no
     if unlock:
         chip = optiga.Chip()
 
-        if export_all or meta or out or outform:
+        if export or meta or out or outform:
             raise click.BadParameter('with the --lock option only --id and --in are allowed')
 
         if click.confirm('Do you want to unlock this object? This will run the protected update procedure. '
