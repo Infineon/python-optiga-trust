@@ -232,8 +232,11 @@ def main():
                    'This action can be reversed only in special cases. See Metadata Update.')
 @click.option('--unlock', is_flag=True, default=False, required=False,
               help='Unlock a given Object by running a protected update. ')
-@click.option('--export', is_flag=True, default=False, required=False,
-              help='Export data and metadata from all the objects from the connected device.')
+@click.option('--export-otc', is_flag=True, default=False, required=False,
+              help='Export data and metadata from all the objects to the OTC supported format.')
+@click.option('--export-json', is_flag=True, default=False, required=False,
+              help='Export data and metadata from all the objects to the JSON format which can be used to re-import'
+                   ' the settings.')
 @click.option('--meta', is_flag=True,
               default=False, required=False,
               help='Read metadata from a given Object ID')
@@ -261,14 +264,14 @@ def main():
 @click.option('--outform', type=click.Choice(['PEM', 'DER', 'C', 'DAT']),
               default=None, required=False,
               help='Define which output type to use')
-def object_parser(oid, lock, unlock, export, meta, inp, out, outform):  # noqa: C901
+def object_parser(oid, lock, unlock, export_otc,export_json, meta, inp, out, outform):  # noqa: C901
     buffer = ''
     output = out
 
-    if export:
+    if export_otc:
         click.echo("Warning, export might take a few minutes to complete")
         if oid or lock or meta or inp or outform:
-            raise click.BadParameter('with the --export_all option only --out is allowed')
+            raise click.BadParameter('with the --export_otc option other options are ignored')
 
         chip_handler = optiga.Chip()
         chip_uid = chip_handler.uid
@@ -289,12 +292,31 @@ def object_parser(oid, lock, unlock, export, meta, inp, out, outform):  # noqa: 
         click.echo(message=buffer, file=output)
         click.echo("Export Completed. Now you can open it with the OTC Tool")
         sys.exit(0)
+    elif export_json:
+        click.echo("Warning, export might take a few minutes to complete")
+        if oid or lock or meta or inp or outform:
+            raise click.BadParameter('with the --export_otc option other options are ignored')
+
+        chip_handler = optiga.Chip()
+        chip_uid = chip_handler.uid
+        unique_path = '{chip}_{uid}_{data}_{time}.json'.format(chip=chip_handler.name,
+                                                          uid=chip_uid.fw_build + chip_uid.x_coord + chip_uid.y_coord,
+                                                          data=time.strftime("%Y%m%d"),
+                                                          time=time.strftime("%H%M%S")
+                                                          )
+        unique_path = unique_path.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
+        buffer = json.dumps(port.to_json(), indent=4)
+        with open(unique_path, "w+") as js:
+            js.write(buffer)
+
+        click.echo("Export completed in the file {0}".format(unique_path))
+        sys.exit(0)
 
     # Todo Test lock
     if lock:
         obj = optiga.Object(oid)
 
-        if export or meta or inp or out or outform:
+        if export_otc or export_json or meta or inp or out or outform:
             raise click.BadParameter('with the --lock option only --id is allowed')
 
         if click.confirm('Locking might be irreversible, would you like to prepare the object for a \n '
@@ -318,7 +340,7 @@ def object_parser(oid, lock, unlock, export, meta, inp, out, outform):  # noqa: 
     if unlock:
         chip = optiga.Chip()
 
-        if export or meta or out or outform:
+        if export_otc or export_json or meta or out or outform:
             raise click.BadParameter('with the --lock option only --id and --in are allowed')
 
         if click.confirm('Do you want to unlock this object? This will run the protected update procedure. '
