@@ -83,6 +83,7 @@ class KeyId(IntEnum):
     ECC_KEY_E0F3 = 0xE0F3
     RSA_KEY_E0FC = 0xe0fc
     RSA_KEY_E0FD = 0xe0fd
+    AES_KEY_E200 = 0xe200
 
 
 class SessionId(IntEnum):
