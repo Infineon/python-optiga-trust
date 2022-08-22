@@ -5,7 +5,6 @@ from ctypes import c_ubyte, c_ushort, c_byte, c_int, c_bool, c_void_p, byref, \
     POINTER, Structure, memmove, addressof, c_uint
 import warnings
 import hashlib
-from hashlib import new as _hashlib_new
 
 # Optiga doesn't produce the whole public key, to which other platforms used to.
 # We use an asn1 engine to append this info
@@ -265,7 +264,7 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     if _curve not in opt.curves_values:
         raise TypeError(
             "object_id not found. \n\r Supported = {0},\n\r  "
-            "Provided = {1}".format(map(_curve2str,list(opt.curves), curve)))
+            "Provided = {1}".format(map(_curve2str, list(opt.curves)), curve))
 
     c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
     pkey = (c_ubyte * _key_sizes[curve][0])()
@@ -666,10 +665,8 @@ def pkcs1v15_encrypt(data, pkey, exp_size='1024'):
     api = optiga.Chip().api
 
     if not isinstance(pkey, (int, bytes, bytearray)):
-        raise TypeError(
-            'pkey is not supported. You provided {0}, expected {1}, {2}, or {3}'.
-                format(type(pkey), int, bytes, bytearray)
-        )
+        raise TypeError('pkey is not supported. You provided {0}, expected {1}, {2}, or {3}'.
+                        format(type(pkey), int, bytes, bytearray))
 
     if not isinstance(data, (bytes, bytearray)):
         if isinstance(data, str):
@@ -759,10 +756,7 @@ def pkcs1v15_decrypt(ciphertext, key_id):
         ct = ciphertext
 
     if not isinstance(key_id, int):
-        raise TypeError(
-            'key is not supported. You provided {0}, expected {1}'.
-                format(type(key_id), int)
-        )
+        raise TypeError('key is not supported. You provided {0}, expected {1}'.format(type(key_id), int))
 
     encrypt_scheme = 0x11
 
@@ -772,9 +766,7 @@ def pkcs1v15_decrypt(ciphertext, key_id):
     c_ptlen   = c_uint(500)
 
     ret = api.exp_optiga_crypt_rsa_decrypt_and_export(encrypt_scheme, data_to_decrypt, len(data_to_decrypt),
-                                                      None, c_ushort(0),
-                                                      key_id,
-                                                      plaintext, byref(c_ptlen))
+                                                      None, c_ushort(0), key_id, plaintext, byref(c_ptlen))
 
     if ret == 0:
         cipher_text = (c_ubyte * c_ptlen.value)()

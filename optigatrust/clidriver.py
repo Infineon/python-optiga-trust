@@ -299,11 +299,12 @@ def object_parser(oid, lock, unlock, export_otc,export_json, meta, inp, out, out
 
         chip_handler = optiga.Chip()
         chip_uid = chip_handler.uid
-        unique_path = '{chip}_{uid}_{data}_{time}.json'.format(chip=chip_handler.name,
-                                                          uid=chip_uid.fw_build + chip_uid.x_coord + chip_uid.y_coord,
-                                                          data=time.strftime("%Y%m%d"),
-                                                          time=time.strftime("%H%M%S")
-                                                          )
+        unique_path = '{chip}_{uid}_{data}_{time}.json'.\
+            format(chip=chip_handler.name,
+                   uid=chip_uid.fw_build + chip_uid.x_coord + chip_uid.y_coord,
+                   data=time.strftime("%Y%m%d"),
+                   time=time.strftime("%H%M%S")
+                   )
         unique_path = unique_path.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
         buffer = json.dumps(port.to_json(), indent=4)
         with open(unique_path, "w+") as js:

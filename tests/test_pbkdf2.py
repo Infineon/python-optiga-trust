@@ -8,12 +8,14 @@ import optigatrust.crypto as optiga_crypto
     (b'password', b'salt', 2, 'ae4d0c95af6b46d32d0adff928f06dd02a303f8ef3c251dfd6e2d85a95474c43')
 ])
 def test_pbkdf2_sha256(password, salt, iterations, output):
-    obj = objects.AppData(0xf1d0)
-    obj.write(password)
-    obj.meta = {'type': 'pre_sh_secret'}
+    app_data = objects.AppData(0xf1d0)
+    app_data.write(password)
+    old_type = app_data.meta['type']
+    app_data.meta = {'type': 'pre_sh_secret'}
 
-    result = optiga_crypto.pbkdf2_hmac(obj, 'sha256', salt, iterations, 32)
+    result = optiga_crypto.pbkdf2_hmac(app_data, 'sha256', salt, iterations, 32)
 
+    app_data.meta = {'type': old_type}
     assert output == result.hex()
 
 
@@ -22,10 +24,12 @@ def test_pbkdf2_sha256(password, salt, iterations, output):
     ( b'password', b'salt', 2, 'e1d9c16aa681708a45f5c7c4e215ceb66e011a2e9f0040713f18aefdb866d53cf76cab2868a39b9f7840edce4fef5a82be67335c77a6068e04112754f27ccf4e')
 ])
 def test_pbkdf2_sha512( password, salt, iterations, output):
-    obj = objects.AppData(0xf1d0)
-    obj.write(password)
-    obj.meta = {'type': 'pre_sh_secret'}
+    app_data = objects.AppData(0xf1d0)
+    app_data.write(password)
+    old_type = app_data.meta['type']
+    app_data.meta = {'type': 'pre_sh_secret'}
 
-    result = optiga_crypto.pbkdf2_hmac(obj, 'sha512', salt, iterations, 64)
+    result = optiga_crypto.pbkdf2_hmac(app_data, 'sha512', salt, iterations, 64)
+    app_data.meta = {'type': old_type}
 
     assert output == result.hex()
