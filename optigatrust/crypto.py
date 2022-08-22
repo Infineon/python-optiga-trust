@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 """This module implements all crypo related APIs of the optigatrust package """
-
+from builtins import ValueError
 from ctypes import c_ubyte, c_ushort, c_byte, c_int, c_bool, c_void_p, byref, \
     POINTER, Structure, memmove, addressof, c_uint
 import warnings
 import hashlib
+from hashlib import new as _hashlib_new
 
 # Optiga doesn't produce the whole public key, to which other platforms used to.
 # We use an asn1 engine to append this info
@@ -26,6 +27,7 @@ __all__ = [
     'hmac',
     'tls_prf',
     'hkdf',
+    'pbkdf2_hmac',
     'ECDSASignature',
     'PKCS1v15Signature',
 ]
@@ -1033,3 +1035,85 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
         return objects.AcquiredSession()
 
     raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def pbkdf2_hmac(key_object, hash_name, salt, iterations, dklen=None):
+    """
+    This function is an implementation of Password Based Key Dereviation Function v2 (PBKDF2)
+    using a HMAC function and a secret stored on OPTIGA Trust device.
+
+    .. note:: Implementation follows the https://www.rfc-editor.org/rfc/rfc2898#section-5.2 Spec
+    .. note:: Only OPTIGA™ Trust M3 relevant
+
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the password storage.
+        Can be one of the following classes
+        :class:`~optigatrust.objects.AppData`, with the obj.meta = {`type`:`pre_sh_secret`} to be set
+
+    :param hash_name:
+        Hash algorithm which should be used to sign data. 'sha256' by default
+
+    :param password:
+        password, should be bytestring
+
+    :param salt:
+        salt, should be bytestring
+
+    :param iterations:
+        iteration count, a positive integer
+
+    :param dklen:
+        intended length in octets of the derived key, a positive integer, at most (2^32 - 1) * hLen
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the parameters not expected
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        byte string with the key
+    """
+    _hash_map = {
+        'sha256': 32,
+        'sha384': 48,
+        'sha512': 64
+    }
+    if hash_name not in _hash_map:
+        raise ValueError(
+            'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
+        )
+
+    if not isinstance(hash_name, str):
+        raise TypeError(hash_name)
+
+    # no unicode, memoryview and other bytes-like objects are too hard to support
+    if not isinstance(salt, (bytes, bytearray)):
+        salt = memoryview(salt).tobytes()
+
+    # Fast inline HMAC implementation
+    blocksize = _hash_map[hash_name]
+
+    if iterations < 1:
+        raise ValueError(iterations)
+    if dklen is None:
+        dklen = blocksize
+    if dklen < 1:
+        raise ValueError(dklen)
+
+    def _loop_counter(loop):
+        return loop.to_bytes(4, 'big')
+
+    dkey = b''
+    loop = 1
+    while len(dkey) < dklen:
+        prev = hmac(key_object, salt + _loop_counter(loop), hash_algorithm=hash_name)
+        # endianess doesn't matter here as long to / from use the same
+        rkey = int.from_bytes(prev, 'big')
+        for i in range(iterations - 1):
+            prev = hmac(key_object, prev, hash_algorithm=hash_name)
+            # rkey = rkey ^ prev
+            rkey ^= int.from_bytes(prev, 'big')
+        loop += 1
+        dkey += int.to_bytes(rkey, blocksize, 'big')
+
+    return dkey[:dklen]
