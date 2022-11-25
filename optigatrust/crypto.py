@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """This module implements all crypo related APIs of the optigatrust package """
-
+from builtins import ValueError
 from ctypes import c_ubyte, c_ushort, c_byte, c_int, c_bool, c_void_p, byref, \
     POINTER, Structure, memmove, addressof, c_uint
 import warnings
@@ -26,25 +26,39 @@ __all__ = [
     'hmac',
     'tls_prf',
     'hkdf',
+    'pbkdf2_hmac',
     'ECDSASignature',
     'PKCS1v15Signature',
 ]
 
+curves_map = {
+    'secp256r1': optiga.enums.m3.Curves.SEC_P256R1,
+    'secp384r1': optiga.enums.m3.Curves.SEC_P384R1,
+    'secp521r1': optiga.enums.m3.Curves.SEC_P521R1,
+    'brainpoolp256r1': optiga.enums.m3.Curves.BRAINPOOL_P256R1,
+    'brainpoolp384r1': optiga.enums.m3.Curves.BRAINPOOL_P384R1,
+    'brainpoolp512r1': optiga.enums.m3.Curves.BRAINPOOL_P512R1
+}
+
 
 def _str2curve(curve_str, return_value=False):
-    _map = {
-        'secp256r1': optiga.enums.m3.Curves.SEC_P256R1,
-        'secp384r1': optiga.enums.m3.Curves.SEC_P384R1,
-        'secp521r1': optiga.enums.m3.Curves.SEC_P521R1,
-        'brainpoolp256r1': optiga.enums.m3.Curves.BRAINPOOL_P256R1,
-        'brainpoolp384r1': optiga.enums.m3.Curves.BRAINPOOL_P384R1,
-        'brainpoolp512r1': optiga.enums.m3.Curves.BRAINPOOL_P512R1
-    }
-    if curve_str in _map:
+    global curves_map
+
+    if curve_str in curves_map:
         if return_value:
-            return _map[curve_str].value
-        return _map[curve_str]
-    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, _map.keys()))
+            return curves_map[curve_str].value
+        return curves_map[curve_str]
+    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve_str, curves_map.keys()))
+
+
+def _curve2str(curve):
+    global curves_map
+
+    for entry in curves_map:
+        if curve == curves_map[entry]:
+            return entry
+
+    raise ValueError('Your curve ({0}) not supported use one of these: {1}'.format(curve, curves_map.keys()))
 
 
 def _native_to_pkcs(pkey, key=None, algorithm=None):
@@ -250,11 +264,7 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     if _curve not in opt.curves_values:
         raise TypeError(
             "object_id not found. \n\r Supported = {0},\n\r  "
-            "Provided = {1}".format(list(opt.curves_values), _curve))
-
-    opt.api.exp_optiga_crypt_ecc_generate_keypair.argtypes = c_int, c_ubyte, c_bool, c_void_p, POINTER(
-        c_ubyte), POINTER(c_ushort)
-    opt.api.exp_optiga_crypt_ecc_generate_keypair.restype = c_int
+            "Provided = {1}".format(map(_curve2str, list(opt.curves)), curve))
 
     c_keyusage = c_ubyte(sum(map(lambda ku: ku.value, _key_usage)))
     pkey = (c_ubyte * _key_sizes[curve][0])()
@@ -655,10 +665,8 @@ def pkcs1v15_encrypt(data, pkey, exp_size='1024'):
     api = optiga.Chip().api
 
     if not isinstance(pkey, (int, bytes, bytearray)):
-        raise TypeError(
-            'pkey is not supported. You provided {0}, expected {1}, {2}, or {3}'.
-                format(type(pkey), int, bytes, bytearray)
-        )
+        raise TypeError('pkey is not supported. You provided {0}, expected {1}, {2}, or {3}'.
+                        format(type(pkey), int, bytes, bytearray))
 
     if not isinstance(data, (bytes, bytearray)):
         if isinstance(data, str):
@@ -748,10 +756,7 @@ def pkcs1v15_decrypt(ciphertext, key_id):
         ct = ciphertext
 
     if not isinstance(key_id, int):
-        raise TypeError(
-            'key is not supported. You provided {0}, expected {1}'.
-                format(type(key_id), int)
-        )
+        raise TypeError('key is not supported. You provided {0}, expected {1}'.format(type(key_id), int))
 
     encrypt_scheme = 0x11
 
@@ -761,9 +766,7 @@ def pkcs1v15_decrypt(ciphertext, key_id):
     c_ptlen   = c_uint(500)
 
     ret = api.exp_optiga_crypt_rsa_decrypt_and_export(encrypt_scheme, data_to_decrypt, len(data_to_decrypt),
-                                                      None, c_ushort(0),
-                                                      key_id,
-                                                      plaintext, byref(c_ptlen))
+                                                      None, c_ushort(0), key_id, plaintext, byref(c_ptlen))
 
     if ret == 0:
         cipher_text = (c_ubyte * c_ptlen.value)()
@@ -1024,3 +1027,85 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm='sha256', 
         return objects.AcquiredSession()
 
     raise IOError('Function can\'t be executed. Error {0}'.format(hex(ret)))
+
+
+def pbkdf2_hmac(key_object, hash_name, salt, iterations, dklen=None):
+    """
+    This function is an implementation of Password Based Key Dereviation Function v2 (PBKDF2)
+    using a HMAC function and a secret stored on OPTIGA Trust device.
+
+    .. note:: Implementation follows the https://www.rfc-editor.org/rfc/rfc2898#section-5.2 Spec
+    .. note:: Only OPTIGA™ Trust M3 relevant
+
+    :param key_object:
+        Key Object on the OPTIGA Chip, which should be used as a source of the password storage.
+        Can be one of the following classes
+        :class:`~optigatrust.objects.AppData`, with the obj.meta = {`type`:`pre_sh_secret`} to be set
+
+    :param hash_name:
+        Hash algorithm which should be used to sign data. 'sha256' by default
+
+    :param password:
+        password, should be bytestring
+
+    :param salt:
+        salt, should be bytestring
+
+    :param iterations:
+        iteration count, a positive integer
+
+    :param dklen:
+        intended length in octets of the derived key, a positive integer, at most (2^32 - 1) * hLen
+
+    :raises:
+        - TypeError - when any of the parameters are of the wrong type
+        - ValueError - when any of the parameters not expected
+        - OSError - when an error is returned by the core initialisation library
+
+    :returns:
+        byte string with the key
+    """
+    _hash_map = {
+        'sha256': 32,
+        'sha384': 48,
+        'sha512': 64
+    }
+    if hash_name not in _hash_map:
+        raise ValueError(
+            'Hash algorithm should be one of the following {}'.format(_hash_map.keys())
+        )
+
+    if not isinstance(hash_name, str):
+        raise TypeError(hash_name)
+
+    # no unicode, memoryview and other bytes-like objects are too hard to support
+    if not isinstance(salt, (bytes, bytearray)):
+        salt = memoryview(salt).tobytes()
+
+    # Fast inline HMAC implementation
+    blocksize = _hash_map[hash_name]
+
+    if iterations < 1:
+        raise ValueError(iterations)
+    if dklen is None:
+        dklen = blocksize
+    if dklen < 1:
+        raise ValueError(dklen)
+
+    def _loop_counter(loop):
+        return loop.to_bytes(4, 'big')
+
+    dkey = b''
+    loop = 1
+    while len(dkey) < dklen:
+        prev = hmac(key_object, salt + _loop_counter(loop), hash_algorithm=hash_name)
+        # endianess doesn't matter here as long to / from use the same
+        rkey = int.from_bytes(prev, 'big')
+        for i in range(iterations - 1):
+            prev = hmac(key_object, prev, hash_algorithm=hash_name)
+            # rkey = rkey ^ prev
+            rkey ^= int.from_bytes(prev, 'big')
+        loop += 1
+        dkey += int.to_bytes(rkey, blocksize, 'big')
+
+    return dkey[:dklen]

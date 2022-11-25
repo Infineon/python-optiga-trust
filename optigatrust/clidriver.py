@@ -7,6 +7,7 @@ import ntpath
 import json
 from ast import literal_eval
 import click
+import time
 
 # PEM files parser from the AS1 Crypto Library
 from asn1crypto import pem
@@ -71,15 +72,22 @@ def validate_ecc_rsa_id(ctx, param, value):
     :raises:
         - click.BadParameter - in case the given object id can't be initialised
     """
+    if isinstance(value, str):
+        id = int(value, base=16)
+    elif isinstance(value, int):
+        id = value
+    else:
+        raise click.BadParameter("Object ID doesn't exist. Please align with the format, should be 0x0ef1")
+
     try:
-        obj = objects.ECCKey(int(value, base=16))
+        obj = objects.ECCKey(id)
         obj = obj.meta
-        return int(value, base=16)
+        return id
     except (ValueError, TypeError, OSError):
         try:
-            obj = objects.RSAKey(int(value, base=16))
+            obj = objects.RSAKey(id)
             obj = obj.meta
-            return int(value, base=16)
+            return id
         except (ValueError, TypeError, OSError) as no_rsa:
             raise click.BadParameter("Object ID doesn't exist. Please align with the ECC Objects map") from no_rsa
 
@@ -224,8 +232,11 @@ def main():
                    'This action can be reversed only in special cases. See Metadata Update.')
 @click.option('--unlock', is_flag=True, default=False, required=False,
               help='Unlock a given Object by running a protected update. ')
-@click.option('--export-all', is_flag=True, default=False, required=False,
-              help='Export data and metadata from all the objects from the connected device.')
+@click.option('--export-otc', is_flag=True, default=False, required=False,
+              help='Export data and metadata from all the objects to the OTC supported format.')
+@click.option('--export-json', is_flag=True, default=False, required=False,
+              help='Export data and metadata from all the objects to the JSON format which can be used to re-import'
+                   ' the settings.')
 @click.option('--meta', is_flag=True,
               default=False, required=False,
               help='Read metadata from a given Object ID')
@@ -253,25 +264,60 @@ def main():
 @click.option('--outform', type=click.Choice(['PEM', 'DER', 'C', 'DAT']),
               default=None, required=False,
               help='Define which output type to use')
-def object_parser(oid, lock, unlock, export_all, meta, inp, out, outform):  # noqa: C901
+def object_parser(oid, lock, unlock, export_otc,export_json, meta, inp, out, outform):  # noqa: C901
     buffer = ''
     output = out
 
-    if export_all:
+    if export_otc:
         click.echo("Warning, export might take a few minutes to complete")
         if oid or lock or meta or inp or outform:
-            raise click.BadParameter('with the --export_all option only --out is allowed')
-        buffer = json.dumps(port.to_json(), indent=4)
+            raise click.BadParameter('with the --export_otc option other options are ignored')
+
+        chip_handler = optiga.Chip()
+        chip_uid = chip_handler.uid
+        unique_path = '{chip}_{uid}_{data}_{time}'.format(chip=chip_handler.name,
+                                                          uid=chip_uid.fw_build + chip_uid.x_coord + chip_uid.y_coord,
+                                                          data=time.strftime("%Y%m%d"),
+                                                          time=time.strftime("%H%M%S")
+                                                          )
+        unique_path = unique_path.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
+        try:
+            os.mkdir(unique_path)
+        except OSError:
+            print("Creation of the directory %s failed" % unique_path)
+        else:
+            print("Starting export to the directory: %s " % unique_path)
+        buffer = port.to_otc(unique_path)
 
         click.echo(message=buffer, file=output)
-        click.echo("Export Completed")
+        click.echo("Export Completed. Now you can open it with the OTC Tool")
+        sys.exit(0)
+    elif export_json:
+        click.echo("Warning, export might take a few minutes to complete")
+        if oid or lock or meta or inp or outform:
+            raise click.BadParameter('with the --export_otc option other options are ignored')
+
+        chip_handler = optiga.Chip()
+        chip_uid = chip_handler.uid
+        unique_path = '{chip}_{uid}_{data}_{time}.json'.\
+            format(chip=chip_handler.name,
+                   uid=chip_uid.fw_build + chip_uid.x_coord + chip_uid.y_coord,
+                   data=time.strftime("%Y%m%d"),
+                   time=time.strftime("%H%M%S")
+                   )
+        unique_path = unique_path.replace(' ', '_').replace('(', '').replace(')', '').replace('/', '_')
+        buffer = json.dumps(port.to_json(), indent=4)
+        with open(unique_path, "w+") as js:
+            js.write(buffer)
+
+        click.echo("Export completed in the file {0}".format(unique_path))
         sys.exit(0)
 
     # Todo Test lock
     if lock:
         obj = optiga.Object(oid)
 
-        if export_all or meta or inp or out or outform:
+        if export_otc or export_json or meta or inp or out or outform:
             raise click.BadParameter('with the --lock option only --id is allowed')
 
         if click.confirm('Locking might be irreversible, would you like to prepare the object for a \n '
@@ -295,7 +341,7 @@ def object_parser(oid, lock, unlock, export_all, meta, inp, out, outform):  # no
     if unlock:
         chip = optiga.Chip()
 
-        if export_all or meta or out or outform:
+        if export_otc or export_json or meta or out or outform:
             raise click.BadParameter('with the --lock option only --id and --in are allowed')
 
         if click.confirm('Do you want to unlock this object? This will run the protected update procedure. '
@@ -582,17 +628,17 @@ def update_parser(oid, file):
               metavar='<0x1234>',
               help='Select an Object ID you would like to use.')
 @click.option('--rsa', is_flag=True,
-              default=False, show_default=True, required=True,
+              default=False, show_default=True, required=False,
               help='If selected an RSA key generation will be invoked')
 @click.option('--curve', type=click.Choice(['secp256r1', 'secp384r1', 'secp521r1',
-                                            'brainpool256r1', 'brainpool384r1', 'brainpool521r1']),
-              default='secp256r1', required=True,
+                                            'brainpoolp256r1', 'brainpoolp384r1', 'brainpoolp512r1']),
+              default='secp256r1', required=False,
               help='Used during a key generation to define which curve to use')
 @click.option('--key_usage', type=click.Choice(['key_agreement', 'authentication', 'encryption', 'signature']),
-              default=['signature'], required=True, multiple=True,
+              default=['signature'], required=False, multiple=True,
               help='Define how the key should be used on the secure element')
 @click.option('--key_size', type=click.Choice(['1024', '2048']),
-              default='1024', required=True,
+              default='1024', required=False,
               help='In case the --rsa option is defined it defines the key size in bits')
 @click.option('--pubout', type=click.File('w'),
               default=None, required=False,
@@ -608,7 +654,7 @@ def create_keys(oid, rsa, curve, key_usage, key_size, pubout, privout):
         curve = None
     else:
         obj = objects.ECCKey(oid)
-        key_size = None
+        key_size = '1024'
 
     if privout is not None:
         export = True
