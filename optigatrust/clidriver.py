@@ -197,10 +197,10 @@ def process_metadata_file(file):
 
             _fragments.append(bytearray(fragment_data))
 
-            return _manifest, _fragments
         except ValueError:
             return _manifest, _fragments
 
+    return _manifest, _fragments
 
 # pylint: disable=missing-function-docstring
 @click.group()
