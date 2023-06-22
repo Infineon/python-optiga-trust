@@ -6,15 +6,16 @@ The precompiled shared libraries are available for the following platforms:
 * 32bit Windows 8+
 * 64bit Windows 8+
 * 32bit Linux (tested on Ubuntu)
+* 64bit Linux (tested on Raspberry Pi OS 64-bit)
 
 ## Add support for you own Embedded Linux
 
-You need to build the shared library for your platform for this you need to have `cmake` and `build-essential` packages installed in your system
+You need to build the shared library for your platform for this you need to have `cmake`, `build-essential`and `libusb-1.0.0-dev` packages installed on your system
 
 Then you can do the following
 
 ```bash
-$ cd cd python-optiga-trust/lib/optigatrust/csrc
+$ cd python-optiga-trust/optigatrust/csrc
 $ mkdir build && cd build
 $ cmake ..
 $ make

@@ -1,9 +1,12 @@
 import pytest
 import os
-from oscrypto import use_openssl
-libcrypto_path = os.path.abspath("C:\\Program Files (x86)\\OpenSSL-Win32\\libcrypto-1_1.dll")
-libssl_path = os.path.abspath("C:\\Program Files (x86)\\OpenSSL-Win32\\libssl-1_1.dll")
-use_openssl(libcrypto_path, libssl_path)
+import sys
+
+if sys.platform == 'win32':
+    from oscrypto import use_openssl
+    libcrypto_path = os.path.abspath("C:\\Program Files (x86)\\OpenSSL-Win32\\libcrypto-1_1.dll")
+    libssl_path = os.path.abspath("C:\\Program Files (x86)\\OpenSSL-Win32\\libssl-1_1.dll")
+    use_openssl(libcrypto_path, libssl_path)
 
 from oscrypto.asymmetric import ecdsa_verify, load_public_key
 from oscrypto.errors import SignatureError
