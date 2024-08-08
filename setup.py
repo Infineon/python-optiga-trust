@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-2024 Infineon Technologies AG
+# SPDX-License-Identifier: MIT
+
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
@@ -7,44 +10,8 @@ import os
 import shutil
 
 
-def __get_arch_os():
-    platforms = {
-        'linux': 'Linux',
-        'linux1': 'Linux',
-        'linux2': 'Linux',
-        'darwin': 'OSX',
-        'cygwin': 'Windows',
-        'msys': 'Windows',
-        'win32': 'Windows',
-    }
-
-    if sys.platform not in platforms:
-        return sys.platform
-
-    return platform.architecture()[0], platforms[sys.platform]
-
-
-def __get_lib_postfix():
-    targets = {
-        'Linux': {
-            '32bit': 'x86',
-            '64bit': 'x86_64'
-        },
-        'Windows': {
-            '32bit': 'ms32',
-            '64bit': 'ms64',
-        }
-    }
-    arch_os = __get_arch_os()
-
-    if arch_os[1] not in targets:
-        raise Exception('Platform not supported')
-
-    return targets[arch_os[1]][arch_os[0]]
-
-
 def __copy_rules(target):
-    rules = 'src/optiga-trust-x/pal/libusb/include/90-optigatrust.rules'
+    rules = 'rules/90-optigatrust.rules'
 
     if not os.path.exists(target):
         raise FileNotFoundError
@@ -63,8 +30,9 @@ def _install_rules():
             print('Install udev rules failed')
 
 
-def __readme():
-    with open('README.md', 'r', encoding='utf-8') as f:
+def __description():
+    description_file = os.path.join("src" , "optigatrust", "DESCRIPTION.md")
+    with open(description_file, 'r', encoding='utf-8') as f:
         readme = f.read()
 
     return readme
@@ -77,7 +45,7 @@ class OptigaTrustInstall(install):
 
 
 __name = 'optigatrust'
-__desc = 'The ctypes Python wrapper for the Infineon OPTIGA(TM) Trust family of security solutions'
+__desc = 'A ctypes based Python wrapper for the OPTIGA™ Trust M Host Library for C'
 __url = 'https://github.com/infineon/python-optiga-trust'
 __author = 'Infineon Technologies AG'
 __author_email = 'DSSTechnicalSupport@infineon.com'
@@ -96,37 +64,39 @@ __classifiers = [
     'Operating System :: POSIX :: Linux'
 ]
 
-with open(os.path.join(__name, "version.py")) as init_root:
-    for line in init_root:
-        if line.startswith("__version_info__"):
-            __version_tuple__ = eval(line.split("=")[1])
-__version = ".".join([str(x) for x in __version_tuple__])
-
 # Parameters for setup
 __packages = [
     'optigatrust',
     'optigatrust.enums',
-    'optigatrust.csrc.lib'
+    'optigatrust.rules',
+    'optigatrust.lib'
 ]
 
 __package_data = {
-    'optigatrust.csrc.lib': ['*.dll', '*.so', '*.ini'],
+    'optigatrust': ['*.md'],
+    'optigatrust.lib': ['*.dll', '*.so', '*.ini'],
     'optigatrust.enums': ['*.xml'],
-    'optigatrust.rules': [
-        'csrc/optiga-trust-m/pal/libusb/include/90-optigatrust.rules'
-    ]
+    'optigatrust.rules': ['*.rules']
 }
 
+__package_root_dir = "src/" + __name
+
 __package_dir = {
-    "optigatrust": "optigatrust",
+    "optigatrust": __package_root_dir,
 }
+
+with open(os.path.join(__package_root_dir, "version.py")) as init_root:
+    for line in init_root:
+        if line.startswith("__version_info__"):
+            __version_tuple__ = eval(line.split("=")[1])
+    __version = ".".join([str(x) for x in __version_tuple__])
 
 if __name__ == '__main__':
     setup(
         name=__name,
         version=__version,
         description=__desc,
-        long_description=__readme(),
+        long_description=__description(),
         long_description_content_type='text/markdown',
         url=__url,
         author=__author,

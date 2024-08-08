@@ -1,195 +1,131 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>2. Object and Metadata management &mdash; python-optiga-trust 1.0.4 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-  
-  <link rel="stylesheet" href="static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="static/pygments.css" type="text/css" />
-
-  
-  
-  
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Object and Metadata management &mdash; python-optiga-trust 1.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
   <!--[if lt IE 9]>
-    <script src="static/js/html5shiv.min.js"></script>
+    <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="static/documentation_options.js"></script>
-        <script src="static/jquery.js"></script>
-        <script src="static/underscore.js"></script>
-        <script src="static/doctools.js"></script>
-        <script src="static/language_data.js"></script>
-    
-    <script type="text/javascript" src="static/js/theme.js"></script>
-
-    
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=9172181d"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
-    <link rel="next" title="3. Cryptography" href="crypto.html" />
-    <link rel="prev" title="1. OPTIGA™ Trust management" href="chip.html" /> 
+    <link rel="next" title="Cryptography" href="crypto.html" />
+    <link rel="prev" title="OPTIGA™ Trust management" href="chip.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> python-optiga-trust
           
-
-          
-            
-            <img src="static/infineon_logo.png" class="logo" alt="Logo"/>
-          
+          <a href="index.html" class="icon icon-home">
+            python-optiga-trust
+              <img src="_static/infineon_logo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
-                1.0.4
+                1.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chip.html">OPTIGA™ Trust management</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Object and Metadata management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#objects">Objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#x509-object">X509 object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ecc-key-object">ECC Key object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rsa-key-object">RSA Key object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#metadata">Metadata</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#options">Options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#metadata-tags">Metadata Tags</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#access-conditions">Access Conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#printing-all-metadata-in-human-readable-form">Printing All metadata in human readable form</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#updating-metadata-of-the-certificate-object">Updating Metadata of the Certificate Object</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.Object"><code class="docutils literal notranslate"><span class="pre">Object</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.Object.meta"><code class="docutils literal notranslate"><span class="pre">Object.meta</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.Object.read"><code class="docutils literal notranslate"><span class="pre">Object.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.Object.write"><code class="docutils literal notranslate"><span class="pre">Object.write()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.AESKey"><code class="docutils literal notranslate"><span class="pre">AESKey</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.AcquiredSession"><code class="docutils literal notranslate"><span class="pre">AcquiredSession</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.AppData"><code class="docutils literal notranslate"><span class="pre">AppData</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.ECCKey"><code class="docutils literal notranslate"><span class="pre">ECCKey</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.RSAKey"><code class="docutils literal notranslate"><span class="pre">RSAKey</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.Session"><code class="docutils literal notranslate"><span class="pre">Session</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#optigatrust.objects.X509"><code class="docutils literal notranslate"><span class="pre">X509</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.objects.X509.der"><code class="docutils literal notranslate"><span class="pre">X509.der</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.objects.X509.pem"><code class="docutils literal notranslate"><span class="pre">X509.pem</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.objects.X509.pkey"><code class="docutils literal notranslate"><span class="pre">X509.pkey</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#optigatrust.objects.X509.signature"><code class="docutils literal notranslate"><span class="pre">X509.signature</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">CRS (Certificate Signing Request)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">Export or Import Chip (Meta)Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linux_support.html">Porting to other platforms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">Enable the provisioning mode on your Evaluation Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyrights and Licenses</a></li>
+</ul>
 
-          
         </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">2. Object and Metadata management</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#objects">2.1. Objects</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#x509-object">2.1.1. X509 object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#ecc-key-object">2.1.2. ECC Key object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#rsa-key-object">2.1.3. RSA Key object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#aes-key-object">2.1.4. AES Key object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#session-object">2.1.5. Session object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#acquiredsession-object">2.1.6. AcquiredSession object</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#appdata-object">2.1.7. AppData object</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#metadata">2.2. Metadata</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#options">2.2.1. Options</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#metadata-tags">2.2.2. Metadata Tags</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#access-conditions">2.2.3. Access Conditions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#printing-all-metadata-in-human-readable-form">2.2.4. Printing All metadata in human readable form</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#updating-metadata-of-the-certificate-object">2.2.5. Updating Metadata of the Certificate Object</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#api">2.3. API</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="crypto.html">3. Cryptography</a></li>
-<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
-<li class="toctree-l1"><a class="reference internal" href="prov_mode.html">7. Enable the provisioning mode on your Evaluation Kit</a></li>
-<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
-</ul>
-
-            
-          
-        </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">python-optiga-trust</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li><span class="section-number">2. </span>Object and Metadata management</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Object and Metadata management</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/metadata.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="object-and-metadata-management">
-<h1><span class="section-number">2. </span>Object and Metadata management<a class="headerlink" href="#object-and-metadata-management" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="objects">
-<h2><span class="section-number">2.1. </span>Objects<a class="headerlink" href="#objects" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="object-and-metadata-management">
+<h1>Object and Metadata management<a class="headerlink" href="#object-and-metadata-management" title="Link to this heading"></a></h1>
+<section id="objects">
+<h2>Objects<a class="headerlink" href="#objects" title="Link to this heading"></a></h2>
 <p>An object within this library is a generic class, which represents basic functionality and features valid for all
 OIDs (Object IDs, except for Session Objects) located on the chip.</p>
 <p>Here are basic features what you can do with a generic Object instance (if access condition allows):</p>
@@ -199,7 +135,7 @@ OIDs (Object IDs, except for Session Objects) located on the chip.</p>
 </ul>
 <p>Below you can find object maps for various supported products</p>
 <p>OPTIGA™ Trust M3</p>
-<img alt="https://github.com/Infineon/Assets/raw/master/Pictures/trustm_keystore_dataobjects_v04.png" src="https://github.com/Infineon/Assets/raw/master/Pictures/trustm_keystore_dataobjects_v04.png" />
+<img alt="_images/trustm_keystore_dataobjects_v04.png" src="_images/trustm_keystore_dataobjects_v04.png" />
 <p><a class="reference external" href="https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_m_datastore_overview_v3.jpg">OPTIGA™ Trust M1</a></p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">optigatrust</span> <span class="k">as</span> <span class="nn">optiga</span>
 
@@ -214,8 +150,8 @@ OIDs (Object IDs, except for Session Objects) located on the chip.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;01020304 ... 898a8b8c&#39;</span>
 </pre></div>
 </div>
-<div class="section" id="x509-object">
-<h3><span class="section-number">2.1.1. </span>X509 object<a class="headerlink" href="#x509-object" title="Permalink to this headline">¶</a></h3>
+<section id="x509-object">
+<h3>X509 object<a class="headerlink" href="#x509-object" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
 
 <span class="n">cert_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">X509</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
@@ -251,9 +187,9 @@ OIDs (Object IDs, except for Session Objects) located on the chip.</p>
 <span class="o">============================================================</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="ecc-key-object">
-<h3><span class="section-number">2.1.2. </span>ECC Key object<a class="headerlink" href="#ecc-key-object" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="ecc-key-object">
+<h3>ECC Key object<a class="headerlink" href="#ecc-key-object" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -278,9 +214,9 @@ OIDs (Object IDs, except for Session Objects) located on the chip.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="rsa-key-object">
-<h3><span class="section-number">2.1.3. </span>RSA Key object<a class="headerlink" href="#rsa-key-object" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="rsa-key-object">
+<h3>RSA Key object<a class="headerlink" href="#rsa-key-object" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -305,43 +241,31 @@ OIDs (Object IDs, except for Session Objects) located on the chip.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="aes-key-object">
-<h3><span class="section-number">2.1.4. </span>AES Key object<a class="headerlink" href="#aes-key-object" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="session-object">
-<h3><span class="section-number">2.1.5. </span>Session object<a class="headerlink" href="#session-object" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="acquiredsession-object">
-<h3><span class="section-number">2.1.6. </span>AcquiredSession object<a class="headerlink" href="#acquiredsession-object" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="appdata-object">
-<h3><span class="section-number">2.1.7. </span>AppData object<a class="headerlink" href="#appdata-object" title="Permalink to this headline">¶</a></h3>
-</div>
-</div>
-<div class="section" id="metadata">
-<h2><span class="section-number">2.2. </span>Metadata<a class="headerlink" href="#metadata" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
 <p>Every Object (except for Session Objects) have a special service area called - metadata. It is a structured data which
 can significantly influence many aspects of the object itself, for example a lifecycle state.</p>
-<div class="section" id="options">
-<h3><span class="section-number">2.2.1. </span>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h3>
+<section id="options">
+<h3>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h3>
 <p>Users can work with metadata directly in human-readable form.
 Metadata should be contructed in the following manner:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;&lt;metadata_tag&gt;&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;metadata_value&gt;&#39;</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>Where metadata can take the following values:</p>
-</div>
-<div class="section" id="metadata-tags">
-<h3><span class="section-number">2.2.2. </span>Metadata Tags<a class="headerlink" href="#metadata-tags" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="metadata-tags">
+<h3>Metadata Tags<a class="headerlink" href="#metadata-tags" title="Link to this heading"></a></h3>
 <p>All metadata can be changed (except for OPTIGA Trust M V3) only if the lifecycle state of the object is either
 ‘creation’ or ‘initialisation’</p>
-<table class="colwidths-given docutils align-default" id="id1">
-<caption><span class="caption-text">Metadata Tags Table</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Metadata Tags Table</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
 <colgroup>
-<col style="width: 9%" />
-<col style="width: 27%" />
-<col style="width: 64%" />
+<col style="width: 9.1%" />
+<col style="width: 27.3%" />
+<col style="width: 63.6%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Tag</p></th>
@@ -395,9 +319,9 @@ e.g. {‘key_usage’: [[ ‘authentication’, ‘sign’, ‘key_agreement’]
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="access-conditions">
-<h3><span class="section-number">2.2.3. </span>Access Conditions<a class="headerlink" href="#access-conditions" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="access-conditions">
+<h3>Access Conditions<a class="headerlink" href="#access-conditions" title="Link to this heading"></a></h3>
 <p>The ‘&lt;metadata_value&gt;’ should be defined either as a list of values; e.g.</p>
 <blockquote>
 <div><ul class="simple">
@@ -420,11 +344,11 @@ e.g. {‘key_usage’: [[ ‘authentication’, ‘sign’, ‘key_agreement’]
 </li>
 </ul>
 </div></blockquote>
-<table class="colwidths-given docutils align-default" id="id2">
-<caption><span class="caption-text">Access Conditions Table (SRM M V3 - Table 69)</span><a class="headerlink" href="#id2" title="Permalink to this table">¶</a></caption>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Access Conditions Table (SRM M V3 - Table 69)</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 67%" />
+<col style="width: 33.3%" />
+<col style="width: 66.7%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Tag</p></th>
@@ -525,9 +449,9 @@ only if the given object reached the AUTO (Authorised)</p></li>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="printing-all-metadata-in-human-readable-form">
-<h3><span class="section-number">2.2.4. </span>Printing All metadata in human readable form<a class="headerlink" href="#printing-all-metadata-in-human-readable-form" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="printing-all-metadata-in-human-readable-form">
+<h3>Printing All metadata in human readable form<a class="headerlink" href="#printing-all-metadata-in-human-readable-form" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">x509</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
@@ -535,9 +459,9 @@ only if the given object reached the AUTO (Authorised)</p></li>
 <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">cert_object</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="updating-metadata-of-the-certificate-object">
-<h3><span class="section-number">2.2.5. </span>Updating Metadata of the Certificate Object<a class="headerlink" href="#updating-metadata-of-the-certificate-object" title="Permalink to this headline">¶</a></h3>
+</section>
+<section id="updating-metadata-of-the-certificate-object">
+<h3>Updating Metadata of the Certificate Object<a class="headerlink" href="#updating-metadata-of-the-certificate-object" title="Link to this heading"></a></h3>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">x509</span>
 
 <span class="n">cert_object</span> <span class="o">=</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
@@ -566,7 +490,7 @@ only if the given object reached the AUTO (Authorised)</p></li>
 </div>
 <p>Output</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">:</span>\<span class="n">Users</span>\<span class="n">User</span>\<span class="n">git</span>\<span class="n">python</span><span class="o">-</span><span class="n">optiga</span><span class="o">-</span><span class="n">trust</span><span class="o">&gt;</span><span class="n">python</span>
-<span class="n">Python</span> <span class="mf">3.8</span><span class="o">.</span><span class="mi">1</span> <span class="p">(</span><span class="n">tags</span><span class="o">/</span><span class="n">v3</span><span class="o">.</span><span class="mf">8.1</span><span class="p">:</span><span class="mi">1</span><span class="n">b293b6</span><span class="p">,</span> <span class="n">Dec</span> <span class="mi">18</span> <span class="mi">2019</span><span class="p">,</span> <span class="mi">22</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">24</span><span class="p">)</span> <span class="p">[</span><span class="n">MSC</span> <span class="n">v</span><span class="o">.</span><span class="mi">1916</span> <span class="mi">32</span> <span class="n">bit</span> <span class="p">(</span><span class="n">Intel</span><span class="p">)]</span> <span class="n">on</span> <span class="n">win32</span>
+<span class="n">Python</span> <span class="mf">3.8.1</span> <span class="p">(</span><span class="n">tags</span><span class="o">/</span><span class="n">v3</span><span class="mf">.8.1</span><span class="p">:</span><span class="mi">1</span><span class="n">b293b6</span><span class="p">,</span> <span class="n">Dec</span> <span class="mi">18</span> <span class="mi">2019</span><span class="p">,</span> <span class="mi">22</span><span class="p">:</span><span class="mi">39</span><span class="p">:</span><span class="mi">24</span><span class="p">)</span> <span class="p">[</span><span class="n">MSC</span> <span class="n">v</span><span class="mf">.1916</span> <span class="mi">32</span> <span class="n">bit</span> <span class="p">(</span><span class="n">Intel</span><span class="p">)]</span> <span class="n">on</span> <span class="n">win32</span>
 <span class="n">Type</span> <span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="s2">&quot;copyright&quot;</span><span class="p">,</span> <span class="s2">&quot;credits&quot;</span> <span class="ow">or</span> <span class="s2">&quot;license&quot;</span> <span class="k">for</span> <span class="n">more</span> <span class="n">information</span><span class="o">.</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">x509</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">cert_object</span> <span class="o">=</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
@@ -647,16 +571,16 @@ only if the given object reached the AUTO (Authorised)</p></li>
 <span class="o">============================================================</span>
 </pre></div>
 </div>
-</div>
-</div>
-<div class="section" id="api">
-<h2><span class="section-number">2.3. </span>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
 <dl class="py class">
-<dt id="optigatrust.Object">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.</code><code class="sig-name descname">Object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">object_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Object" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.Object">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.</span></span><span class="sig-name descname"><span class="pre">Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Object" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent an Object on the OPTIGA Trust Chip</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>id</strong> (<em>int</em>) – the id of the object; e.g. 0xe0e0</p></li>
 <li><p><strong>updated</strong> (<em>bool</em>) – This boolean variable notifies whether metadata or data has been updated and this can bu used to
@@ -664,9 +588,9 @@ notify other modules to reread data if needed</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py method">
-<dt id="optigatrust.Object.meta">
-<em class="property">property </em><code class="sig-name descname">meta</code><a class="headerlink" href="#optigatrust.Object.meta" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Object.meta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meta</span></span><a class="headerlink" href="#optigatrust.Object.meta" title="Link to this definition"></a></dt>
 <dd><p>A dictionary of the metadata present right now on the chip for the given object. It is writable,
 so user can update the metadata assigning the value to it. Example return</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
@@ -685,35 +609,35 @@ so user can update the metadata assigning the value to it. Example return</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="optigatrust.Object.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em>, <em class="sig-param"><span class="n">force</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; bytearray<a class="headerlink" href="#optigatrust.Object.read" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.Object.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytearray</span></span></span><a class="headerlink" href="#optigatrust.Object.read" title="Link to this definition"></a></dt>
 <dd><p>This function helps to read the data stored on the chip</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>offset</strong> (<em>int</em>) – An optional parameter defining whether you want to read the data with offset</p></li>
 <li><p><strong>force</strong> – This is a <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> parameter which can be used to try to read the data even if id can’t be found</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
 <li><p>ValueError - when any of the parameters contain an invalid value</p></li>
 <li><p>TypeError - when any of the parameters are of the wrong type</p></li>
 <li><p>OSError - when an error is returned by the chip initialisation library</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>byte string</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="optigatrust.Object.write">
-<code class="sig-name descname">write</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em>, <em class="sig-param"><span class="n">offset</span><span class="o">=</span><span class="default_value">0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Object.write" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.Object.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Object.write" title="Link to this definition"></a></dt>
 <dd><p>This function helps to write the data onto the chip</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> – byte string to write</p></li>
 <li><p><strong>offset</strong> (<em>int</em>) – An optional parameter defining whether you want to read the data with offset</p></li>
@@ -732,135 +656,110 @@ so user can update the metadata assigning the value to it. Example return</p>
 
 </dd></dl>
 
-<span class="target" id="module-optigatrust.objects"></span><dl class="py class">
-<dt id="optigatrust.objects.AESKey">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">AESKey</code><a class="headerlink" href="#optigatrust.objects.AESKey" title="Permalink to this definition">¶</a></dt>
+<p id="module-optigatrust.objects">This module implements all Object manipulation related APIs of the optigatrust package</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.AESKey">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">AESKey</span></span><a class="headerlink" href="#optigatrust.objects.AESKey" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent an aes key object on the OPTIGA Trust Chip</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="optigatrust.objects.AcquiredSession">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">AcquiredSession</code><a class="headerlink" href="#optigatrust.objects.AcquiredSession" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.objects.AcquiredSession">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">AcquiredSession</span></span><a class="headerlink" href="#optigatrust.objects.AcquiredSession" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent a session object on the OPTIGA Trust Chip. This is a pseudo object,
 just to indicate to OPTIGA, that we would like to use the acquired session</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="optigatrust.objects.AppData">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">AppData</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">object_id</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.AppData" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.objects.AppData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">AppData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.AppData" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent an Application Data object on the OPTIGA Trust Chip.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="optigatrust.objects.ECCKey">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">ECCKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.ECCKey" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.objects.ECCKey">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">ECCKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.ECCKey" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent an ecc key object on the OPTIGA Trust Chip</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="optigatrust.objects.RSAKey">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">RSAKey</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.RSAKey" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.objects.RSAKey">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">RSAKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.RSAKey" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent an rsa key object on the OPTIGA Trust Chip</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="optigatrust.objects.Session">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">Session</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.Session" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.objects.Session">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.Session" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent a session object on the OPTIGA Trust Chip.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="optigatrust.objects.X509">
-<em class="property">class </em><code class="sig-prename descclassname">optigatrust.objects.</code><code class="sig-name descname">X509</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cert_id</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.X509" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="optigatrust.objects.X509">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">X509</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cert_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.X509" title="Link to this definition"></a></dt>
 <dd><p>A class used to represent a certificate on the OPTIGA Trust Chip</p>
-<dl class="py method">
-<dt id="optigatrust.objects.X509.der">
-<em class="property">property </em><code class="sig-name descname">der</code><a class="headerlink" href="#optigatrust.objects.X509.der" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.der">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">der</span></span><a class="headerlink" href="#optigatrust.objects.X509.der" title="Link to this definition"></a></dt>
 <dd><p>This property allows to get or set the certificate in der form.
 Input should be a valid DER encoded certificate.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="optigatrust.objects.X509.pem">
-<em class="property">property </em><code class="sig-name descname">pem</code><a class="headerlink" href="#optigatrust.objects.X509.pem" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.pem">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pem</span></span><a class="headerlink" href="#optigatrust.objects.X509.pem" title="Link to this definition"></a></dt>
 <dd><p>This property allows to get or set the certificate in PEM form.
 Input should be a valid PEM formatted certificate.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="optigatrust.objects.X509.pkey">
-<em class="property">property </em><code class="sig-name descname">pkey</code><a class="headerlink" href="#optigatrust.objects.X509.pkey" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.pkey">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pkey</span></span><a class="headerlink" href="#optigatrust.objects.X509.pkey" title="Link to this definition"></a></dt>
 <dd><p>This property allows to get the public key from the certificate. In case the certificate can’t be parsed an
 exception will be generated</p>
 </dd></dl>
 
-<dl class="py method">
-<dt id="optigatrust.objects.X509.signature">
-<em class="property">property </em><code class="sig-name descname">signature</code><a class="headerlink" href="#optigatrust.objects.X509.signature" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.signature">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">signature</span></span><a class="headerlink" href="#optigatrust.objects.X509.signature" title="Link to this definition"></a></dt>
 <dd><p>This property allows to get the signature of the certificate.
 In case the certificate can’t be parsed an exception will be generated</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="crypto.html" class="btn btn-neutral float-right" title="3. Cryptography" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="chip.html" class="btn btn-neutral float-left" title="1. OPTIGA™ Trust management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="chip.html" class="btn btn-neutral float-left" title="OPTIGA™ Trust management" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="crypto.html" class="btn btn-neutral float-right" title="Cryptography" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        
-        &copy; <a href="copyright.html">Copyright</a> 2021, Infineon Technologies AG
-
-    </p>
+    <p>&#169; <a href="copyright.html">Copyright</a> 2021-2024, Infineon Technologies AG.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

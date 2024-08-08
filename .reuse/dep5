@@ -1,0 +1,18 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+
+Files: docs/*
+Copyright: 2021-2024 Infineon Technologies AG
+License:  CC-BY-NC-ND-4.0
+
+Files: README.md CHANGELOG.md INSTALL.md tests/README.md src/optigatrust/DESCRIPTION.md
+Copyright: 2021-2024 Infineon Technologies AG
+License:  CC0-1.0
+
+Files: extras/optiga-trust-m/README.md
+Copyright: 2021-2024 Infineon Technologies AG
+License:  CC0-1.0
+
+Files: tests/fixtures/*.pem tests/fixtures/*.crt tests/fixtures/*.key src/optigatrust/lib/*
+Copyright: 2021-2024 Infineon Technologies AG
+License:  CC-BY-NC-ND-4.0
+

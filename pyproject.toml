@@ -1,6 +1,17 @@
+# SPDX-FileCopyrightText: 2021-2024 Infineon Technologies AG
+# SPDX-License-Identifier: MIT
+
 [build-system]
 requires = [
     "setuptools>=42",
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+include = ["pyproject.toml", "src/optigatrust/*.py", "tests/*.py"]
+# But use a different line length.
+line-length = 160

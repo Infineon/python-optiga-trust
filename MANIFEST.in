@@ -1,5 +1,0 @@
-include MANIFEST.in
-include *.md
-include setup.py
-recursive-include optigatrust *.dll *.so 90-optigatrust.rules
-recursive-exclude lib *.pyc .idea

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-2024 Infineon Technologies AG
+# SPDX-License-Identifier: MIT
+
 [ req ]
 prompt             = no
 distinguished_name = my dn

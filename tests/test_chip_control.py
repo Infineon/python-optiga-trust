@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021-2024 Infineon Technologies AG
+# SPDX-License-Identifier: MIT
+
 import pytest
 import optigatrust as ot
 import logging
@@ -26,5 +29,3 @@ def test_chip_control_set_wrong_current_limit():
 
     with pytest.raises(ValueError):
         optiga.current_limit = 20
-
-
