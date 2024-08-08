@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2021-2024 Infineon Technologies AG
+SPDX-License-Identifier: MIT
+-->
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{6856AD58-BECA-4DF5-9EF0-3DDF9061D168}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>optiga-trust-m-uart</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>
+    </LinkIncremental>
+    <OutDir>$(SolutionDir)..\..\src\optigatrust\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\$(TargetName)\</IntDir>
+    <TargetName>liboptigatrust-uart-win-i686-debug</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>
+    </LinkIncremental>
+    <OutDir>$(SolutionDir)..\..\src\optigatrust\lib\</OutDir>
+    <TargetName>liboptigatrust-uart-win-i686</TargetName>
+    <IntDir>$(SolutionDir)build\$(TargetName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)..\..\src\optigatrust\lib\</OutDir>
+    <IntDir>$(SolutionDir)build\$(TargetName)\</IntDir>
+    <TargetName>liboptigatrust-uart-win-amd64-debug</TargetName>
+    <LinkIncremental />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)..\..\src\optigatrust\lib\</OutDir>
+    <TargetName>liboptigatrust-uart-win-amd64</TargetName>
+    <IntDir>$(SolutionDir)build\$(TargetName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;OPTIGA_LIB_EXPORTS;OPTIGA_SYNC_COMMS;OPTIGA_LIB_EXTERNAL="optiga_lib_config_m_v3_python.h";WIN32;__WIN32__;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;OPTIGA_LIB_EXPORTS;OPTIGA_SYNC_COMMS;OPTIGA_LIB_EXTERNAL="optiga_lib_config_m_v3_python.h";WIN32;__WIN32__;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Disabled</Optimization>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>IFX_I2C_FRAME_SIZE=55;OPTIGA_LIB_EXPORTS;OPTIGA_SYNC_COMMS;OPTIGA_LIB_EXTERNAL="optiga_lib_config_m_v3_python.h";WIN32;__WIN32__;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_OPTIGA_EXPORTS_DLLEXPORT_H_;IFX_I2C_FRAME_SIZE=55;PAL_OS_HAS_EVENT_INIT;USE_LIBUSB_PAL;OPTIGA_LIB_EXPORTS;OPTIGA_LIB_EXTERNAL="optiga_lib_config_m_v3_python.h";__WIN32__;_WINDLL;OPTIGA_SYNC_COMMS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>legacy_stdio_definitions.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>
+      </Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\optiga_comms_tc_uart.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_config.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_gpio.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_logger.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_os_datastore.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_os_event.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_os_lock.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_os_memory.c" />
+    <ClCompile Include="external\optiga\extras\pal\windows_uart\pal_os_timer.c" />
+    <ClCompile Include="external\optiga\src\cmd\optiga_cmd.c" />
+    <ClCompile Include="external\optiga\src\common\optiga_lib_common.c" />
+    <ClCompile Include="external\optiga\src\common\optiga_lib_logger.c" />
+    <ClCompile Include="external\optiga\src\crypt\optiga_crypt.c" />
+    <ClCompile Include="external\optiga\src\util\optiga_util.c" />
+    <ClCompile Include="src\optiga_trust_init.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="config\optiga_lib_config_m_v3_python.h" />
+    <ClInclude Include="external\optiga\include\cmd\optiga_cmd.h" />
+    <ClInclude Include="external\optiga\include\common\optiga_lib_common.h" />
+    <ClInclude Include="external\optiga\include\common\optiga_lib_common_internal.h" />
+    <ClInclude Include="external\optiga\include\common\optiga_lib_logger.h" />
+    <ClInclude Include="external\optiga\include\common\optiga_lib_return_codes.h" />
+    <ClInclude Include="external\optiga\include\common\optiga_lib_types.h" />
+    <ClInclude Include="external\optiga\include\comms\optiga_comms.h" />
+    <ClInclude Include="external\optiga\include\ifx_i2c\ifx_i2c.h" />
+    <ClInclude Include="external\optiga\include\ifx_i2c\ifx_i2c_config.h" />
+    <ClInclude Include="external\optiga\include\ifx_i2c\ifx_i2c_data_link_layer.h" />
+    <ClInclude Include="external\optiga\include\ifx_i2c\ifx_i2c_physical_layer.h" />
+    <ClInclude Include="external\optiga\include\ifx_i2c\ifx_i2c_presentation_layer.h" />
+    <ClInclude Include="external\optiga\include\ifx_i2c\ifx_i2c_transport_layer.h" />
+    <ClInclude Include="external\optiga\include\optiga_crypt.h" />
+    <ClInclude Include="external\optiga\include\optiga_util.h" />
+    <ClInclude Include="external\optiga\include\pal\pal.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_crypt.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_gpio.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_i2c.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_ifx_i2c_config.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_logger.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_os_datastore.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_os_memory.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_os_event.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_os_lock.h" />
+    <ClInclude Include="external\optiga\include\pal\pal_os_timer.h" />
+    <ClInclude Include="external\optiga\include\optiga_lib_version.h" />
+    <ClInclude Include="external\optiga\include\optiga_lib_config.h" />
+    <ClInclude Include="optiga\include\optiga_lib_config_m_v3.h" />
+    <ClInclude Include="include\optiga_trust_init.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

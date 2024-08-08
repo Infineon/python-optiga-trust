@@ -1,265 +1,147 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>7. Enable the provisioning mode on your Evaluation Kit &mdash; python-optiga-trust 1.0.4 documentation</title>
-  
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-  
-  <link rel="stylesheet" href="static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="static/pygments.css" type="text/css" />
-
-  
-  
-  
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enable the provisioning mode on your Evaluation Kit &mdash; python-optiga-trust 1.4.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
 
   
   <!--[if lt IE 9]>
-    <script src="static/js/html5shiv.min.js"></script>
+    <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="static/documentation_options.js"></script>
-        <script src="static/jquery.js"></script>
-        <script src="static/underscore.js"></script>
-        <script src="static/doctools.js"></script>
-        <script src="static/language_data.js"></script>
-    
-    <script type="text/javascript" src="static/js/theme.js"></script>
-
-    
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=9172181d"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="copyright" title="Copyright" href="copyright.html" />
-    <link rel="next" title="8. Copyrights and Licenses" href="copyright.html" />
-    <link rel="prev" title="6. Porting to non-Raspberry Linux" href="linux_support.html" /> 
+    <link rel="next" title="Copyrights and Licenses" href="copyright.html" />
+    <link rel="prev" title="Porting to other platforms" href="linux_support.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> python-optiga-trust
           
-
-          
-            
-            <img src="static/infineon_logo.png" class="logo" alt="Logo"/>
-          
+          <a href="index.html" class="icon icon-home">
+            python-optiga-trust
+              <img src="_static/infineon_logo.png" class="logo" alt="Logo"/>
           </a>
-
-          
-            
-            
               <div class="version">
-                1.0.4
+                1.4.0
               </div>
-            
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="chip.html">1. OPTIGA™ Trust management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="metadata.html">2. Object and Metadata management</a></li>
-<li class="toctree-l1"><a class="reference internal" href="crypto.html">3. Cryptography</a></li>
-<li class="toctree-l1"><a class="reference internal" href="csr.html">4. CRS (Certificate Signing Request)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="port.html">5. Export or Import Chip (Meta)Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="linux_support.html">6. Porting to non-Raspberry Linux</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">7. Enable the provisioning mode on your Evaluation Kit</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#optiga-trust-m-evaluation-kit">7.1. OPTIGA™ Trust M Evaluation Kit</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#optiga-trust-charge-evaluation-kit">7.2. OPTIGA™ Trust Charge Evaluation Kit</a></li>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="chip.html">OPTIGA™ Trust management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="metadata.html">Object and Metadata management</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crypto.html">Cryptography</a></li>
+<li class="toctree-l1"><a class="reference internal" href="csr.html">CRS (Certificate Signing Request)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="port.html">Export or Import Chip (Meta)Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linux_support.html">Porting to other platforms</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Enable the provisioning mode on your Evaluation Kit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#optiga-trust-m-with-psoc-6-evaluation-kits">OPTIGA™ Trust M with PSoC™ 6 Evaluation Kits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optiga-trust-charge-evaluation-kit">OPTIGA™ Trust Charge Evaluation Kit</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="copyright.html">8. Copyrights and Licenses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="copyright.html">Copyrights and Licenses</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">python-optiga-trust</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li><span class="section-number">7. </span>Enable the provisioning mode on your Evaluation Kit</li>
-    
-    
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Enable the provisioning mode on your Evaluation Kit</li>
       <li class="wy-breadcrumbs-aside">
-        
-            
             <a href="_sources/prov_mode.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
-  <div class="section" id="enable-the-provisioning-mode-on-your-evaluation-kit">
-<h1><span class="section-number">7. </span>Enable the provisioning mode on your Evaluation Kit<a class="headerlink" href="#enable-the-provisioning-mode-on-your-evaluation-kit" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="optiga-trust-m-evaluation-kit">
-<h2><span class="section-number">7.1. </span>OPTIGA™ Trust M Evaluation Kit<a class="headerlink" href="#optiga-trust-m-evaluation-kit" title="Permalink to this headline">¶</a></h2>
+             
+  <section id="enable-the-provisioning-mode-on-your-evaluation-kit">
+<h1>Enable the provisioning mode on your Evaluation Kit<a class="headerlink" href="#enable-the-provisioning-mode-on-your-evaluation-kit" title="Link to this heading"></a></h1>
+<section id="optiga-trust-m-with-psoc-6-evaluation-kits">
+<h2>OPTIGA™ Trust M with PSoC™ 6 Evaluation Kits<a class="headerlink" href="#optiga-trust-m-with-psoc-6-evaluation-kits" title="Link to this heading"></a></h2>
+<p>To use the OPTIGA™ Trust Host Library for Python in combination with any OPTIGA™ Trust M device and a supported PSoC 6 evaluation kit, follow
+the instructions at <a class="reference external" href="https://github.com/Infineon/mtb-example-optiga-data-management">ModusToolbox™ example application for OPTIGA™ Trust M data management</a> to activate the provisioning mode on PSoC™ 6.</p>
+</section>
+<section id="optiga-trust-charge-evaluation-kit">
+<h2>OPTIGA™ Trust Charge Evaluation Kit<a class="headerlink" href="#optiga-trust-charge-evaluation-kit" title="Link to this heading"></a></h2>
 <ul class="simple">
 <li><p>Make sure you have connected your Evaluation Kit as depicted below (USB Port <strong>X1002</strong>)</p></li>
 </ul>
-<img alt="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_m_evalkit_debug_mode.jpg" src="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_m_evalkit_debug_mode.jpg" />
-<ul class="simple">
-<li><p>Make usre you have Segger J-Link tool v6.00 installed. J-Link tool <a class="reference external" href="https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack">Download for Windows, Linux, Mac</a></p></li>
-<li><p>Click on <strong>Device</strong> to select a target device: Select Infineon as Manufacturer</p></li>
-<li><p>Run JFlashLite.exe from JLink installation folder. It shows a notice window. Click OK.</p></li>
-<li><p>Select Infineon as Manufacturer and Device as XMC4800-2048, and then click OK.</p></li>
-<li><p>Select <a class="reference external" href="static/optiga_trust_charge_m_uart_python.hex">xmc4800 hex file</a> (right click, Save) to be flashed under <strong>Data File</strong> and click on <strong>Program Device</strong>. It then shows the programming progress window.</p></li>
-<li><p>Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port <strong>X100</strong>)</p></li>
-</ul>
-<img alt="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_m_evalkit_provisioning_mode.jpg" src="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_m_evalkit_provisioning_mode.jpg" />
-</div>
-<div class="section" id="optiga-trust-charge-evaluation-kit">
-<h2><span class="section-number">7.2. </span>OPTIGA™ Trust Charge Evaluation Kit<a class="headerlink" href="#optiga-trust-charge-evaluation-kit" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><p>Make sure you have connected your Evaluation Kit as depicted below (USB Port <strong>X1002</strong>)</p></li>
-</ul>
-<img alt="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_charge_evalkit_debug_mode.jpg" src="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_charge_evalkit_debug_mode.jpg" />
+<img alt="_images/optiga_trust_charge_evalkit_debug_mode.jpg" src="_images/optiga_trust_charge_evalkit_debug_mode.jpg" />
 <ul class="simple">
 <li><p>Make usre you have Segger J-Link tool v6.00 installed. J-Link tool <a class="reference external" href="https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack">Download for Windows, Linux, Mac</a></p></li>
 <li><p>Click on <strong>Device</strong> to select a target device: Select Infineon as Manufacturer</p></li>
 <li><p>Run JFlashLite.exe from JLink installation folder. It shows a notice window. Click OK.</p></li>
 <li><p>Select Infineon as Manufacturer and Device as XMC4700-2048, and then click OK.</p></li>
-<li><p>Select <a class="reference external" href="static/optiga_trust_charge_evalkit_uart_python.hex">xmc4700 hex file</a> (right click, Save) to be flashed under <strong>Data File</strong> and click on <strong>Program Device</strong>. It then shows the programming progress window.</p></li>
+<li><p>Select <a class="reference external" href="_static/optiga_trust_charge_evalkit_uart_python.hex">xmc4700 hex file</a> (right click, Save) to be flashed under <strong>Data File</strong> and click on <strong>Program Device</strong>. It then shows the programming progress window.</p></li>
 <li><p>Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port <strong>X100</strong>)</p></li>
 </ul>
-<img alt="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_charge_evalkit_provisioning_mode.jpg" src="https://raw.githubusercontent.com/Infineon/Assets/master/Pictures/optiga_trust_charge_evalkit_provisioning_mode.jpg" />
-</div>
-</div>
+<img alt="_images/optiga_trust_charge_evalkit_provisioning_mode.jpg" src="_images/optiga_trust_charge_evalkit_provisioning_mode.jpg" />
+</section>
+</section>
 
 
            </div>
-           
           </div>
-          <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="copyright.html" class="btn btn-neutral float-right" title="8. Copyrights and Licenses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="linux_support.html" class="btn btn-neutral float-left" title="6. Porting to non-Raspberry Linux" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="linux_support.html" class="btn btn-neutral float-left" title="Porting to other platforms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="copyright.html" class="btn btn-neutral float-right" title="Copyrights and Licenses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        
-        
-        &copy; <a href="copyright.html">Copyright</a> 2021, Infineon Technologies AG
-
-    </p>
+    <p>&#169; <a href="copyright.html">Copyright</a> 2021-2024, Infineon Technologies AG.</p>
   </div>
-    
-    
-    
-    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
-
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>
