@@ -95,12 +95,6 @@ __package_dir = {
     "optigatrust": __package_root_dir,
 }
 
-with open(os.path.join(__package_root_dir, "version.py")) as init_root:
-    for line in init_root:
-        if line.startswith("__version_info__"):
-            __version_tuple__ = eval(line.split("=")[1])
-    __version = ".".join([str(x) for x in __version_tuple__])
-
 if __name__ == '__main__':
     setup(
         name=__name,
