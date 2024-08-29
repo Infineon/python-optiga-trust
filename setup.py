@@ -4,11 +4,15 @@
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
-import platform
+import codecs
 import sys
 import os
 import shutil
 
+def read(rel_path):
+    here = os.path.abspath(os.path.dirname(__file__))
+    with codecs.open(os.path.join(here, rel_path), 'r') as fp:
+        return fp.read()
 
 def __copy_rules(target):
     rules = 'rules/90-optigatrust.rules'
@@ -29,7 +33,6 @@ def _install_rules():
         except:
             print('Install udev rules failed')
 
-
 def __description():
     description_file = os.path.join("src" , "optigatrust", "DESCRIPTION.md")
     with open(description_file, 'r', encoding='utf-8') as f:
@@ -37,6 +40,13 @@ def __description():
 
     return readme
 
+def __get_version(rel_path):
+    for line in read(rel_path).splitlines():
+        if line.startswith('__version__'):
+            delim = '"' if '"' in line else "'"
+            return line.split(delim)[1]
+    else:
+        raise RuntimeError("Unable to find version string.")
 
 class OptigaTrustInstall(install):
     def run(self):
@@ -94,7 +104,7 @@ with open(os.path.join(__package_root_dir, "version.py")) as init_root:
 if __name__ == '__main__':
     setup(
         name=__name,
-        version=__version,
+        version=__get_version("src/optigatrust/version.py"),
         description=__desc,
         long_description=__description(),
         long_description_content_type='text/markdown',

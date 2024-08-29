@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2024 Infineon Technologies AG
+# SPDX-License-Identifier: MIT
+
+version = 1
+
+[[annotations]]
+path = ["README.md", 
+        "CHANGELOG.md",
+        "INSTALL.md",
+        "docs/**",
+        "src/optigatrust/DESCRIPTION.md",
+        "tests/README.md",
+        "extras/optiga-trust-m/README.md"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2024 Infineon Technologies AG"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["src/optigatrust/lib/**",
+        "tests/fixtures/**.pem", 
+        "tests/fixtures/**.crt", 
+        "tests/fixtures/**.key", 
+        "tests/fixtures/optiga_trust_m_v3_test_configuration.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2024 Infineon Technologies AG"
+SPDX-License-Identifier = "CC-BY-NC-ND-4.0"
