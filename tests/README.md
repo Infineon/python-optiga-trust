@@ -42,3 +42,11 @@ Currently, oscrypto has some issues in combination with OpenSSL v3.x.x. There is
 python -m pip install git+https://github.com/wbond/oscrypto.git@1547f535001ba568b239b8797465536759c742a3
 ```
 NOTE: This is only needed on Windows systems. On Linux, the official release of oscrypto can be used. It is part of [tests/requirements.txt](requirements.txt)
+
+## Configuring OPTIGA™ Trust M v3 samples for tests
+
+The tests in this folder require a certain configuration of the OPTIGA™ Trust M v3 sample under test. Thus, please prepare your samples (once), to manually set the data and metadata of the OPTIGA™ Trust M v3 sample using the following command in order to ensure the tests run correctly.
+
+```bash 
+optigatrust object --in ./tests/fixtures/optiga_trust_m_v3_test_configuration.json
+```

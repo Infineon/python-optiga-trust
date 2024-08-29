@@ -73,7 +73,9 @@ python-optiga-trust
 | tests                 | Tests for the Python module optigatrust       |
 
 ## Licensing
-   
+
 Please see our [LICENSE](LICENSE) for copyright and license information.
-   
-This project follows the REUSE approach, so copyright and licensing information is available for every file (including third party components) either in the file header, an individual *.license file or the .reuse/dep5 file. All licenses can be found in the [LICENSES](LICENSES) folder.
+
+This project follows the [REUSE](https://reuse.software/) approach, so copyright and licensing information is
+available for every file (including third party components) either in the file header, an individual *.license file or
+a REUSE.toml file. All licenses can be found in the [LICENSES](LICENSES) folder.

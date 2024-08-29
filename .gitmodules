@@ -3,3 +3,4 @@
 [submodule "extras/optiga-trust-m/external/optiga"]
 	path = extras/optiga-trust-m/external/optiga
 	url = https://github.com/Infineon/optiga-trust-m.git
+	branch = release-v5.1.0
