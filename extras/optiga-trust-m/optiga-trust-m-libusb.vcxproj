@@ -100,14 +100,14 @@ SPDX-License-Identifier: MIT
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\include;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\libusb;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\VS2019\MS32\static\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\build\v142\Win32\Release\lib;$(SolutionDir)external\libusb\build\v143\Win32\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
@@ -126,7 +126,7 @@ SPDX-License-Identifier: MIT
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\include;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\libusb;$(SolutionDir)external\libusb\include;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Disabled</Optimization>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
@@ -136,7 +136,7 @@ SPDX-License-Identifier: MIT
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\VS2019\MS32\static\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\build\v142\Win32\Release\lib;$(SolutionDir)external\libusb\build\v143\Win32\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;legacy_stdio_definitions.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
@@ -149,20 +149,18 @@ SPDX-License-Identifier: MIT
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\include;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\libusb;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPTIGA_LIB_EXPORTS;OPTIGA_LIB_EXTERNAL="optiga_lib_config_m_v3_python.h";IFX_I2C_FRAME_SIZE=55;WIN32;__WIN32__;_WINDLL</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\VS2019\MS64\static\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>
       <IgnoreSpecificDefaultLibraries>LIBCMT</IgnoreSpecificDefaultLibraries>
-      <OptimizeReferences>true</OptimizeReferences>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\build\v142\x64\Release\lib;$(SolutionDir)external\libusb\build\v143\x64\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
@@ -173,14 +171,14 @@ SPDX-License-Identifier: MIT
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\include;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)config;$(SolutionDir)include;$(SolutionDir)external\libusb\libusb;$(SolutionDir)external\optiga\extras\pal\libusb\include;$(SolutionDir)external\optiga\include;$(SolutionDir)external\optiga\include\cmd;$(SolutionDir)external\optiga\include\common;$(SolutionDir)external\optiga\include\comms;$(SolutionDir)external\optiga\include\ifx_i2c;$(SolutionDir)external\optiga\include\pal;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>OPTIGA_LIB_EXPORTS;OPTIGA_LIB_EXTERNAL="optiga_lib_config_m_v3_python.h";IFX_I2C_FRAME_SIZE=55;WIN32;__WIN32__;_WINDLL</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <WarningLevel>Level3</WarningLevel>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\VS2019\MS64\static\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)external\libusb\build\v142\x64\Release\lib;$(SolutionDir)external\libusb\build\v143\x64\Release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libusb-1.0.lib;legacy_stdio_definitions.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreAllDefaultLibraries>
       </IgnoreAllDefaultLibraries>

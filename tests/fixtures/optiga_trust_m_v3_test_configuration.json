@@ -13,7 +13,6 @@
             "lcso": "creation",
             "change": "never",
             "execute": "always",
-            "algorithm": "secp256r1",
             "key_usage": [
                 "authentication"
             ]
@@ -29,7 +28,6 @@
                 "operational"
             ],
             "execute": "always",
-            "algorithm": "brainpoolp512r1",
             "key_usage": [
                 "signature",
                 "key_agreement"
@@ -46,7 +44,6 @@
                 "operational"
             ],
             "execute": "always",
-            "algorithm": "brainpoolp512r1",
             "key_usage": [
                 "signature",
                 "key_agreement"
@@ -63,7 +60,6 @@
                 "operational"
             ],
             "execute": "always",
-            "algorithm": "brainpoolp512r1",
             "key_usage": [
                 "signature",
                 "key_agreement"
@@ -98,8 +94,6 @@
         "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 8,
-            "used_size": 8,
             "change": [
                 "lcso",
                 "<",
@@ -115,8 +109,6 @@
         "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 8,
-            "used_size": 8,
             "change": [
                 "lcso",
                 "<",
@@ -132,8 +124,6 @@
         "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 8,
-            "used_size": 8,
             "change": [
                 "lcso",
                 "<",
@@ -149,8 +139,6 @@
         "metadata": "2017c00101c40108c50108d003e1fc07d10100d30100e80101",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 8,
-            "used_size": 8,
             "change": [
                 "lcso",
                 "<",
@@ -162,107 +150,10 @@
         },
         "data": "0000000000000000"
     },
-    "f1c0": {
-        "metadata": "2009c40101d00100d10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "always",
-            "read": "always"
-        },
-        "data": "01"
-    },
-    "f1c1": {
-        "metadata": "2009c40101d00100d10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "always",
-            "read": "always"
-        },
-        "data": "20"
-    },
-    "e0c2": {
-        "metadata": "2009c4011bd001ffd10100",
-        "pretty_metadata": {
-            "max_size": 27,
-            "change": "never",
-            "read": "always"
-        },
-        "data": "cd16339301001c000500000a01bb8200030038006d801010712440"
-    },
-    "e0c0": {
-        "metadata": "2009c40101d00100d10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "always",
-            "read": "always"
-        },
-        "data": "07"
-    },
-    "e0c1": {
-        "metadata": "2009c40101d00100d10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "always",
-            "read": "always"
-        },
-        "data": "20"
-    },
-    "e0c3": {
-        "metadata": "2009c40101d00100d10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "always",
-            "read": "always"
-        },
-        "data": "14"
-    },
-    "e0c4": {
-        "metadata": "2009c40101d00100d10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "always",
-            "read": "always"
-        },
-        "data": "06"
-    },
-    "e0c5": {
-        "metadata": "2009c40101d001ffd10100",
-        "pretty_metadata": {
-            "max_size": 1,
-            "change": "never",
-            "read": "always"
-        },
-        "data": "00"
-    },
-    "e0c6": {
-        "metadata": "2006c40102d10100",
-        "pretty_metadata": {
-            "max_size": 2,
-            "read": "always"
-        },
-        "data": "0615"
-    },
-    "e0c9": {
-        "metadata": "2011c00107c40108d003e1fc07d10100d301ff",
-        "pretty_metadata": {
-            "lcso": "operational",
-            "max_size": 8,
-            "change": [
-                "lcso",
-                "<",
-                "operational"
-            ],
-            "read": "always",
-            "execute": "never"
-        },
-        "data": "3200050100000000"
-    },
     "e140": {
         "metadata": "201dc00101c40140c50140d007e1fc07fe20e140d103e1fc07d30100e80122",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 64,
-            "used_size": 64,
             "change": [
                 "lcso",
                 "<",
@@ -286,8 +177,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -301,8 +190,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -316,8 +203,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -331,8 +216,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -346,8 +229,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -361,8 +242,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -376,8 +255,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -391,8 +268,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -406,8 +281,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -421,8 +294,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -436,8 +307,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -451,8 +320,6 @@
         "metadata": "2011c00101c4018cc50164d003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 140,
-            "used_size": 100,
             "change": [
                 "lcso",
                 "<",
@@ -466,8 +333,6 @@
         "metadata": "2017c00101c40206c0c5020203d001ffd10100d30100e80112",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1728,
-            "used_size": 515,
             "change": "never",
             "read": "always",
             "execute": "always",
@@ -479,8 +344,6 @@
         "metadata": "2019c00101c40206c0c50206c0d003e1fc07d10100d30100e80112",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1728,
-            "used_size": 1728,
             "change": [
                 "lcso",
                 "<",
@@ -496,8 +359,6 @@
         "metadata": "2019c00101c40206c0c50206c0d003e1fc07d10100d30100e80112",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1728,
-            "used_size": 1728,
             "change": [
                 "lcso",
                 "<",
@@ -513,8 +374,6 @@
         "metadata": "2019c00101c40206c0c50206c0d003e1fc07d10100d30100e80112",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1728,
-            "used_size": 1728,
             "change": [
                 "lcso",
                 "<",
@@ -530,8 +389,6 @@
         "metadata": "2013c00101c40205dcc50205dcd003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1500,
-            "used_size": 1500,
             "change": [
                 "lcso",
                 "<",
@@ -545,8 +402,6 @@
         "metadata": "2013c00101c40205dcc50205dcd003e1fc07d10100",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1500,
-            "used_size": 1500,
             "change": [
                 "lcso",
                 "<",
@@ -560,8 +415,6 @@
         "metadata": "2019c00101c40204b0c50204b0d003e1fc07d10100d30100e80111",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1200,
-            "used_size": 1200,
             "change": [
                 "lcso",
                 "<",
@@ -577,8 +430,6 @@
         "metadata": "2019c00101c40204b0c50204b0d003e1fc07d10100d30100e80111",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1200,
-            "used_size": 1200,
             "change": [
                 "lcso",
                 "<",
@@ -594,8 +445,6 @@
         "metadata": "2019c00101c40204b0c50204b0d003e1fc07d10100d30100e80111",
         "pretty_metadata": {
             "lcso": "creation",
-            "max_size": 1200,
-            "used_size": 1200,
             "change": [
                 "lcso",
                 "<",
