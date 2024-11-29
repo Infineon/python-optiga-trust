@@ -41,6 +41,25 @@ To install this Python module from pip, run the following command
 $ python -m pip install optigatrust
 ```
 
+### libusb: Allow access to USB device (USB-to-UART-interface)
+
+If you want to use the `optigatrust` Python package with libusb and a USB-to-UART-interface from user space, the access has to be permitted with a udev rule.
+
+#### Manual installation of the udev rule
+
+When using the OPTIGA™ Trust M Perso2Go board, add the predefined [udev rule](./src/optigatrust/rules/90-optigatrust.rules) as follows (root permission needed).
+
+```bash
+$ sudo cp ./src/optigatrust/rules/90-optigatrust.rules /etc/udev/rules.d/
+```
+#### Automatic installation of the udev rule (root permission needed)
+
+Alternatively, you can also run the installation with root permissions which will install the udev rule for the OPTIGA™ Trust M Perso2Go board automatically.
+
+```bash
+$ sudo python -m pip install optigatrust
+```
+
 ## Building from sources
 
 ### Building the OPTIGA™ Trust Host Library for C as library

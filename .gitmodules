@@ -3,3 +3,6 @@
 [submodule "extras/optiga-trust-m/external/optiga"]
 	path = extras/optiga-trust-m/external/optiga
 	url = https://github.com/Infineon/optiga-trust-m.git
+[submodule "extras/optiga-trust-m/external/libusb"]
+	path = extras/optiga-trust-m/external/libusb
+	url = https://github.com/libusb/libusb.git

@@ -15,6 +15,7 @@ if(UNIX)
 		${TRUSTM_HOST_LIBRARY_PATH}/extras/pal/linux/pal_os_lock.c
 		${TRUSTM_HOST_LIBRARY_PATH}/extras/pal/linux/pal_os_timer.c
 		${TRUSTM_HOST_LIBRARY_PATH}/extras/pal/linux/pal_os_memory.c
+		${TRUSTM_HOST_LIBRARY_PATH}/extras/pal/linux/pal_shared_mutex.c
 		${TRUSTM_HOST_LIBRARY_PATH}/src/comms/optiga_comms_ifx_i2c.c
 		${TRUSTM_HOST_LIBRARY_PATH}/src/comms/ifx_i2c/ifx_i2c.c
 		${TRUSTM_HOST_LIBRARY_PATH}/src/comms/ifx_i2c/ifx_i2c_config.c

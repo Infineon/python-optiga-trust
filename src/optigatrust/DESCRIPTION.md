@@ -4,6 +4,8 @@
 
 A [ctypes](https://docs.python.org/3/library/ctypes.html) based Python wrapper for the [OPTIGA™ Trust M Host Library for C](https://github.com/Infineon/optiga-trust-m).
 
+The source code of this Python package is available in the [OPTIGA™ Trust M Host Library for Python](https://github.com/Infineon/python-optiga-trust) GitHub repository.
+
 ## Features
 
 This Python module is a wrapper for the [OPTIGA™ Trust M Host Library for C](https://github.com/Infineon/optiga-trust-m) and allows the communication with OPTIGA™ Trust M devices.
@@ -15,6 +17,22 @@ Please see the [OPTIGA™ Trust M Overview Repository](https://github.com/Infine
 ```bash
 $ python -m pip install optigatrust
 ```
+
+### libusb: Allow access to USB device (USB-to-UART-interface)
+
+If you want to use the `optigatrust` Python package with libusb and a USB-to-UART-interface from user space, the access has to be permitted with a udev rule.
+
+#### Automatic installation of the udev rule (root permission needed)
+
+When the package installation is performed with root permissions, it will install the udev rule for the OPTIGA™ Trust M Perso2Go board automatically.
+
+```bash
+$ sudo python -m pip install optigatrust
+```
+
+#### Manual installation of the udev rule
+
+For manually installing the udev rule, please consult the README.md in our [OPTIGA™ Trust M Host Library for Python](https://github.com/Infineon/python-optiga-trust) GitHub repository.
 
 ## Documentation
 
@@ -30,9 +48,6 @@ Please find more information about the OPTIGA™ Trust M product family on the [
 
 Please find the source code and examples for this Python module on the [OPTIGA™ Trust M Host Library for Python](https://github.com/Infineon/python-optiga-trust) GitHub repository.
 
-
 ## Licensing
-   
-Please see our [LICENSE](LICENSE) for copyright and license information.
-   
-This project follows the REUSE approach, so copyright and licensing information is available for every file (including third party components) either in the file header, an individual *.license file or the .reuse/dep5 file. All licenses can be found in the [LICENSES](LICENSES) folder.
+
+This project is published under the MIT license and with copyright of Infineon Technologies AG. For more details, see the [OPTIGA™ Trust M Host Library for Python](https://github.com/Infineon/python-optiga-trust) GitHub repository.
