@@ -1,0 +1,66 @@
+Overview on hardware variants
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following hardware is recommended for the evaluation of the respective communication interfaces.
+
++------------+------------------------------------+--------------------------------------+----------------------------+
+| Interface  |           Host Hardware            |               Adapter                |           Sample           |
++============+====================================+======================================+============================+
+| **I²C**    | `Raspberry Pi`_                    | `Pi 4 Click Shield for mikroBUS™`_   | `OPTIGA™ Trust M Shield`_  |
++------------+------------------------------------+--------------------------------------+----------------------------+
+| **UART**   | `PSOC™ 62S2 Wi-Fi BT Pioneer Kit`_ | `OPTIGA™ Trust Adapter`_             | `OPTIGA™ Trust M Shield`_  |
++------------+------------------------------------+--------------------------------------+----------------------------+
+| **libusb** | PC, `Raspberry Pi`_                | Any FTDI USB-HID/I²C converter board | Any OPTIGA™ Trust M sample |
++------------+------------------------------------+--------------------------------------+----------------------------+
+
+
+I²C
+~~~
+
+In this variant, the communication between host system and OPTIGA™ Trust M chip happens directly via I²C.
+
+The preferred setup for this variant is a `Raspberry Pi`_ with a `Pi 4 Click Shield for mikroBUS™`_ and an `OPTIGA™ Trust M Shield`_.
+
+.. image:: ../_images/optiga_trust_m_raspberry_pi_mikrobus.jpg
+   :align: center
+   :width: 500px
+
+**NOTE:** If you use any of the embedded Linux as a host, please don't forget to enable I²C support in your kernel (e.g. Raspberry Pi via :code:`raspi-config` command), as well as add your user to the gpio group (e.g. Raspberry Pi via :code:`sudo adduser pi gpio`).
+
+**NOTE:** There are two PAL versions for I²C.
+
+- `sysfs`_: Use :code:`i2c` as interface name
+- `gpiod`_: Use :code:`i2c-gpiod` as interface name
+
+UART
+~~~~
+
+In this variant, the communication between the host and the OPTIGA™ Trust M chip happens via an UART-to-I²C translator.
+
+PSOC™ 62S2 Wi-Fi BT Pioneer Kit
+-------------------------------
+
+The preferred setup for this variant is `PSOC™ 62S2 Wi-Fi BT Pioneer Kit with OPTIGA™ Trust M Shield`_. In this setup, the PSOC™ 62S2 has to be set up as a UART-to-I²C translator by enabling the :doc:`provisioning mode <02_prov_mode>`.
+
+.. image:: ../_images/psoc62_matter_kit.png
+   :align: center
+   :width: 500px
+
+XMC47000 Relax Kit
+------------------
+
+As a alternative setup for this variant, `XMC47000 Relax Kit`_ can be used with the `My IoT Adapter`_. In this setup, the XMC4700 has to be set up as a UART-to-I²C translator by enabling the :doc:`provisioning mode <02_prov_mode>`.
+
+.. image:: ../_images/xmc4700_relax_kit_normal_mode.jpg
+   :align: center
+   :width: 500px
+
+
+libusb
+~~~~~~
+
+In this variant, the communication between the host and the OPTIGA™ Trust M chip happens via a FTDI USB-HID/I²C converter board as USB-to-I²C translator.
+
+This variant can be run directly from a normal host (Windows or Linux) and depends on the `libusb`_ library. It is tested with `Raspberry Pi`_.
+
+ .. include:: ../references.rst

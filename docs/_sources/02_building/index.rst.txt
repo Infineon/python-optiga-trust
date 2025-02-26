@@ -1,0 +1,60 @@
+********************************
+Building & Porting
+********************************
+
+This Python package uses the OPTIGA™ Trust Host Library for C as a shared library (.so or .dll). Precompiled libraries are available for the following platforms in `src/optigatrust/lib`.
+
++---------+--------------+-----------+-------------------------------------------+
+|   OS    | Architecture | Interface |               Library name                |
++=========+==============+===========+===========================================+
+| Linux   | armv7l       | I²C       | liboptigatrust-i2c-linux-armv7l.so        |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | aarch64      | I²C       | liboptigatrust-i2c-linux-aarch64.so       |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | x86_64       | I²C       | liboptigatrust-i2c-linux-x86_64.so        |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | armv7l       | I²C-GPIOD | liboptigatrust-i2c-gpiod-linux-armv7l.so  |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | aarch64      | I²C-GPIOD | liboptigatrust-i2c-gpiod-linux-aarch64.so |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | x86_64       | I²C-GPIOD | liboptigatrust-i2c-gpiod-linux-x86_64.so  |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | armv7l       | UART      | liboptigatrust-uart-linux-armv7l.so       |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | aarch64      | UART      | liboptigatrust-uart-linux-aarch64.so      |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | x86_64       | UART      | liboptigatrust-uart-linux-x86_64.so       |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | armv7l       | libusb    | liboptigatrust-libusb-linux-armv7l.so     |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | aarch64      | libusb    | liboptigatrust-libusb-linux-aarch64.so    |
++---------+--------------+-----------+-------------------------------------------+
+| Linux   | x86_64       | libusb    | liboptigatrust-libusb-linux-x86_64.so     |
++---------+--------------+-----------+-------------------------------------------+
+| Windows | i686         | UART      | liboptigatrust-uart-win-x86_64.dll        |
++---------+--------------+-----------+-------------------------------------------+
+| Windows | amd64        | UART      | liboptigatrust-uart-win-x86_64.dll        |
++---------+--------------+-----------+-------------------------------------------+
+| Windows | i686         | libusb    | liboptigatrust-libsub-win-x86_64.dll      |
++---------+--------------+-----------+-------------------------------------------+
+| Windows | amd64        | libusb    | liboptigatrust-libsub-win-x86_64.dll      |
++---------+--------------+-----------+-------------------------------------------+
+
+Building the OPTIGA™ Trust Host Library for C
+=============================================
+
+This chapter describes how to build the :code:`optigatrust` Python module from scratch.
+
+.. include:: building_linux.rst
+.. include:: building_windows.rst
+
+
+Building and installing the Python module
+=========================================
+
+Install the Python module :code:`optigatrust` from source code as follows.
+
+.. code-block:: console
+
+   python -m pip install -r requirements.txt
+   python -m pip install .

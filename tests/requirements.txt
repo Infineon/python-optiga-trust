@@ -1,9 +1,6 @@
 # SPDX-FileCopyrightText: 2021-2024 Infineon Technologies AG
 # SPDX-License-Identifier: MIT
 
-pytest
-pytest-cov
-MarkupSafe==2.0.1
-# oscrypto version with fix for OpenSSL v3.x.x. 
-# See: https://github.com/wbond/oscrypto/issues/78
-https://github.com/wbond/oscrypto/archive/d5f3437ed24257895ae1edd9e503cfb352e635a8.zip
+pytest==8.3.4
+pytest-cov==6.0.0
+pytest-console-scripts==1.4.1

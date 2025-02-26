@@ -6,9 +6,12 @@
 
 ###
 
+[![Lastest Release](https://img.shields.io/github/v/release/Infineon/python-optiga-trust)](https://github.com/Infineon/python-optiga-trust/releases)
 [![PyPI](https://img.shields.io/pypi/v/optigatrust.svg)](https://pypi.org/project/optigatrust/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Python version](https://img.shields.io/badge/Python-3-green?logo=python)](https://www.python.org/)
+[![REUSE status](https://api.reuse.software/badge/github.com/Infineon/python-optiga-trust)](https://api.reuse.software/info/github.com/Infineon/python-optiga-trust)
+
 
 # Infineon OPTIGA™ Trust M Host Library for Python
 
@@ -22,16 +25,14 @@ This Python module is a wrapper for the [OPTIGA™ Trust M Host Library for C](h
 
 Please see the [OPTIGA™ Trust M overview repository](https://github.com/optiga-trust-m-overview) for more information on our OPTIGA™ Trust M product family.
 
-## Required hardware
+## Recommended hardware
 
-* Any of the following
-    - PSoC™ 6 Kit in [Provisioning Mode](https://github.com/Infineon/mtb-example-optiga-data-management) + [OPTIGA™ Trust Adapter](https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-adapter)
-    - OPTIGA™ Trust [M](https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-m-eval-kit/)/[Charge](https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-ch-eval-kit/) Evaluation Kit
-    - OPTIGA™ Trust Personalisation Board (SP005405452), or any FTDI USB-HID/I2C Converter board
-    - Raspberry Pi + [Shield2Go RPi Adapter](https://www.infineon.com/cms/en/product/evaluation-boards/s2go-adapter-rasp-pi-iot/)
-    - Raspberry Pi + [Pi 4 Click Shield](https://www.mikroe.com/pi-4-click-shield)
-    
-* OPTIGA™ Trust X/M/Charge sample, a [Security Shield2Go](https://www.infineon.com/cms/en/product/evaluation-boards/s2go-security-optiga-m/) or a mikroBUS compatible OPTIGA™ Trust M Shield.
+The following two hardware setups are recommended for use with this project.
+
+| Interface |                Host Hardware                 |                                                                                                             Adapter                                                                                                             |                                               Sample                                                |
+| --------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| I²C       | [Raspberry Pi](https://www.raspberrypi.com/) | [Pi 4 Click Shield for mikroBUS™](https://www.mikroe.com/pi-4-click-shield)                                                                                                                                                     | [OPTIGA™ Trust M Shield](https://www.infineon.com/cms/en/product/evaluation-boards/trust-m-shield/) |
+| UART      | Linux or Windows host                        | [PSOC™ 62S2 Wi-Fi BT Pioneer Kit](https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/) <br> + [OPTIGA™ Trust Adapter](https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-adapter/) | [OPTIGA™ Trust M Shield](https://www.infineon.com/cms/en/product/evaluation-boards/trust-m-shield/) |
 
 ## Installation from pip
 
@@ -52,6 +53,7 @@ When using the OPTIGA™ Trust M Perso2Go board, add the predefined [udev rule](
 ```bash
 $ sudo cp ./src/optigatrust/rules/90-optigatrust.rules /etc/udev/rules.d/
 ```
+
 #### Automatic installation of the udev rule (root permission needed)
 
 Alternatively, you can also run the installation with root permissions which will install the udev rule for the OPTIGA™ Trust M Perso2Go board automatically.

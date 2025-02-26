@@ -1,0 +1,376 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building &amp; Porting &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Error codes" href="../01_features/20_error_codes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../00_getting_started/index.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/02_prov_mode.html">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../01_features/index.html">Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/11_chip.html">Chip settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/12_metadata.html">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/14_csr.html">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/15_port.html">Export or import chip metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/20_error_codes.html">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Building &amp; Porting</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="../01_features/20_error_codes.html" class="btn btn-neutral float-left" title="Error codes" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="building-porting">
+<h1>Building &amp; Porting<a class="headerlink" href="#building-porting" title="Link to this heading"></a></h1>
+<p>This Python package uses the OPTIGA™ Trust Host Library for C as a shared library (.so or .dll). Precompiled libraries are available for the following platforms in <cite>src/optigatrust/lib</cite>.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>OS</p></th>
+<th class="head"><p>Architecture</p></th>
+<th class="head"><p>Interface</p></th>
+<th class="head"><p>Library name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Linux</p></td>
+<td><p>armv7l</p></td>
+<td><p>I²C</p></td>
+<td><p>liboptigatrust-i2c-linux-armv7l.so</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linux</p></td>
+<td><p>aarch64</p></td>
+<td><p>I²C</p></td>
+<td><p>liboptigatrust-i2c-linux-aarch64.so</p></td>
+</tr>
+<tr class="row-even"><td><p>Linux</p></td>
+<td><p>x86_64</p></td>
+<td><p>I²C</p></td>
+<td><p>liboptigatrust-i2c-linux-x86_64.so</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linux</p></td>
+<td><p>armv7l</p></td>
+<td><p>I²C-GPIOD</p></td>
+<td><p>liboptigatrust-i2c-gpiod-linux-armv7l.so</p></td>
+</tr>
+<tr class="row-even"><td><p>Linux</p></td>
+<td><p>aarch64</p></td>
+<td><p>I²C-GPIOD</p></td>
+<td><p>liboptigatrust-i2c-gpiod-linux-aarch64.so</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linux</p></td>
+<td><p>x86_64</p></td>
+<td><p>I²C-GPIOD</p></td>
+<td><p>liboptigatrust-i2c-gpiod-linux-x86_64.so</p></td>
+</tr>
+<tr class="row-even"><td><p>Linux</p></td>
+<td><p>armv7l</p></td>
+<td><p>UART</p></td>
+<td><p>liboptigatrust-uart-linux-armv7l.so</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linux</p></td>
+<td><p>aarch64</p></td>
+<td><p>UART</p></td>
+<td><p>liboptigatrust-uart-linux-aarch64.so</p></td>
+</tr>
+<tr class="row-even"><td><p>Linux</p></td>
+<td><p>x86_64</p></td>
+<td><p>UART</p></td>
+<td><p>liboptigatrust-uart-linux-x86_64.so</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linux</p></td>
+<td><p>armv7l</p></td>
+<td><p>libusb</p></td>
+<td><p>liboptigatrust-libusb-linux-armv7l.so</p></td>
+</tr>
+<tr class="row-even"><td><p>Linux</p></td>
+<td><p>aarch64</p></td>
+<td><p>libusb</p></td>
+<td><p>liboptigatrust-libusb-linux-aarch64.so</p></td>
+</tr>
+<tr class="row-odd"><td><p>Linux</p></td>
+<td><p>x86_64</p></td>
+<td><p>libusb</p></td>
+<td><p>liboptigatrust-libusb-linux-x86_64.so</p></td>
+</tr>
+<tr class="row-even"><td><p>Windows</p></td>
+<td><p>i686</p></td>
+<td><p>UART</p></td>
+<td><p>liboptigatrust-uart-win-x86_64.dll</p></td>
+</tr>
+<tr class="row-odd"><td><p>Windows</p></td>
+<td><p>amd64</p></td>
+<td><p>UART</p></td>
+<td><p>liboptigatrust-uart-win-x86_64.dll</p></td>
+</tr>
+<tr class="row-even"><td><p>Windows</p></td>
+<td><p>i686</p></td>
+<td><p>libusb</p></td>
+<td><p>liboptigatrust-libsub-win-x86_64.dll</p></td>
+</tr>
+<tr class="row-odd"><td><p>Windows</p></td>
+<td><p>amd64</p></td>
+<td><p>libusb</p></td>
+<td><p>liboptigatrust-libsub-win-x86_64.dll</p></td>
+</tr>
+</tbody>
+</table>
+<section id="building-the-optiga-trust-host-library-for-c">
+<h2>Building the OPTIGA™ Trust Host Library for C<a class="headerlink" href="#building-the-optiga-trust-host-library-for-c" title="Link to this heading"></a></h2>
+<p>This chapter describes how to build the <code class="code docutils literal notranslate"><span class="pre">optigatrust</span></code> Python module from scratch.</p>
+<section id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Link to this heading"></a></h3>
+<p>If you want to port this module to other Linux platforms, perform the following steps.</p>
+<ol class="arabic">
+<li><p>Clone the git submodule for the OPTIGA™ Trust Host Library for C in <cite>extras/optiga-trust-m</cite>.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">submodule</span> <span class="n">update</span> <span class="o">--</span><span class="n">init</span>
+</pre></div>
+</div>
+</li>
+<li><p>Install CMake:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">cmake</span>
+</pre></div>
+</div>
+</li>
+<li><p>Install prerequisites:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">libgpio</span><span class="o">-</span><span class="n">dev</span> <span class="n">libusb</span><span class="o">-</span><span class="n">dev</span>
+</pre></div>
+</div>
+</li>
+<li><p>Build the library</p>
+<blockquote>
+<div><p>To build the library from this folder (<cite>extras/optiga-trust-m</cite>), run the following commands. You can enable/disable the build of individual interfaces via <cite>-D&lt;variant&gt;=ON</cite>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cmake -B build -Di2c=ON -Di2c-gpiod=ON -Duart=ON -Dlibusb=ON</span>
+<span class="go">cmake --build build</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ol>
+<details class="summary-sample-output">
+<summary>Sample output</summary><div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">cmake -B build -Di2c=ON -Di2c-gpiod=ON -Duart=ON -Dlibusb=ON</span>
+<span class="go">-- The C compiler identification is GNU 11.4.0</span>
+<span class="go">-- The CXX compiler identification is GNU 11.4.0</span>
+<span class="go">-- Detecting C compiler ABI info</span>
+<span class="go">-- Detecting C compiler ABI info - done</span>
+<span class="go">-- Check for working C compiler: /usr/bin/cc - skipped</span>
+<span class="go">-- Detecting C compile features</span>
+<span class="go">-- Detecting C compile features - done</span>
+<span class="go">-- Detecting CXX compiler ABI info</span>
+<span class="go">-- Detecting CXX compiler ABI info - done</span>
+<span class="go">-- Check for working CXX compiler: /usr/bin/c++ - skipped</span>
+<span class="go">-- Detecting CXX compile features</span>
+<span class="go">-- Detecting CXX compile features - done</span>
+<span class="go">-- Configuring done</span>
+<span class="go">-- Generating done</span>
+<span class="go">-- Build files have been written to: /python-optiga-trust/extras/optiga-trust-m/build</span>
+
+<span class="go">cmake --build build</span>
+<span class="go">[  1%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal.c.o</span>
+<span class="go">[  2%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_gpio.c.o</span>
+<span class="go">[  3%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_i2c.c.o</span>
+<span class="go">[  4%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/target/rpi3/pal_ifx_i2c_config.c.o</span>
+<span class="go">[  5%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_event.c.o</span>
+<span class="go">[  6%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_datastore.c.o</span>
+<span class="go">[  7%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_logger.c.o</span>
+<span class="go">[  8%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_lock.c.o</span>
+<span class="go">[  9%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_timer.c.o</span>
+<span class="go">[ 10%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_memory.c.o</span>
+<span class="go">[ 12%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_shared_mutex.c.o</span>
+<span class="go">[ 13%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/optiga_comms_ifx_i2c.c.o</span>
+<span class="go">[ 14%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c.c.o</span>
+<span class="go">[ 15%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_config.c.o</span>
+<span class="go">[ 16%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_data_link_layer.c.o</span>
+<span class="go">[ 17%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_physical_layer.c.o</span>
+<span class="go">[ 18%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_presentation_layer.c.o</span>
+<span class="go">[ 19%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_transport_layer.c.o</span>
+<span class="go">[ 20%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/src/optiga_trust_init.c.o</span>
+<span class="go">[ 21%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/crypt/optiga_crypt.c.o</span>
+<span class="go">[ 23%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/util/optiga_util.c.o</span>
+<span class="go">[ 24%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/cmd/optiga_cmd.c.o</span>
+<span class="go">[ 25%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/common/optiga_lib_common.c.o</span>
+<span class="go">[ 26%] Building C object CMakeFiles/optigatrust-i2c-linux-x86_64.dir/external/optiga/src/common/optiga_lib_logger.c.o</span>
+<span class="go">[ 27%] Linking C shared library /python-optiga-trust/src/optigatrust/lib/liboptigatrust-i2c-linux-x86_64.so</span>
+<span class="go">[ 27%] Built target optigatrust-i2c-linux-x86_64</span>
+<span class="go">[ 28%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal.c.o</span>
+<span class="go">[ 29%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_gpio_gpiod.c.o</span>
+<span class="go">[ 30%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_i2c.c.o</span>
+<span class="go">[ 31%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/target/gpiod/pal_ifx_i2c_config.c.o</span>
+<span class="go">[ 32%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_event.c.o</span>
+<span class="go">[ 34%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_datastore.c.o</span>
+<span class="go">[ 35%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_logger.c.o</span>
+<span class="go">[ 36%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_lock.c.o</span>
+<span class="go">[ 37%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_timer.c.o</span>
+<span class="go">[ 38%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_os_memory.c.o</span>
+<span class="go">[ 39%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/extras/pal/linux/pal_shared_mutex.c.o</span>
+<span class="go">[ 40%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/optiga_comms_ifx_i2c.c.o</span>
+<span class="go">[ 41%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c.c.o</span>
+<span class="go">[ 42%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_config.c.o</span>
+<span class="go">[ 43%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_data_link_layer.c.o</span>
+<span class="go">[ 45%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_physical_layer.c.o</span>
+<span class="go">[ 46%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_presentation_layer.c.o</span>
+<span class="go">[ 47%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_transport_layer.c.o</span>
+<span class="go">[ 48%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/src/optiga_trust_init.c.o</span>
+<span class="go">[ 49%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/crypt/optiga_crypt.c.o</span>
+<span class="go">[ 50%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/util/optiga_util.c.o</span>
+<span class="go">[ 51%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/cmd/optiga_cmd.c.o</span>
+<span class="go">[ 52%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/common/optiga_lib_common.c.o</span>
+<span class="go">[ 53%] Building C object CMakeFiles/optigatrust-i2c-gpiod-linux-x86_64.dir/external/optiga/src/common/optiga_lib_logger.c.o</span>
+<span class="go">[ 54%] Linking C shared library /python-optiga-trust/src/optigatrust/lib/liboptigatrust-i2c-gpiod-linux-x86_64.so</span>
+<span class="go">[ 54%] Built target optigatrust-i2c-gpiod-linux-x86_64</span>
+<span class="go">[ 56%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal.c.o</span>
+<span class="go">[ 57%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_common.c.o</span>
+<span class="go">[ 58%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_gpio.c.o</span>
+<span class="go">[ 59%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_i2c.c.o</span>
+<span class="go">[ 60%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_ifx_usb_config.c.o</span>
+<span class="go">[ 61%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_os_event.c.o</span>
+<span class="go">[ 62%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_logger.c.o</span>
+<span class="go">[ 63%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_os_datastore.c.o</span>
+<span class="go">[ 64%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_os_lock.c.o</span>
+<span class="go">[ 65%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_os_memory.c.o</span>
+<span class="go">[ 67%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/extras/pal/libusb/pal_os_timer.c.o</span>
+<span class="go">[ 68%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/optiga_comms_ifx_i2c.c.o</span>
+<span class="go">[ 69%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c.c.o</span>
+<span class="go">[ 70%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_config.c.o</span>
+<span class="go">[ 71%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_data_link_layer.c.o</span>
+<span class="go">[ 72%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_physical_layer.c.o</span>
+<span class="go">[ 73%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_presentation_layer.c.o</span>
+<span class="go">[ 74%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/comms/ifx_i2c/ifx_i2c_transport_layer.c.o</span>
+<span class="go">[ 75%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/src/optiga_trust_init.c.o</span>
+<span class="go">[ 76%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/crypt/optiga_crypt.c.o</span>
+<span class="go">[ 78%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/util/optiga_util.c.o</span>
+<span class="go">[ 79%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/cmd/optiga_cmd.c.o</span>
+<span class="go">[ 80%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/common/optiga_lib_common.c.o</span>
+<span class="go">[ 81%] Building C object CMakeFiles/optigatrust-libusb-linux-x86_64.dir/external/optiga/src/common/optiga_lib_logger.c.o</span>
+<span class="go">[ 82%] Linking C shared library python-optiga-trust/src/optigatrust/lib/liboptigatrust-libusb-linux-x86_64.so</span>
+<span class="go">[ 82%] Built target optigatrust-libusb-linux-x86_64</span>
+<span class="go">[ 83%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/optiga_comms_tc_uart.c.o</span>
+<span class="go">[ 84%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_os_event.c.o</span>
+<span class="go">[ 85%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_gpio.c.o</span>
+<span class="go">[ 86%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_config.c.o</span>
+<span class="go">[ 87%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_os_datastore.c.o</span>
+<span class="go">[ 89%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_logger.c.o</span>
+<span class="go">[ 90%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_os_lock.c.o</span>
+<span class="go">[ 91%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_os_timer.c.o</span>
+<span class="go">[ 92%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/extras/pal/linux_uart/pal_os_memory.c.o</span>
+<span class="go">[ 93%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/src/optiga_trust_init.c.o</span>
+<span class="go">[ 94%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/src/crypt/optiga_crypt.c.o</span>
+<span class="go">[ 95%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/src/util/optiga_util.c.o</span>
+<span class="go">[ 96%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/src/cmd/optiga_cmd.c.o</span>
+<span class="go">[ 97%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/src/common/optiga_lib_common.c.o</span>
+<span class="go">[ 98%] Building C object CMakeFiles/optigatrust-uart-linux-x86_64.dir/external/optiga/src/common/optiga_lib_logger.c.o</span>
+<span class="go">[100%] Linking C shared library /python-optiga-trust/src/optigatrust/lib/liboptigatrust-uart-linux-x86_64.so</span>
+<span class="go">[100%] Built target optigatrust-uart-linux-x86_64</span>
+</pre></div>
+</div>
+</details></section>
+<section id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Link to this heading"></a></h3>
+<p>To build the OPTIGA™ Trust Host Library for C, Microsoft Visual Studio 2022 is needed. The solution for the project is located in <code class="code docutils literal notranslate"><span class="pre">extras/optiga-trust-m</span></code>.</p>
+</section>
+</section>
+<section id="building-and-installing-the-python-module">
+<h2>Building and installing the Python module<a class="headerlink" href="#building-and-installing-the-python-module" title="Link to this heading"></a></h2>
+<p>Install the Python module <code class="code docutils literal notranslate"><span class="pre">optigatrust</span></code> from source code as follows.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">python -m pip install -r requirements.txt</span>
+<span class="go">python -m pip install .</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../01_features/20_error_codes.html" class="btn btn-neutral float-left" title="Error codes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

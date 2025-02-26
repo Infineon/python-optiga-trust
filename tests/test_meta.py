@@ -96,7 +96,17 @@ def test_meta_assign_used_size():
         obj.meta = {"used_size": 100}
 
 
-@pytest.mark.parametrize("curve", ("secp256r1", "secp384r1", "secp521r1", "brainpoolp256r1", "brainpoolp384r1", "brainpoolp512r1"))
+@pytest.mark.parametrize(
+    "curve",
+    (
+        "secp256r1",
+        "secp384r1",
+        "secp521r1",
+        "brainpoolp256r1",
+        "brainpoolp384r1",
+        "brainpoolp512r1",
+    ),
+)
 def test_meta_check_algorithm_ecc(curve):
     obj = objects.ECCKey(0xE0F1)
     crypto.generate_pair(key_object=obj, curve=curve)
@@ -112,18 +122,36 @@ def test_meta_check_algorithm_rsa(key_size):
 
 def test_meta_check_key_usage_ecc():
     obj = objects.ECCKey(0xE0F1)
-    crypto.generate_pair(key_object=obj, curve="secp256r1", key_usage=["signature", "authentication"])
-    assert ["signature", "authentication"] == obj.meta["key_usage"] or ["authentication", "signature"] == obj.meta["key_usage"]
+    crypto.generate_pair(
+        key_object=obj, curve="secp256r1", key_usage=["signature", "authentication"]
+    )
+    assert ["signature", "authentication"] == obj.meta["key_usage"] or [
+        "authentication",
+        "signature",
+    ] == obj.meta["key_usage"]
 
 
 def test_meta_check_key_usage_rsa():
     obj = objects.RSAKey(0xE0FC)
     crypto.generate_pair(key_object=obj, key_size=1024, key_usage=["key_agreement", "encryption"])
-    assert ["key_agreement", "encryption"] == obj.meta["key_usage"] or ["encryption", "key_agreement"] == obj.meta["key_usage"]
+    assert ["key_agreement", "encryption"] == obj.meta["key_usage"] or [
+        "encryption",
+        "key_agreement",
+    ] == obj.meta["key_usage"]
 
 
 @pytest.mark.parametrize(
-    "obj_type", ["byte_string", "up_counter", "trust_anchor", "device_cert", "pre_sh_secret", "platform_binding", "update_secret", "authorization_ref"]
+    "obj_type",
+    [
+        "byte_string",
+        "up_counter",
+        "trust_anchor",
+        "device_cert",
+        "pre_sh_secret",
+        "platform_binding",
+        "update_secret",
+        "authorization_ref",
+    ],
 )
 def test_meta_set_object_type(obj_type):
     obj = objects.AppData(0xF1D0)

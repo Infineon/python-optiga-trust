@@ -226,7 +226,9 @@ def _to_xml(meta):
     """
     opt = optiga.Chip()
     path = os.path.dirname(os.path.abspath(__file__))
-    template_env = Environment(autoescape=False, loader=FileSystemLoader(os.path.join(path, "enums")), trim_blocks=False)
+    template_env = Environment(
+        autoescape=False, loader=FileSystemLoader(os.path.join(path, "enums")), trim_blocks=False
+    )
     fname = "conf_template.xml"
     new_meta_list = list()
     for key, value in meta.items():
@@ -290,6 +292,8 @@ def to_otc(path):
     for key, value in meta.items():
         if "data" in value:
             if "used_size" in value["pretty_metadata"]:
-                formatted_data = re.sub("(.{64})", "\\1\n", value["data"].upper(), 0, re.DOTALL)
+                formatted_data = re.sub(
+                    "(.{64})", "\\1\n", value["data"].upper(), count=0, flags=re.DOTALL
+                )
                 with open("{0}/{1}.dat".format(path, key.upper()), "w+", encoding="utf-8") as file:
                     file.write(formatted_data)

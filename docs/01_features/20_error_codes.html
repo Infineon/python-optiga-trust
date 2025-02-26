@@ -1,0 +1,246 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Error codes &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Building &amp; Porting" href="../02_building/index.html" />
+    <link rel="prev" title="Export or import chip metadata" href="15_port.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../00_getting_started/index.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/02_prov_mode.html">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Features</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="11_chip.html">Chip settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12_metadata.html">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="14_csr.html">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="15_port.html">Export or import chip metadata</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../02_building/index.html">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Features</a></li>
+      <li class="breadcrumb-item active">Error codes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="15_port.html" class="btn btn-neutral float-left" title="Export or import chip metadata" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../02_building/index.html" class="btn btn-neutral float-right" title="Building &amp; Porting" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="error-codes">
+<h1>Error codes<a class="headerlink" href="#error-codes" title="Link to this heading"></a></h1>
+<p>The possible error codes returned from the security chip are listed in Table below (for more details please refer to the
+<a class="reference external" href="https://github.com/Infineon/optiga-trust-m-overview/blob/main/docs/OPTIGA%E2%84%A2%20Trust%20M%20Solution%20Reference%20Manual.md">Solution Reference
+Manual</a>.
+If multiple commands happen to produce subsequent errors then only the highest-numbered error code is stored.</p>
+<p><strong>Note:</strong> The error code will be returned in the following form: <strong>0x8001</strong>, where the last byte corresponds to the error
+code in the table below, in this case “Invalid Object ID”.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Field</p></th>
+<th class="head text-center"><p>Code</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>No error</p></td>
+<td class="text-center"><p>0x00</p></td>
+<td><p>No Error</p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid OID</p></td>
+<td class="text-center"><p>0x01</p></td>
+<td><p>Invalid OID</p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid Password</p></td>
+<td class="text-center"><p>0x02</p></td>
+<td><p>Invalid Password</p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid Param field</p></td>
+<td class="text-center"><p>0x03</p></td>
+<td><p>Invalid Param field in command</p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid length field</p></td>
+<td class="text-center"><p>0x04</p></td>
+<td><p>Invalid Length field in command</p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid parameter in data field</p></td>
+<td class="text-center"><p>0x05</p></td>
+<td><p>Invalid parameter in command data field</p></td>
+</tr>
+<tr class="row-even"><td><p>Internal process error</p></td>
+<td class="text-center"><p>0x06</p></td>
+<td><p>Internal process error</p></td>
+</tr>
+<tr class="row-odd"><td><p>Access conditions not satisfied</p></td>
+<td class="text-center"><p>0x07</p></td>
+<td><p>Access conditions are not satisfied</p></td>
+</tr>
+<tr class="row-even"><td><p>Data object boundary exceeded</p></td>
+<td class="text-center"><p>0x08</p></td>
+<td><p>The sum of offset and data provided (offset + data length) exceeds the max length of the data object</p></td>
+</tr>
+<tr class="row-odd"><td><p>Metadata truncation error</p></td>
+<td class="text-center"><p>0x09</p></td>
+<td><p>Metadata truncation error</p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid command field</p></td>
+<td class="text-center"><p>0x0A</p></td>
+<td><p>Invalid command field</p></td>
+</tr>
+<tr class="row-odd"><td><p>Command out of sequence</p></td>
+<td class="text-center"><p>0x0B</p></td>
+<td><p>Command or message out of sequence. Command out of sequence means that the command which expected to use certain resources are not available or not started at chip e.g. invoking the <code class="docutils literal notranslate"><span class="pre">optiga_crypt_tls_prf_sha256()</span></code> function (which is using session) before invoking the <code class="docutils literal notranslate"><span class="pre">optiga_crypt_ecdh()</span></code> function. Another example is a usage of the <code class="docutils literal notranslate"><span class="pre">optiga_crypt_ecdh()</span></code> and <code class="docutils literal notranslate"><span class="pre">optiga_crypt_tls_prf_sha256()</span></code> functions in the row using the Session OID without <code class="docutils literal notranslate"><span class="pre">optiga_crypt_ecc_generate_keypair()</span></code>, this leads to failure “of out of sequence” due to a lack of private key in Session OID slot</p></td>
+</tr>
+<tr class="row-even"><td><p>Command not available</p></td>
+<td class="text-center"><p>0x0C</p></td>
+<td><p><ul><li>due to termination state of the application</li><li>due to Application closed</li></ul></p></td>
+</tr>
+<tr class="row-odd"><td><p>Insufficient buffer/ memory</p></td>
+<td class="text-center"><p>0x0D</p></td>
+<td><p>Insufficient memory to process the command APDU</p></td>
+</tr>
+<tr class="row-even"><td><p>Counter threshold limit exceeded</p></td>
+<td class="text-center"><p>0x0E</p></td>
+<td><p>Counter value crossed the threshold limit and further counting is denied.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid Manifest</p></td>
+<td class="text-center"><p>0x0F</p></td>
+<td><p><ul><li> The Manifest version provided is not supported or the Payload Version in Manifest has MSB set (Invalid Flag=1).</li><li> Invalid or un-supported manifest values or formats including CBOR parsing errors. </li></p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid/Wrong Payload Version</p></td>
+<td class="text-center"><p>0x10</p></td>
+<td><p>The Payload Version provided in the Manifest is not greater than the version of the target object, or the last update was interrupted and the restarted/retried update has not the same version</p></td>
+</tr>
+<tr class="row-odd"><td><p>Invalid metadata of the key/data object</p></td>
+<td class="text-center"><p>0x11</p></td>
+<td><p>A command is acting on metadata for key or data objects and the current metadata are invalid</p></td>
+</tr>
+<tr class="row-even"><td><p>Unsupported extension/identifier</p></td>
+<td class="text-center"><p>0x24</p></td>
+<td><p><ul><li>An unsupported extension found in the message</li><li>Unsupported keyusage/Algorithm extension/identifier for the usage of Private key</li></ul></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unsupported parameters</p></td>
+<td class="text-center"><p>0x25</p></td>
+<td><p><ul><li>At least one parameter received in the handshake message is not supported</li><li>Unsupported parameter in the command APDU InData</li></ul></p></td>
+</tr>
+<tr class="row-even"><td><p>Invalid certificate format</p></td>
+<td class="text-center"><p>0x29</p></td>
+<td><p>Invalid certificate(s) in certificate message with the following reasons. <ul><li> Invalid format</li> <li>Invalid chain of certificates</li> <li>Signature verification failure</li></ul></p></td>
+</tr>
+<tr class="row-odd"><td><p>Unsupported certificate algorithm</p></td>
+<td class="text-center"><p>0x2A</p></td>
+<td><p>At least one cryptographic algorithm specified in the certificate is not supported (e.g. hash or sign algorithms).</p></td>
+</tr>
+<tr class="row-even"><td><p>Signature verification failure</p></td>
+<td class="text-center"><p>0x2C</p></td>
+<td><p>Signature verification failure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Integrity validation failure</p></td>
+<td class="text-center"><p>0x2D</p></td>
+<td><p>Message Integrity validation failure (e.g. during CCM decryption).</p></td>
+</tr>
+<tr class="row-even"><td><p>Decryption Failure</p></td>
+<td class="text-center"><p>0x2E</p></td>
+<td><p>Decryption Failure.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Authorization failure</p></td>
+<td class="text-center"><p>0x2F</p></td>
+<td><p>Session random comparison failure or HMAC verification failure</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="15_port.html" class="btn btn-neutral float-left" title="Export or import chip metadata" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../02_building/index.html" class="btn btn-neutral float-right" title="Building &amp; Porting" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

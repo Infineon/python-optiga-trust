@@ -43,34 +43,36 @@ def test_read_existing_faulty_objid():
 def test_write_new_default():
     with pytest.raises(IOError):
         with open(os.path.join(pytest.test_dir, "fixtures/test-ec-ecdsa-cert.pem"), "rb") as f:
-            der_bytes = f.read()
-        optiga_objects.X509(0xE0E0).der = der_bytes
+            pem_bytes = f.read()
+        optiga_objects.X509(0xE0E0).pem = pem_bytes
 
 
 def test_write_new_specific():
     with open(os.path.join(pytest.test_dir, "fixtures/test-ec-ecdsa-cert.pem"), "rb") as f:
-        der_bytes = f.read()
+        pem_bytes = f.read()
     obj = optiga_objects.X509(0xE0E1)
     old_meta = {"change": obj.meta["change"]}
     obj.meta = {"change": "always"}
-    optiga_objects.X509(0xE0E1).der = der_bytes
+    optiga_objects.X509(0xE0E1).pem = pem_bytes
     obj.meta = old_meta
 
 
 def test_write_new_faulty_objid():
     with pytest.raises(ValueError):
         with open(os.path.join(pytest.test_dir, "fixtures/test-ec-ecdsa-cert.pem"), "rb") as f:
-            wr_bytes = f.read()
+            pem_bytes = f.read()
 
-        optiga_objects.X509(0xE0EC).der = wr_bytes
+        optiga_objects.X509(0xE0EC).pem = pem_bytes
 
 
 def test_write_new_faulty_cert():
     with pytest.raises(ValueError):
-        with open(os.path.join(pytest.test_dir, "fixtures/test-ec-ecdsa-faulty-cert.pem"), "rb") as f:
-            wr_bytes = f.read()
+        with open(
+            os.path.join(pytest.test_dir, "fixtures/test-ec-ecdsa-faulty-cert.pem"), "rb"
+        ) as f:
+            pem_bytes = f.read()
 
-        optiga_objects.X509(0xE0E1).pem = wr_bytes
+        optiga_objects.X509(0xE0E1).pem = pem_bytes
 
 
 def test_write_new_locked_object():
@@ -78,9 +80,9 @@ def test_write_new_locked_object():
     old_meta = c.meta["change"]
     with pytest.raises(IOError):
         with open(os.path.join(pytest.test_dir, "fixtures/test-ec-ecdsa-cert.pem"), "rb") as f:
-            wr_bytes = f.read()
+            pem_bytes = f.read()
 
         c.meta = {"change": "never"}
-        c.der = wr_bytes
+        c.pem = pem_bytes
 
     c.meta = {"change": old_meta}

@@ -1,0 +1,32 @@
+.. Dependencies
+.. _optigatrust: https://pypi.org/project/optigatrust/
+.. _asn1crypto: https://github.com/wbond/asn1crypto
+.. _jinja2: https://jinja.palletsprojects.com/en/2.11.x/
+.. _cryptography: https://github.com/pyca/cryptography
+.. _ctypes: https://docs.python.org/3/library/ctypes.html
+.. _libusb: https://libusb.info/
+.. _gpiod: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/
+.. _sysfs: https://www.kernel.org/doc/Documentation/gpio/sysfs.txt
+
+.. _OPTIGA™ Trust M Overview Repository: https://github.com/Infineon/optiga-trust-m-overview
+.. _OPTIGA™ Trust M Host Library for C: https://github.com/Infineon/optiga-trust-m/
+.. _Solution Reference Manual: https://github.com/Infineon/optiga-trust-m-overview/blob/main/docs/OPTIGA%E2%84%A2%20Trust%20M%20Solution%20Reference%20Manual.md
+
+.. Samples
+.. _OPTIGA™ Trust M Shield: https://www.infineon.com/cms/en/product/evaluation-boards/trust-m-shield/
+
+.. Adapters and host systems
+.. _PSOC™ 62S2 Wi-Fi BT Pioneer Kit with OPTIGA™ Trust M Shield: https://github.com/Infineon/getstarted-optiga-trust-m/tree/main/psoc62_cy8ckit_mikrobus
+.. _PSOC™ 62S2 Wi-Fi BT Pioneer Kit: https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/
+.. _OPTIGA™ Trust Adapter: https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-adapter/
+
+.. _Raspberry Pi: https://www.raspberrypi.com/
+.. _Pi 4 Click Shield for mikroBUS™: https://www.mikroe.com/pi-4-click-shield
+
+.. _XMC47000 Relax Kit: https://www.infineon.com/cms/de/product/evaluation-boards/kit_xmc47_relax_v1/
+.. _My IoT Adapter: https://www.infineon.com/cms/en/product/evaluation-boards/my-iot-adapter/
+
+
+.. _Download J-Link Software and Documentation pack: https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack
+.. _ModusToolbox™ example application for OPTIGA™ Trust M data management: https://github.com/Infineon/mtb-example-optiga-data-management
+.. _xmc4700 hex file: ../_static/optiga_trust_charge_evalkit_uart_python.hex

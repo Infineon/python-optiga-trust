@@ -62,7 +62,11 @@ def test_metadata_json_output():
 def test_metadata_json_output_in_file():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(object_parser, ["--id", "0xe0e0", "--meta", "--out", "e0e0_meta.json"], terminal_width=100)
+        result = runner.invoke(
+            object_parser,
+            ["--id", "0xe0e0", "--meta", "--out", "e0e0_meta.json"],
+            terminal_width=100,
+        )
         assert result.exit_code == 0
         with open("e0e0_meta.json", "r") as f:
             assert json.loads(f.read())
@@ -71,7 +75,11 @@ def test_metadata_json_output_in_file():
 def test_object_with_input():
     runner = CliRunner()
     with runner.isolated_filesystem():
-        result = runner.invoke(object_parser, ["--id", "0xe0e0", "--meta", "--out", "e0e0_meta.json"], terminal_width=100)
+        result = runner.invoke(
+            object_parser,
+            ["--id", "0xe0e0", "--meta", "--out", "e0e0_meta.json"],
+            terminal_width=100,
+        )
         assert result.exit_code == 0
         with open("e0e0_meta.json", "r") as f:
             assert json.loads(f.read())

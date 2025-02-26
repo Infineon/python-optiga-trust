@@ -52,9 +52,15 @@ def test_tls_prf(hash_alg, hazmat_curve, curve):
     key = objects.ECCKey(0xE0F1)
     _, _ = optiga_ec.generate_pair(key, curve=curve)
     private_key = ec.generate_private_key(hazmat_curve, default_backend())
-    peer_public_key = private_key.public_key().public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)
+    peer_public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
     session_object = optiga_ec.ecdh(key, peer_public_key)
-    derived_key = optiga_ec.tls_prf(session_object, 32, seed=bytes().fromhex(seed), hash_algorithm=hash_alg, export=True)
+    derived_key = optiga_ec.tls_prf(
+        session_object, 32, seed=bytes().fromhex(seed), hash_algorithm=hash_alg, export=True
+    )
+
+    assert derived_key is not None
 
 
 @pytest.mark.parametrize("hash_alg", ["sha256", "sha384", "sha512"])
@@ -64,8 +70,17 @@ def test_tls_prf_secret_from_appdata(hash_alg):
     old_type = app_data.meta["type"]
     old_execute_ac = app_data.meta["execute"]
     app_data.meta = {"type": "pre_sh_secret", "execute": "always"}
-    derived_key = optiga_ec.tls_prf(app_data, 32, label="Firmware update", seed=bytes().fromhex(seed), hash_algorithm=hash_alg, export=True)
+    derived_key = optiga_ec.tls_prf(
+        app_data,
+        32,
+        label="Firmware update",
+        seed=bytes().fromhex(seed),
+        hash_algorithm=hash_alg,
+        export=True,
+    )
     app_data.meta = {"type": old_type, "execute": old_execute_ac}
+
+    assert derived_key is not None
 
 
 @pytest.mark.parametrize("hash_alg", ["sha256", "sha384", "sha512"])
@@ -118,9 +133,13 @@ def test_hkdf(hash_alg, hazmat_curve, curve):
     key = objects.ECCKey(0xE0F1)
     _, _ = optiga_ec.generate_pair(key, curve=curve)
     private_key = ec.generate_private_key(hazmat_curve, default_backend())
-    peer_public_key = private_key.public_key().public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)
+    peer_public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
     session_object = optiga_ec.ecdh(key, peer_public_key)
     derived_key = optiga_ec.hkdf(session_object, 32, hash_algorithm=hash_alg, export=True)
+
+    assert derived_key is not None
 
 
 @pytest.mark.parametrize("hash_alg", ["sha256", "sha384", "sha512"])
@@ -132,3 +151,5 @@ def test_hkdf_secret_from_appdata(hash_alg):
     app_data.meta = {"type": "pre_sh_secret", "execute": "always"}
     derived_key = optiga_ec.hkdf(app_data, 32, hash_algorithm=hash_alg, export=True)
     app_data.meta = {"type": old_type, "execute": old_execute_ac}
+
+    assert derived_key is not None

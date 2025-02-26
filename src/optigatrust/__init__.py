@@ -15,10 +15,24 @@ from . import _backend, util
 
 logger = util.Logger(name=__name__)
 
-__all__ = ["__version__", "__version_info__", "enums", "objects", "crypto", "csr", "port", "lifecycle_states", "Chip", "Object"]
+__all__ = [
+    "__version__",
+    "__version_info__",
+    "enums",
+    "objects",
+    "crypto",
+    "csr",
+    "port",
+    "lifecycle_states",
+    "Chip",
+    "Object",
+]
 
 
-UID = namedtuple("UID", "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build")
+UID = namedtuple(
+    "UID",
+    "cim_id platform_id model_id rommask_id chip_type batch_num x_coord y_coord fw_id fw_build",
+)
 
 
 # pylint: disable=too-many-instance-attributes disable=no-self-use
@@ -29,7 +43,7 @@ class Chip:
     A class used to represent the whole OPTIGA Trust Chip
     """
 
-    def __init__(self):
+    def __init__(self, interface=None):
         """
         This class
 
@@ -46,7 +60,7 @@ class Chip:
             self
         """
 
-        optiga_cddl = _backend.get_handler()
+        optiga_cddl = _backend.get_handler(interface)
 
         self.api = optiga_cddl
         consts, name = _backend.lookup_optiga(optiga_cddl)
@@ -81,7 +95,11 @@ class Chip:
     @current_limit.setter
     def current_limit(self, val: int):
         if val < 6 or val > 15:
-            raise ValueError("Current limitation is not supported. Should be between 6 and 15 mA, you have {0}".format(val))
+            raise ValueError(
+                "Current limitation is not supported. Should be between 6 and 15 mA, you have {0}".format(
+                    val
+                )
+            )
         Object(0xE0C4).write(bytes([val]))
 
     @property
@@ -95,7 +113,11 @@ class Chip:
     @sleep_activation_delay.setter
     def sleep_activation_delay(self, val: int):
         if val < 1 or val > 255:
-            raise ValueError("Sleep activation value is not supported. Should be between 1 and 255 mA, you have {0}".format(val))
+            raise ValueError(
+                "Sleep activation value is not supported. Should be between 1 and 255 mA, you have {0}".format(
+                    val
+                )
+            )
         Object(0xE0C3).write(bytes([val]))
 
     @property
@@ -133,7 +155,11 @@ class Chip:
     @global_lifecycle_state.setter
     def global_lifecycle_state(self, val: str):
         if val not in lifecycle_states.values():
-            raise ValueError("Wrong lifecycle state. Expected {0}, your provided {1}".format(lifecycle_states, val))
+            raise ValueError(
+                "Wrong lifecycle state. Expected {0}, your provided {1}".format(
+                    lifecycle_states, val
+                )
+            )
         for _, state in lifecycle_states.items():
             if state == val:
                 Object(0xE0C0).write(bytes(state))
@@ -227,18 +253,45 @@ class Chip:
     def __str__(self):
         header = "=============================================="
         top = "Guessed chip name: {0}\n".format(self.name)
-        fw_id = "{0:<30}{1:^10}:{2}\n".format("Firmware Identifier", "[dwFirmwareIdentifier]", self.uid.fw_id)
+        fw_id = "{0:<30}{1:^10}:{2}\n".format(
+            "Firmware Identifier", "[dwFirmwareIdentifier]", self.uid.fw_id
+        )
         fw_build = "{0:<30}{1:^10}:{2}\n".format("Build Number", "[rgbESWBuild]", self.uid.fw_build)
-        current_limit = "{0:<30}{1:^10}:{2}\n".format("Current Limitation", "[OID: 0xE0C4]", hex(self.current_limit))
-        sleep_delay = "{0:<30}{1:^10}:{2}\n".format("Sleep Activation Delay", "[OID: 0xE0C3]", hex(self.sleep_activation_delay))
-        lcsg = "{0:<30}{1:^10}:{2}\n".format("Global Lifecycle State", "[OID: 0xE0C0]", self.global_lifecycle_state)
-        sec_status = "{0:<30}{1:^10}:{2}\n".format("Security Status", "[OID: 0xE0C1]", hex(self.security_status))
-        sec_counter = "{0:<30}{1:^10}:{2}\n".format("Security Event Counter", "[OID: 0xE0C5]", hex(self.security_event_counter))
+        current_limit = "{0:<30}{1:^10}:{2}\n".format(
+            "Current Limitation", "[OID: 0xE0C4]", hex(self.current_limit)
+        )
+        sleep_delay = "{0:<30}{1:^10}:{2}\n".format(
+            "Sleep Activation Delay", "[OID: 0xE0C3]", hex(self.sleep_activation_delay)
+        )
+        lcsg = "{0:<30}{1:^10}:{2}\n".format(
+            "Global Lifecycle State", "[OID: 0xE0C0]", self.global_lifecycle_state
+        )
+        sec_status = "{0:<30}{1:^10}:{2}\n".format(
+            "Security Status", "[OID: 0xE0C1]", hex(self.security_status)
+        )
+        sec_counter = "{0:<30}{1:^10}:{2}\n".format(
+            "Security Event Counter", "[OID: 0xE0C5]", hex(self.security_event_counter)
+        )
 
-        return header + top + fw_id + fw_build + current_limit + sleep_delay + lcsg + sec_status + sec_counter
+        return (
+            header
+            + top
+            + fw_id
+            + fw_build
+            + current_limit
+            + sleep_delay
+            + lcsg
+            + sec_status
+            + sec_counter
+        )
 
 
-lifecycle_states = {0x01: "creation", 0x03: "initialization", 0x07: "operational", 0x0F: "termination"}
+lifecycle_states = {
+    0x01: "creation",
+    0x03: "initialization",
+    0x07: "operational",
+    0x0F: "termination",
+}
 
 _lifecycle_states_swaped = {y: x for x, y in lifecycle_states.items()}
 
@@ -432,7 +485,9 @@ def _parse_version(tag_size, meta_itr):
         is_valid = bool((value >> 15) & 0x01)
         value &= value & 0x7FFF
     else:
-        raise ValueError("Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}".format(tag_size))
+        raise ValueError(
+            "Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}".format(tag_size)
+        )
     return [is_valid, value]
 
 
@@ -445,7 +500,12 @@ def _parse_access_conditions(tag_size, meta_itr):
         if _id in _access_conditions_ids_swaped:
             # Conf, Int, auto and luc have as the last two bytes a reference to the oid used for the expression
             # it is just another OID from the system
-            if _id in (_access_conditions_ids["conf"], _access_conditions_ids["int"], _access_conditions_ids["auto"], _access_conditions_ids["luc"]):
+            if _id in (
+                _access_conditions_ids["conf"],
+                _access_conditions_ids["int"],
+                _access_conditions_ids["auto"],
+                _access_conditions_ids["luc"],
+            ):
                 access_conditions.append(_access_conditions_ids_swaped[_id])
                 access_conditions.append(hex(next(meta_itr)))
                 access_conditions.append(hex(next(meta_itr)))
@@ -472,7 +532,9 @@ def _parse_access_conditions(tag_size, meta_itr):
 def _parse_lifecycle_state(tag_size, meta_itr):
     lcso = next(meta_itr)
     if lcso not in lifecycle_states:
-        raise ValueError("Algorithm tag value {0} not found in supported {1}".format(lcso, lifecycle_states))
+        raise ValueError(
+            "Algorithm tag value {0} not found in supported {1}".format(lcso, lifecycle_states)
+        )
     return lifecycle_states[lcso]
 
 
@@ -498,7 +560,11 @@ def _parse_key_usage(tag_size: int, meta_itr) -> list:
 def _parse_algorithm(tag_size, meta_itr):
     algorithm = next(meta_itr)
     if algorithm not in _algorithms_swaped:
-        raise ValueError("Algorithm tag value {0} not found in supported {1}".format(algorithm, _algorithms_swaped))
+        raise ValueError(
+            "Algorithm tag value {0} not found in supported {1}".format(
+                algorithm, _algorithms_swaped
+            )
+        )
     return _algorithms_swaped[algorithm]
 
 
@@ -530,7 +596,11 @@ def _parse_reset_type(tag_size, meta_itr):
 def _parse_type(tag_size, meta_itr):
     object_type = next(meta_itr)
     if object_type not in _data_object_types_swaped:
-        raise ValueError("Type tag value {0} not found in supported {1}".format(object_type, _data_object_types_swaped))
+        raise ValueError(
+            "Type tag value {0} not found in supported {1}".format(
+                object_type, _data_object_types_swaped
+            )
+        )
     return _data_object_types_swaped[object_type]
 
 
@@ -540,7 +610,9 @@ def _parse_used_max_size(tag_size: int, meta_itr) -> int:
     elif tag_size == 1:
         value = int(next(meta_itr))
     else:
-        raise ValueError("Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}".format(tag_size))
+        raise ValueError(
+            "Tag Size for Max or Used Sizes should be either 2 or 1, you have {0}".format(tag_size)
+        )
     return value
 
 
@@ -582,7 +654,9 @@ def _parse_raw_meta(raw_meta: bytes or bytearray):
 
     """
     if not isinstance(raw_meta, bytes) and not isinstance(raw_meta, bytearray):
-        raise TypeError("Metadata (meta) should be in bytes form, you provided {0}".format(type(raw_meta)))
+        raise TypeError(
+            "Metadata (meta) should be in bytes form, you provided {0}".format(type(raw_meta))
+        )
     meta_tuple = tuple(raw_meta)
     meta_itr = iter(meta_tuple)
     # First byte is always 20
@@ -603,7 +677,9 @@ def _parse_raw_meta(raw_meta: bytes or bytearray):
     if meta_size == 0:
         return None
     if meta_size < 0 or meta_size > 62:
-        raise ValueError("Metadata size can't be less than zero and more than 64. Ou have {0}".format(meta_size))
+        raise ValueError(
+            "Metadata size can't be less than zero and more than 64. Ou have {0}".format(meta_size)
+        )
     meta_parsed = dict()
     try:
         while True:
@@ -613,7 +689,9 @@ def _parse_raw_meta(raw_meta: bytes or bytearray):
                 warnings.warn("Somehow the tag size for {0} was calculated as 0. Skip.".format(tag))
                 return None
             if tag_size < 0:
-                raise ValueError("Metadata size can't be less than zero. Ou have {0}".format(meta_size))
+                raise ValueError(
+                    "Metadata size can't be less than zero. Ou have {0}".format(meta_size)
+                )
             if tag not in _parser_map:
                 raise ValueError("Parser for your tag [{0}] is not found".format(tag))
             meta_parsed[tag] = _parser_map[tag](tag_size, meta_itr)
@@ -641,7 +719,11 @@ def _prepare_access_conditions(key, value: list) -> list:
         elif element in _lifecycle_states_swaped:
             _meta = [_lifecycle_states_swaped[element]]
         elif element not in _access_conditions_ids:
-            raise ValueError("Value for Access Condition isn't found. " "Accepted values {0}, you provided {1}".format(_access_conditions_ids.keys(), element))
+            raise ValueError(
+                "Value for Access Condition isn't found. Accepted values {0}, you provided {1}".format(
+                    _access_conditions_ids.keys(), element
+                )
+            )
         else:
             _meta = [_access_conditions_ids[element]]
         meta += _meta
@@ -656,11 +738,17 @@ def _prepare_key_usage(key, value) -> int and list:
     key_usage = 0
     # the value should be of type list()
     if not isinstance(value, list):
-        raise TypeError("key usage tag should be provided in the form of a list for instance ['x', 'y', 'z']")
+        raise TypeError(
+            "key usage tag should be provided in the form of a list for instance ['x', 'y', 'z']"
+        )
 
     for i in value:
         if i not in _key_usages:
-            raise ValueError("key usage isn't supported. Supported values {0}, you provided {1}".format(_key_usages, i))
+            raise ValueError(
+                "key usage isn't supported. Supported values {0}, you provided {1}".format(
+                    _key_usages, i
+                )
+            )
         key_usage |= _key_usages[i]
 
     meta = [
@@ -677,10 +765,16 @@ def _prepare_reset_type(key, value) -> int and list:
     reset_type = 0
     # the value should be of type list()
     if not isinstance(value, list):
-        raise TypeError("reset type tag should be provided in the form of a list for instance ['x', 'y', 'z']")
+        raise TypeError(
+            "reset type tag should be provided in the form of a list for instance ['x', 'y', 'z']"
+        )
     for i in value:
         if i not in _reset_types:
-            raise ValueError("reset type isn't supported. Supported values {0}, you provided {1}".format(_reset_types, i))
+            raise ValueError(
+                "reset type isn't supported. Supported values {0}, you provided {1}".format(
+                    _reset_types, i
+                )
+            )
         reset_type |= _reset_types[i]
 
     meta = [
@@ -695,7 +789,9 @@ def _prepare_reset_type(key, value) -> int and list:
 def _prepare_lcso(key, value) -> list:
     if value not in _lifecycle_states_swaped:
         raise ValueError(
-            "Value for Lifecycle State meta tag isn't found. " "Accepted values {0}, you provided {1}".format(_lifecycle_states_swaped.keys(), value)
+            "Value for Lifecycle State meta tag isn't found. Accepted values {0}, you provided {1}".format(
+                _lifecycle_states_swaped.keys(), value
+            )
         )
     meta = [
         _meta_tags[key],  # key
@@ -708,7 +804,11 @@ def _prepare_lcso(key, value) -> list:
 
 def _prepare_type(key, value) -> list:
     if value not in _data_object_types:
-        raise ValueError("Value for Type meta tag isn't found. " "Accepted values {0}, you provided {1}".format(_data_object_types.keys(), value))
+        raise ValueError(
+            "Value for Type meta tag isn't found. Accepted values {0}, you provided {1}".format(
+                _data_object_types.keys(), value
+            )
+        )
     meta = [
         _meta_tags[key],  # key
         1,  # size
@@ -723,7 +823,7 @@ def _prepare_meta_and_size(key, value) -> list:
     # key  size  value
     # Used size and max size tags can't be send to the chip, so ignore them with a warning
     if key in ("used_size", "max_size", "algorithm"):
-        logger.warn("Tag '{0}' cannot be defined by a user. Skip.".format(key))
+        logger.warning("Tag '{0}' cannot be defined by a user. Skip.".format(key))
         return list()
     # Parse each key, and construct a
     if key == "type":
@@ -788,7 +888,9 @@ def _prepare_raw_meta(new_meta: dict) -> bytearray:
     # We get as an input a dictionary, which is handy, we go entry by entry and add them correspondingly in the meta
     for key, value in new_meta.items():
         if key not in _meta_tags:
-            raise ValueError("Wrong value. Accepted values: {0}, you provided {1}".format(_meta_tags.keys(), key))
+            raise ValueError(
+                "Wrong value. Accepted values: {0}, you provided {1}".format(_meta_tags.keys(), key)
+            )
         # here we call a global parser for all known keys, as a result we should get a sequence of bytes which will have
         # key[n], size[n], value[n] prepared based on the given key entry (n)
         _meta = _prepare_meta_and_size(key, value)
@@ -894,7 +996,11 @@ class Object:
 
         if force is False:
             if self.id not in self._optiga.object_id_values:
-                raise TypeError("object_id not found. \n\r Supported = {0},\n\r  " "Provided = {1}".format(list(hex(self._optiga.object_id)), self.id))
+                raise TypeError(
+                    "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(
+                        list(hex(self._optiga.object_id)), self.id
+                    )
+                )
 
         return _backend.read_data(self._optiga.api, self.id, offset)
 
@@ -918,7 +1024,11 @@ class Object:
             raise TypeError("data should be bytes type")
 
         if self.id not in self._optiga.object_id_values:
-            raise TypeError("object_id not found. \n\r Supported = {0},\n\r  " "Provided = {1}".format(list(hex(self._optiga.object_id)), self.id))
+            raise TypeError(
+                "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(
+                    list(hex(self._optiga.object_id)), self.id
+                )
+            )
 
         if len(data) > 1700:
             raise ValueError("length of data exceeds the limit of 1700")
@@ -942,7 +1052,9 @@ class Object:
         :returns:
             byte string
         """
-        if (self.id not in self._optiga.object_id_values) and (self.id not in self._optiga.key_id_values):
+        if (self.id not in self._optiga.object_id_values) and (
+            self.id not in self._optiga.key_id_values
+        ):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
                     list(hex(self._optiga.object_id)), list(hex(self._optiga.key_id)), self.id
@@ -966,7 +1078,9 @@ class Object:
         if not isinstance(data, bytes) and not isinstance(data, bytearray):
             raise TypeError("data should be bytes type")
 
-        if (self.id not in self._optiga.object_id_values) and (self.id not in self._optiga.key_id_values):
+        if (self.id not in self._optiga.object_id_values) and (
+            self.id not in self._optiga.key_id_values
+        ):
             raise TypeError(
                 "data_id not found. \n\r Supported = {0} and {1},\n\r  Provided = {2}".format(
                     list(hex(self._optiga.object_id)), list(hex(self._optiga.key_id)), self.id

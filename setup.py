@@ -77,13 +77,18 @@ __classifiers = [
     "Programming Language :: Python",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX :: Linux",
-    "Framework :: Pytest"
+    "Framework :: Pytest",
 ]
 
 # Parameters for setup
 __packages = ["optigatrust", "optigatrust.enums", "optigatrust.rules", "optigatrust.lib"]
 
-__package_data = {"optigatrust": ["*.md"], "optigatrust.lib": ["*.dll", "*.so", "*.ini"], "optigatrust.enums": ["*.xml"], "optigatrust.rules": ["*.rules"]}
+__package_data = {
+    "optigatrust": ["*.md"],
+    "optigatrust.lib": ["*.dll", "*.so", "*.ini"],
+    "optigatrust.enums": ["*.xml"],
+    "optigatrust.rules": ["*.rules"],
+}
 
 __package_root_dir = "src/" + __name
 
@@ -109,7 +114,14 @@ if __name__ == "__main__":
         package_dir=__package_dir,
         package_data=__package_data,
         setup_requires=["setuptools>=40", "wheel"],
-        install_requires=["optigatrust", "asn1crypto", "jinja2", "cryptography", "pyserial", "click"],
+        install_requires=[
+            "optigatrust",
+            "asn1crypto",
+            "jinja2",
+            "cryptography",
+            "pyserial",
+            "click",
+        ],
         python_requires=">=3.5",
         entry_points={
             "console_scripts": [

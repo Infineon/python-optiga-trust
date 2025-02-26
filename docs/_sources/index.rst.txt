@@ -1,128 +1,67 @@
-.. header::
-
-   GUIDELINE
-
-.. footer::
-
-   Created 2021-01-18, 1.0.1
-
 .. toctree::
    :hidden:
 
-   chip
-   metadata
-   crypto
-   csr
-   port
-   linux_support
-   prov_mode
-   copyright
+   Home <self>
+   00_getting_started/index
+   01_features/index
+   02_building/index
 
+***************************************
 OPTIGA™ Trust M Host Library for Python
-=======================================
+***************************************
 
-The ``optigatrust`` python module is a `ctypes`_ based Python wrapper to work with the OPTIGA™ Trust M security solutions.
+The `optigatrust`_ Python module is a `ctypes`_ based Python wrapper for the OPTIGA™ Trust M security solution.
 
 Introduction
 ^^^^^^^^^^^^
 
 This Python module is based on the `OPTIGA™ Trust M Host Library for C`_. The host library is pre-compiled for different communication interfaces and operating systems and integrated via `ctypes`_.
  
-For an overview on the features of the `OPTIGA™ Trust M` security solutions, please also visit the `OPTIGA™ Trust M Overview Repository`_.
+For an overview on the features of the :code:`OPTIGA™ Trust M` security solutions, please also visit the `OPTIGA™ Trust M Overview Repository`_.
 
-Currently, the following combinations of communiation interfaces and and operating systems are supported.
+Currently, the following combinations of communication interfaces and and operating systems are supported.
 
 +--------------+-----------+---------+
 | Interface/OS | Windows   | Linux   |
 +==============+===========+=========+
-| **I2C**      | No        |   Yes   |
+| **I²C**      | No        |   Yes   |
 +--------------+-----------+---------+
 | **UART**     | Yes       |   Yes   |
 +--------------+-----------+---------+
-| **LibUSB**   | Yes       |   Yes   |
+| **libusb**   | Yes       |   Yes   |
 +--------------+-----------+---------+
-
-Required Hardware
-^^^^^^^^^^^^^^^^^
-
-The following hardware is used for the respective communication interfaces
-
-+--------------+-----------------------+-------------------------------------------------------------------------------------------+
-| Interface    | Host Hardware         | Adapter                                                                                   |
-+==============+=======================+===========================================================================================+
-| **I2C**      | `XMC47000 Relax Kit`_ | `My IoT Adapter`_                                                                         |
-+--------------+-----------------------+-------------------------------------------------------------------------------------------+
-| **UART**     | `Raspberry Pi`_       | `Shield2Go Adapter for Raspberry Pi`_                                                     |
-+--------------+-----------------------+-------------------------------------------------------------------------------------------+
-| **LibUSB**   | PC                    | OPTIGA™ Trust Personalisation Board, or any FTDI USB-HID/I2C Converter board              |
-+--------------+-----------------------+-------------------------------------------------------------------------------------------+
-
-I2C
-~~~
-
-This variant is available in combination of host hardware and adapter as OPTIGA™ Trust M1/M3/Charge EvalKit (see :doc:`Provisioning mode <prov_mode>` for details).
-
-UART
-~~~~
-
-This variant is tested with Raspberry Pi 3.
-
-NOTE: *If you use any of the embedded Linux as a Host, please don't forget to enable i2c support in your kernel (RPi3: via `raspi-config` command), as well as add your user to the gpio group (RPi3: via `sudo adduser pi gpio`)
-`RaspberryPi3 Connection Example`_.*
-
-LibUSB
-~~~~~~
-
-This variant can run directly from a normal host (Windows or Linux) and depends on the `LibUSB`_ library.
-
 
 Installation
 ^^^^^^^^^^^^
 
-::
+Install the Python module `optigatrust`_ directly from Python Package Index (PyPI) as follows.
 
-	$ pip install optigatrust
+.. code-block:: console
 
+   python -m pip install optigatrust
 
 Testing
 ^^^^^^^
 
-Tests are written using `pytest` and `oscrypto` and require these packages to be installed: ::
+The Python module tests can be run as follows.
 
-	$ pip3 install pytest oscrypto
-	$ git clone --recurse-submodules https://github.com/Infineon/python-optiga-trust
-	...
-	$ cd python-optiga-trust
-	$ cd tests
-	$ pytest
+.. code-block:: console
 
+   python -m pip install -r tests/requirements.txt
+   python -m pytest tests
 
-To run only some tests, pass a regular expression as a parameter to `tests`. ::
+To run only some tests, pass a regular expression as a parameter to `tests`.
 
-	$ pytest test_rand.py
+.. code-block:: console
 
-
+   python -m pytest tests/test_rand.py
 
 Dependencies
 ^^^^^^^^^^^^
 
  - Python 3.7+
- - CSR and X509 Handling - asn1crypto_
- - For tests - oscrypto_, cryptography_
- - XML handling in export module jinja2_
- - Keys wrap/unwrap operations cryptography_
+ - Cryptographic operations: cryptography_
+ - CSR and X509 Handling: asn1crypto_
+ - XML handling in export module: jinja2_
 
-.. _asn1crypto: https://github.com/wbond/asn1crypto
-.. _oscrypto: https://github.com/wbond/oscrypto
-.. _jinja2: https://jinja.palletsprojects.com/en/2.11.x/
-.. _cryptography: https://github.com/pyca/cryptography
-.. _ctypes: https://docs.python.org/3/library/ctypes.html
-.. _LibUSB: https://libusb.info/
-
-.. _RaspberryPi3 Connection Example: https://github.com/Infineon/Assets/raw/master/Pictures/optiga_trust_x_rpi3_setup.jpg
-.. _Shield2Go Adapter for Raspberry Pi: https://www.infineon.com/cms/en/product/evaluation-boards/s2go-adapter-rasp-pi-iot/
-.. _My IoT Adapter: https://www.infineon.com/cms/en/product/evaluation-boards/my-iot-adapter/
-.. _OPTIGA™ Trust M Overview Repository: https://github.com/Infineon/optiga-trust-m-overview
-.. _OPTIGA™ Trust M Host Library for C: https://github.com/Infineon/optiga-trust-m/
-.. _XMC47000 Relax Kit: https://www.infineon.com/cms/de/product/evaluation-boards/kit_xmc47_relax_v1/
-.. _Raspberry Pi: https://www.raspberrypi.com/
+ .. include:: references.rst

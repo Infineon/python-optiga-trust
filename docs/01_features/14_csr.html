@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificate Signing Request (CSR) &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Export or import chip metadata" href="15_port.html" />
+    <link rel="prev" title="Cryptographic operations" href="13_crypto.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../00_getting_started/index.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/02_prov_mode.html">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Features</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="11_chip.html">Chip settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12_metadata.html">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="15_port.html">Export or import chip metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="20_error_codes.html">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../02_building/index.html">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Features</a></li>
+      <li class="breadcrumb-item active">Certificate Signing Request (CSR)</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="13_crypto.html" class="btn btn-neutral float-left" title="Cryptographic operations" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="15_port.html" class="btn btn-neutral float-right" title="Export or import chip metadata" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="certificate-signing-request-csr">
+<h1>Certificate Signing Request (CSR)<a class="headerlink" href="#certificate-signing-request-csr" title="Link to this heading"></a></h1>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span><span class="p">,</span> <span class="n">crypto</span>
+<span class="kn">from</span> <span class="nn">optigatrust.csr</span> <span class="kn">import</span> <span class="n">CSRBuilder</span>
+
+<span class="n">csr_key_obj</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">ECCKey</span><span class="p">(</span><span class="mh">0xe0f3</span><span class="p">)</span>
+
+<span class="n">builder</span> <span class="o">=</span> <span class="n">CSRBuilder</span><span class="p">(</span>
+            <span class="p">{</span>
+                    <span class="s1">&#39;country_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DE&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;state_or_province_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Bayern&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;organization_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Infineon Technologies AG&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;common_name&#39;</span><span class="p">:</span> <span class="s1">&#39;OPTIGA(TM) Trust IoT&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">pkey</span>
+    <span class="p">)</span>
+
+<span class="n">builder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">csr_key_obj</span><span class="p">)</span>
+
+<span class="c1"># or RSA</span>
+
+<span class="n">csr_key_obj</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">RSAKey</span><span class="p">(</span><span class="mh">0xe0fc</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">csr_key_obj</span><span class="p">)</span>
+<span class="n">pkey</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">.</span><span class="n">generate_pair</span><span class="p">(</span><span class="n">key_object</span><span class="o">=</span><span class="n">csr_key_obj</span><span class="p">,</span> <span class="n">key_size</span><span class="o">=</span><span class="n">ki</span><span class="p">)</span>
+
+<span class="n">builder</span> <span class="o">=</span> <span class="n">CSRBuilder</span><span class="p">(</span>
+            <span class="p">{</span>
+                    <span class="s1">&#39;country_name&#39;</span><span class="p">:</span> <span class="s1">&#39;DE&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;state_or_province_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Bayern&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;organization_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Infineon Technologies AG&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;common_name&#39;</span><span class="p">:</span> <span class="s1">&#39;OPTIGA(TM) Trust IoT&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+            <span class="n">pkey</span>
+    <span class="p">)</span>
+
+<span class="n">builder</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">csr_key_obj</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="module-optigatrust.csr">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-optigatrust.csr" title="Link to this heading"></a></h2>
+<p>This module implements all Certificate Signing Request related APIs of the optigatrust package</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="optigatrust.csr.pem_armor_csr">
+<span class="sig-prename descclassname"><span class="pre">optigatrust.csr.</span></span><span class="sig-name descname"><span class="pre">pem_armor_csr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">certification_request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.csr.pem_armor_csr" title="Link to this definition"></a></dt>
+<dd><p>Encodes a CSR into PEM format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>certification_request</strong> – An asn1crypto.csr.CertificationRequest object of the CSR to armor. Typically this
+is obtained from <a class="reference internal" href="#optigatrust.csr.CSRBuilder.build" title="optigatrust.csr.CSRBuilder.build"><code class="xref py py-func docutils literal notranslate"><span class="pre">build()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A byte string of the PEM-encoded CSR</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.csr.</span></span><span class="sig-name descname"><span class="pre">CSRBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subject</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subject_public_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.csr.CSRBuilder" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signing_key</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.build" title="Link to this definition"></a></dt>
+<dd><p>Validates the certificate information, constructs an X.509 certificate and then signs it :param signing_key: An
+asn1crypto.keys.PrivateKeyInfo object for the private key to sign the request with. This should be the private
+key that matches the public key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>An asn1crypto.csr.CertificationRequest object of the request</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.ca">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ca</span></span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.ca" title="Link to this definition"></a></dt>
+<dd><p>None or a bool - if the request is for a CA cert. None indicates no
+basic constraints extension request.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.extended_key_usage">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">extended_key_usage</span></span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.extended_key_usage" title="Link to this definition"></a></dt>
+<dd><p>A set of unicode strings representing the allowed usage of the key from
+the extended key usage extension. Empty set indicates no extended key
+usage extension request.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.key_usage">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">key_usage</span></span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.key_usage" title="Link to this definition"></a></dt>
+<dd><p>A set of unicode strings representing the allowed usage of the key.
+Empty set indicates no key usage extension request.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.set_extension">
+<span class="sig-name descname"><span class="pre">set_extension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.set_extension" title="Link to this definition"></a></dt>
+<dd><p>Sets the value for an extension using a fully constructed Asn1Value object from asn1crypto. Normally this should
+not be needed, and the convenience attributes should be sufficient. See the definition of
+asn1crypto.x509.Extension to determine the appropriate object type for a given extension. Extensions are marked
+as critical when RFC5280 or RFC6960 indicate so. If an extension is validly marked as critical or not
+(such as certificate policies and extended key usage), this class will mark it as non-critical.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – A unicode string of an extension id name from asn1crypto.x509.ExtensionId</p></li>
+<li><p><strong>value</strong> – A value object per the specs defined by asn1crypto.x509.Extension</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.subject_alt_domains">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subject_alt_domains</span></span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.subject_alt_domains" title="Link to this definition"></a></dt>
+<dd><p>A list of unicode strings of all domains in the subject alt name
+extension request. Empty list indicates no subject alt name extension
+request.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.csr.CSRBuilder.subject_alt_ips">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">subject_alt_ips</span></span><a class="headerlink" href="#optigatrust.csr.CSRBuilder.subject_alt_ips" title="Link to this definition"></a></dt>
+<dd><p>A list of unicode strings of all IPs in the subject alt name extension
+request. Empty list indicates no subject alt name extension request.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="13_crypto.html" class="btn btn-neutral float-left" title="Cryptographic operations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="15_port.html" class="btn btn-neutral float-right" title="Export or import chip metadata" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

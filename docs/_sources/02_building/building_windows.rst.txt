@@ -1,0 +1,4 @@
+Windows
+~~~~~~~
+
+To build the OPTIGA™ Trust Host Library for C, Microsoft Visual Studio 2022 is needed. The solution for the project is located in :code:`extras/optiga-trust-m`.

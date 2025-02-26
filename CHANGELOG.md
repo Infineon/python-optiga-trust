@@ -3,7 +3,29 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Semantic
+Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 1.5.0 (2025-02-25)
+
+### Added
+- Support for new OPTIGA™ Trust M v3 firmware version v3.02.2564
+- New CLI feature: chipinfo readout
+- New CLI feature: interface parameter for interface selection
+- Support for I²C via gpiod
+- Example for signature creation and verification with Infineon pre-provisioned
+  key pair and certificate
+
+### Changed
+- Updated documentation: 
+    - Move to Infineon theme
+    - Move to mikroBUS™ shields as preferred setup
+    - General improvements and fixes
+- Completely removed `oscrypto` from project in favor of `cryptography` package
+- Updated Python package dependencies to latest versions
+
+### Fixed
+- Fixed an issue when importing a DER formatted x.509 certificate
 
 ## 1.4.3 (2024-11-29)
 
@@ -18,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Removed .reuse/dep5
 - Cleaned setup.py
-- Date of relese 1.4.1 fixed
+- Date of release 1.4.1 fixed
 
 ## 1.4.1 (2024-08-29)
 
@@ -32,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - [Reuse](https://reuse.software/) compliancy
-- [Download script](extras/optiga-trust-m/download_libusb_windows.bat) for the download of LibUSB library and header for Windows
+- [Download script](extras/optiga-trust-m/download_libusb_windows.bat) for the
+  download of LibUSB library and header for Windows
 
 ### Changed
 - Moved to optiga-trust-m host library v5.x.x

@@ -3,9 +3,10 @@
 
 import pytest
 import os
-from oscrypto.asymmetric import rsa_pkcs1v15_verify, load_public_key
-from oscrypto.errors import SignatureError
-from asn1crypto import keys
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric import padding
 
 from optigatrust import objects, crypto
 
@@ -140,50 +141,56 @@ def test_rsassa_2k_sha384():
 
 def test_1k_signverify():
     k1, k2 = setup_keys_1k()
-    ha = "sha256"
-    s = crypto.pkcs1v15_sign(k1, pytest.tbs_str)
-    # print('[{}]'.format(', '.join(hex(x) for x in list(s.signature))))
+    hash_name = "sha256"
 
-    pubkey_info = keys.PublicKeyInfo.load(pytest.onek)
+    # Create signature
+    signature = crypto.pkcs1v15_sign(k1, pytest.tbs_str).signature
 
-    # Load a public key into the oscrypto engine to using it in the verify function
-    public = load_public_key(pubkey_info)
-
-    rsa_pkcs1v15_verify(public, s.signature, pytest.tbs_str, ha)
+    # Verify signature with cryptography package
+    cryptography_public_key = serialization.load_der_public_key(pytest.onek)
+    cryptography_public_key.verify(
+        signature, pytest.tbs_str, padding.PKCS1v15(), crypto._hash_map[hash_name][2]
+    )
 
     # Assert wrong text
-    with pytest.raises(SignatureError):
-        rsa_pkcs1v15_verify(public, s.signature, pytest.tbs_str_fail, ha)
+    with pytest.raises(InvalidSignature):
+        cryptography_public_key.verify(
+            signature, pytest.tbs_str_fail, padding.PKCS1v15(), crypto._hash_map[hash_name][2]
+        )
 
     # Assert wrong key
-    with pytest.raises(SignatureError):
-        pubkey_info = keys.PublicKeyInfo.load(pytest.onek_fail)
-        public = load_public_key(pubkey_info)
-        rsa_pkcs1v15_verify(public, s.signature, pytest.tbs_str, ha)
+    with pytest.raises(InvalidSignature):
+        cryptography_public_key = serialization.load_der_public_key(pytest.onek_fail)
+        cryptography_public_key.verify(
+            signature, pytest.tbs_str, padding.PKCS1v15(), crypto._hash_map[hash_name][2]
+        )
 
 
 def test_2k_signverify():
     k1, k2 = setup_keys_2k()
-    ha = "sha256"
-    s = crypto.pkcs1v15_sign(k1, pytest.tbs_str)
-    print("[{}]".format(", ".join(hex(x) for x in list(s.signature))))
+    hash_name = "sha256"
 
-    pubkey_info = keys.PublicKeyInfo.load(pytest.twok)
+    # Create signature
+    signature = crypto.pkcs1v15_sign(k1, pytest.tbs_str).signature
 
-    # Load a public key into the oscrypto engine to using it in the verify function
-    public = load_public_key(pubkey_info)
-
-    rsa_pkcs1v15_verify(public, s.signature, pytest.tbs_str, ha)
+    # Verify signature with cryptography package
+    cryptography_public_key = serialization.load_der_public_key(pytest.twok)
+    cryptography_public_key.verify(
+        signature, pytest.tbs_str, padding.PKCS1v15(), crypto._hash_map[hash_name][2]
+    )
 
     # Assert wrong text
-    with pytest.raises(SignatureError):
-        rsa_pkcs1v15_verify(public, s.signature, pytest.tbs_str_fail, ha)
+    with pytest.raises(InvalidSignature):
+        cryptography_public_key.verify(
+            signature, pytest.tbs_str_fail, padding.PKCS1v15(), crypto._hash_map[hash_name][2]
+        )
 
     # Assert wrong key
-    with pytest.raises(SignatureError):
-        pubkey_info = keys.PublicKeyInfo.load(pytest.twok_fail)
-        public = load_public_key(pubkey_info)
-        rsa_pkcs1v15_verify(public, s.signature, pytest.tbs_str, ha)
+    with pytest.raises(InvalidSignature):
+        cryptography_public_key = serialization.load_der_public_key(pytest.twok_fail)
+        cryptography_public_key.verify(
+            signature, pytest.tbs_str, padding.PKCS1v15(), crypto._hash_map[hash_name][2]
+        )
 
 
 def test_rsassa_nonkey_2():
@@ -242,7 +249,9 @@ def test_pkcs1v15_encrypt_1024_oid_fail():
     cert_obj_id = 0xE0EF
     new_cert = optiga.Object(cert_obj_id)
     old_content = new_cert.read()
-    with open(os.path.join(pytest.test_dir, "fixtures/test-rsa1024-corrupted-example-cert.crt"), "rb") as f:
+    with open(
+        os.path.join(pytest.test_dir, "fixtures/test-rsa1024-corrupted-example-cert.crt"), "rb"
+    ) as f:
         der_bytes = f.read()
         new_cert.write(der_bytes)
     with pytest.raises(OSError):
@@ -254,7 +263,9 @@ def test_pkcs1v15_encrypt_2048_oid_fail():
     cert_obj_id = 0xE0EF
     new_cert = optiga.Object(cert_obj_id)
     old_content = new_cert.read()
-    with open(os.path.join(pytest.test_dir, "fixtures/test-rsa2048-corrupted-example-cert.crt"), "rb") as f:
+    with open(
+        os.path.join(pytest.test_dir, "fixtures/test-rsa2048-corrupted-example-cert.crt"), "rb"
+    ) as f:
         der_bytes = f.read()
         new_cert.write(der_bytes)
     with pytest.raises(OSError):

@@ -9,8 +9,18 @@ import optigatrust.crypto as optiga_crypto
 @pytest.mark.parametrize(
     "password, salt, iterations, output",
     [
-        (b"password", b"salt", 1, "120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b"),
-        (b"password", b"salt", 2, "ae4d0c95af6b46d32d0adff928f06dd02a303f8ef3c251dfd6e2d85a95474c43"),
+        (
+            b"password",
+            b"salt",
+            1,
+            "120fb6cffcf8b32c43e7225256c4f837a86548c92ccc35480805987cb70be17b",
+        ),
+        (
+            b"password",
+            b"salt",
+            2,
+            "ae4d0c95af6b46d32d0adff928f06dd02a303f8ef3c251dfd6e2d85a95474c43",
+        ),
     ],
 )
 def test_pbkdf2_sha256(password, salt, iterations, output):

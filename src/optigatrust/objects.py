@@ -78,10 +78,18 @@ class ECCKey(optiga.Object):
 
         id_ref = self._optiga.key_id
         if (
-            key_id not in (id_ref.ECC_KEY_E0F0.value, id_ref.ECC_KEY_E0F1.value, id_ref.ECC_KEY_E0F2.value, id_ref.ECC_KEY_E0F3.value)
+            key_id
+            not in (
+                id_ref.ECC_KEY_E0F0.value,
+                id_ref.ECC_KEY_E0F1.value,
+                id_ref.ECC_KEY_E0F2.value,
+                id_ref.ECC_KEY_E0F3.value,
+            )
             and key_id not in self._optiga.session_id_values
         ):
-            raise ValueError("Your key_id {0} can't be sued to generate an ECC Key".format(hex(key_id)))
+            raise ValueError(
+                "Your key_id {0} can't be used to generate an ECC Key".format(hex(key_id))
+            )
         try:
             self.curve = self.meta["algorithm"]
         except (KeyError, TypeError):
@@ -96,7 +104,11 @@ class RSAKey(optiga.Object):
 
     def __init__(self, key_id: int):
         if key_id not in (0xE0FC, 0xE0FD):
-            raise ValueError("key_id isn't supported should be either 0xe0fc, or 0xe0fd, you provided {0}".format(hex(key_id)))
+            raise ValueError(
+                "key_id isn't supported should be either 0xe0fc, or 0xe0fd, you provided {0}".format(
+                    hex(key_id)
+                )
+            )
         self.key_size = None
         super().__init__(key_id)
 
@@ -139,20 +151,40 @@ class X509(optiga.Object):
         self._der = self._read()
 
     def __str__(self):
-        header = "================== Certificate Object [{0}] ==================\n".format(hex(self.id))
+        header = "================== Certificate Object [{0}] ==================\n".format(
+            hex(self.id)
+        )
         lcso = "{0:<30}:{1}\n".format("Lifecycle State", self.meta["lcso"])
         size = "{0:<30}:{1}\n".format("Size", self.meta["used_size"])
         read = "{0:<30}:{1}\n".format("Access Condition: Read", self.meta["read"])
         change = "{0:<30}:{1}\n".format("Access Conditions: Change", self.meta["change"])
-        _pem = "{0:<30}:\n{1}\n".format("PEM", str(self.pem).replace("\\n", "\n").replace("\\t", "\t"))
+        _pem = "{0:<30}:\n{1}\n".format(
+            "PEM", str(self.pem).replace("\\n", "\n").replace("\\t", "\t")
+        )
         cert = asn1_x509.Certificate.load(self.der)
         tbs_certificate = cert["tbs_certificate"]
-        issuer_cn = "{0:<30}:{1}\n".format("Issuer: Common Name", tbs_certificate["issuer"].native["common_name"])
-        subject_cn = "{0:<30}:{1}\n".format("Subject: Common Name", tbs_certificate["subject"].native["common_name"])
+        issuer_cn = "{0:<30}:{1}\n".format(
+            "Issuer: Common Name", tbs_certificate["issuer"].native["common_name"]
+        )
+        subject_cn = "{0:<30}:{1}\n".format(
+            "Subject: Common Name", tbs_certificate["subject"].native["common_name"]
+        )
         pkey = "{0:<30}:{1}\n".format("Public Key", self.pkey)
         signature = "{0:<30}:{1}\n".format("Signature", self.signature)
         footer = "============================================================"
-        return header + lcso + size + read + change + _pem + issuer_cn + subject_cn + pkey + signature + footer
+        return (
+            header
+            + lcso
+            + size
+            + read
+            + change
+            + _pem
+            + issuer_cn
+            + subject_cn
+            + pkey
+            + signature
+            + footer
+        )
 
     @property
     def der(self):
@@ -194,7 +226,9 @@ class X509(optiga.Object):
 
             return subject_public_key
         except TypeError as fail_to_parse:
-            raise TypeError("Failed to parse the certificate. It's either empty or not supported.") from fail_to_parse
+            raise TypeError(
+                "Failed to parse the certificate. It's either empty or not supported."
+            ) from fail_to_parse
 
     @property
     def signature(self):
@@ -206,7 +240,9 @@ class X509(optiga.Object):
             cert = asn1_x509.Certificate.load(self.der)
             return cert["signature_value"].native.hex()
         except TypeError as fail_to_parse:
-            raise TypeError("Failed to parse the certificate. It's either empty or not supported.") from fail_to_parse
+            raise TypeError(
+                "Failed to parse the certificate. It's either empty or not supported."
+            ) from fail_to_parse
 
     def _update(self, cert: str or bytes or bytearray):
         """
@@ -233,18 +269,47 @@ class X509(optiga.Object):
             oids.DATA_SLOT_1500B_1.value,
         )
         if self.id not in _supported_objects:
-            raise ValueError("Object ID is not one of supported {0}".format([hex(i) for i in _supported_objects]))
+            raise ValueError(
+                "Object ID is not one of supported {0}".format([hex(i) for i in _supported_objects])
+            )
 
-        if not isinstance(cert, str) and not isinstance(cert, bytes) and not isinstance(cert, bytearray):
+        if (
+            not isinstance(cert, str)
+            and not isinstance(cert, bytes)
+            and not isinstance(cert, bytearray)
+        ):
             raise TypeError("Bad certificate type should be either bytes, bytes string, or string")
 
         if isinstance(cert, str):
             cert = str.encode(cert)
 
-        _, _, der_cert = asn1_pem.unarmor(cert)
+        der_cert = None
+        # Check if certificate is DER encoded
+        if cert[0] == 0x30:
+            der_cert = cert
+
+        # Check if certificate is PEM encoded
+        try:
+            cert_str = cert.decode("utf-8")
+            if (
+                "-----BEGIN CERTIFICATE-----" in cert_str
+                and "-----END CERTIFICATE-----" in cert_str
+            ):
+                _, _, der_cert = asn1_pem.unarmor(cert)
+        except UnicodeDecodeError:
+            pass
+
+        if der_cert is None:
+            raise ValueError(
+                "Certificate format could not be determined:\n{0}".format(util.binary_to_hex(cert))
+            )
 
         if der_cert[0] != 0x30:
-            raise ValueError("Incorrect Certificate " "Should start with 0x30 your starts with {0}".format(der_cert[0]))
+            raise ValueError(
+                "Incorrect Certificate Should start with 0x30 your starts with {0}".format(
+                    der_cert[0]
+                )
+            )
 
         # Append tags
         # [len_byte_2, len_byte_1, len_byte_0] including the certificate and two lengths
@@ -283,7 +348,11 @@ class X509(optiga.Object):
         oid = self._optiga.object_id
 
         if self.id not in self._optiga.object_id_values:
-            raise ValueError("Certificate Slot is not correct. " "Supported values are {0} class you used {1}".format(self._optiga.object_id_values, self.id))
+            raise ValueError(
+                "Certificate Slot is not correct. Supported values are {0} class you used {1}".format(
+                    self._optiga.object_id_values, self.id
+                )
+            )
         _supported_objects = (
             oid.IFX_CERT.value,
             oid.USER_CERT_1.value,
@@ -295,7 +364,9 @@ class X509(optiga.Object):
             oid.DATA_SLOT_1500B_1.value,
         )
         if self.id not in _supported_objects:
-            raise ValueError("Object ID is not one of supported {0}".format([hex(i) for i in _supported_objects]))
+            raise ValueError(
+                "Object ID is not one of supported {0}".format([hex(i) for i in _supported_objects])
+            )
 
         der_cert = self.read()
 

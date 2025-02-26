@@ -1,0 +1,39 @@
+# Error codes
+
+The possible error codes returned from the security chip are listed in Table below (for more details please refer to the
+[Solution Reference
+Manual](https://github.com/Infineon/optiga-trust-m-overview/blob/main/docs/OPTIGA%E2%84%A2%20Trust%20M%20Solution%20Reference%20Manual.md).
+If multiple commands happen to produce subsequent errors then only the highest-numbered error code is stored.
+
+**Note:** The error code will be returned in the following form: **0x8001**, where the last byte corresponds to the error
+code in the table below, in this case "Invalid Object ID".
+
+
+| Field         | Code  | Description |
+| ------------- |:-----:| ----------- |
+| No error            | 0x00  | No Error |
+| Invalid OID         | 0x01  |  Invalid OID |
+| Invalid Password    | 0x02  |  Invalid Password |
+| Invalid Param field | 0x03  | Invalid Param field in command |
+| Invalid length field| 0x04  | Invalid Length field in command|
+| Invalid parameter in data field|  0x05|  Invalid parameter in command data field|
+| Internal process error|  0x06| Internal process error|
+| Access conditions not satisfied|  0x07|  Access conditions are not satisfied|
+| Data object boundary exceeded|  0x08|  The sum of offset and data provided (offset + data length) exceeds the max length of the data object|
+| Metadata truncation error| 0x09 |  Metadata truncation error|
+| Invalid command field|  0x0A |  Invalid command field |
+| Command out of sequence|  0x0B|  Command or message out of sequence. Command out of sequence means that the command which expected to use certain resources are not available or not started at chip e.g. invoking the `optiga_crypt_tls_prf_sha256()` function (which is using session) before invoking the `optiga_crypt_ecdh()` function. Another example is a usage of the `optiga_crypt_ecdh()` and `optiga_crypt_tls_prf_sha256()` functions in the row using the Session OID without `optiga_crypt_ecc_generate_keypair()`, this leads to failure "of out of sequence" due to a lack of private key in Session OID slot|
+| Command not available|  0x0C|<ul><li>due to termination state of the application</li><li>due to Application closed</li></ul> |
+|Insufficient buffer/ memory| 0x0D| Insufficient memory to process the command APDU|
+|Counter threshold limit exceeded| 0x0E| Counter value crossed the threshold limit and further counting is denied.|
+|Invalid Manifest| 0x0F | <ul><li> The Manifest version provided is not supported or the Payload Version in Manifest has MSB set (Invalid Flag=1).</li><li> Invalid or un-supported manifest values or formats including CBOR parsing errors. </li>|
+|Invalid/Wrong Payload Version | 0x10| The Payload Version provided in the Manifest is not greater than the version of the target object, or the last update was interrupted and the restarted/retried update has not the same version|
+|Invalid metadata of the key/data object | 0x11| A command is acting on metadata for key or data objects and the current metadata are invalid|
+|Unsupported extension/identifier |0x24| <ul><li>An unsupported extension found in the message</li><li>Unsupported keyusage/Algorithm extension/identifier for the usage of Private key</li></ul> |
+|Unsupported parameters |0x25| <ul><li>At least one parameter received in the handshake message is not supported</li><li>Unsupported parameter in the command APDU InData</li></ul> |
+|Invalid certificate format| 0x29 |Invalid certificate(s) in certificate message with the following reasons. <ul><li> Invalid format</li> <li>Invalid chain of certificates</li> <li>Signature verification failure</li></ul>
+|Unsupported certificate algorithm |0x2A| At least one cryptographic algorithm specified in the certificate is not supported (e.g. hash or sign algorithms).|
+|Signature verification failure| 0x2C| Signature verification failure.|
+|Integrity validation failure| 0x2D| Message Integrity validation failure (e.g. during CCM decryption).|
+|Decryption Failure| 0x2E| Decryption Failure. |
+|Authorization failure| 0x2F| Session random comparison failure or HMAC verification failure |

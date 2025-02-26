@@ -1,0 +1,12 @@
+********************************
+Hardware
+********************************
+
+This chapter describes the needed hardware to use this Python package.
+
+.. toctree::
+    :hidden:
+    :maxdepth: 1
+
+    01_hardware.rst
+    02_prov_mode.rst

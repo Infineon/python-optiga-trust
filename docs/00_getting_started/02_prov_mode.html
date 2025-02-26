@@ -1,0 +1,176 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enabling the provisioning mode for UART-to-I²C bridge &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Features" href="../01_features/index.html" />
+    <link rel="prev" title="Overview on hardware variants" href="01_hardware.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Hardware</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../01_features/index.html">Features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/11_chip.html">Chip settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/12_metadata.html">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/14_csr.html">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/15_port.html">Export or import chip metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../01_features/20_error_codes.html">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../02_building/index.html">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Hardware</a></li>
+      <li class="breadcrumb-item active">Enabling the provisioning mode for UART-to-I²C bridge</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="01_hardware.html" class="btn btn-neutral float-left" title="Overview on hardware variants" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../01_features/index.html" class="btn btn-neutral float-right" title="Features" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="enabling-the-provisioning-mode-for-uart-to-i2c-bridge">
+<h1>Enabling the provisioning mode for UART-to-I²C bridge<a class="headerlink" href="#enabling-the-provisioning-mode-for-uart-to-i2c-bridge" title="Link to this heading"></a></h1>
+<section id="optiga-trust-m-with-psoc-6-evaluation-kits">
+<h2>OPTIGA™ Trust M with PSOC™ 6 evaluation kits<a class="headerlink" href="#optiga-trust-m-with-psoc-6-evaluation-kits" title="Link to this heading"></a></h2>
+<p>To use the OPTIGA™ Trust Host Library for Python in combination with any OPTIGA™ Trust M device and a supported PSOC™ 6 evaluation kit, follow
+the instructions at <a class="reference external" href="https://github.com/Infineon/mtb-example-optiga-data-management">ModusToolbox™ example application for OPTIGA™ Trust M data management</a> to activate the provisioning mode on PSOC™ 6.</p>
+<p>As an example, see the following combination of <a class="reference external" href="https://www.infineon.com/cms/en/product/evaluation-boards/cy8ckit-062s2-43012/">PSOC™ 62S2 Wi-Fi BT Pioneer Kit</a>, <a class="reference external" href="https://www.infineon.com/cms/en/product/evaluation-boards/optiga-trust-adapter/">OPTIGA™ Trust Adapter</a> and an  OPTIGA™ Trust M sample.</p>
+<a class="reference internal image-reference" href="../_images/psoc62_matter_kit.png"><img alt="PSOC™ 62S2 Wi-Fi BT Pioneer Kit with OPTIGA™ Trust M Shield." class="align-center" src="../_images/psoc62_matter_kit.png" style="width: 500px;" />
+</a>
+<ol class="arabic simple">
+<li><p>Create a new ModusToolbox™ project via the “New Application” button.</p></li>
+<li><p>Select <code class="code docutils literal notranslate"><span class="pre">CY8CKIT-062S2-43012</span></code> as BSP and press “Next”.</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/psoc_prov_mode_bsp.png"><img alt="../_images/psoc_prov_mode_bsp.png" class="align-center" src="../_images/psoc_prov_mode_bsp.png" style="width: 650px;" />
+</a>
+<ol class="arabic simple" start="3">
+<li><p>Select the <code class="code docutils literal notranslate"><span class="pre">OPTIGA™</span> <span class="pre">Trust</span> <span class="pre">M</span> <span class="pre">Data</span> <span class="pre">and</span> <span class="pre">Certificates</span> <span class="pre">Management</span></code> example and click on “Create”</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/psoc_prov_mode_project.png"><img alt="../_images/psoc_prov_mode_project.png" class="align-center" src="../_images/psoc_prov_mode_project.png" style="width: 650px;" />
+</a>
+<ol class="arabic simple" start="4">
+<li><p>Flash and launch the program.</p></li>
+</ol>
+</section>
+<section id="optiga-trust-m-with-xmc4700-relax-kit">
+<h2>OPTIGA™ Trust M with XMC4700 Relax Kit<a class="headerlink" href="#optiga-trust-m-with-xmc4700-relax-kit" title="Link to this heading"></a></h2>
+<p>Prerequisite: Make sure you have SEGGER J-FLash Lite installed:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.segger.com/downloads/jlink/#J-LinkSoftwareAndDocumentationPack">Download J-Link Software and Documentation pack</a></p></li>
+</ul>
+<ol class="arabic simple">
+<li><p>Make sure you have connected your Evaluation Kit as depicted below (USB Port <strong>X1002</strong>)</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/xmc4700_relax_kit_programming_mode.jpg"><img alt="../_images/xmc4700_relax_kit_programming_mode.jpg" class="align-center" src="../_images/xmc4700_relax_kit_programming_mode.jpg" style="width: 500px;" />
+</a>
+<ol class="arabic simple" start="2">
+<li><p>Start SEGGER J-FLash Lite.</p></li>
+<li><p>Click on Device to select a target device: Select Infineon as “Manufacturer” and XMC4700-2048 as “Device”, and then click “OK”.</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/j-flash_lite_device_selection.png"><img alt="../_images/j-flash_lite_device_selection.png" class="align-center" src="../_images/j-flash_lite_device_selection.png" style="width: 500px;" />
+</a>
+<ol class="arabic simple" start="4">
+<li><p>Select <a class="reference external" href="../_static/optiga_trust_charge_evalkit_uart_python.hex">xmc4700 hex file</a> (right click, Save) to be flashed under “Data File” and click on “Program Device”. It then shows the programming progress window.</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/j-flash_lite_flash.png"><img alt="../_images/j-flash_lite_flash.png" class="align-center" src="../_images/j-flash_lite_flash.png" style="width: 500px;" />
+</a>
+<ol class="arabic simple" start="5">
+<li><p>Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port <strong>X100</strong>)</p></li>
+</ol>
+<a class="reference internal image-reference" href="../_images/xmc4700_relax_kit_normal_mode.jpg"><img alt="../_images/xmc4700_relax_kit_normal_mode.jpg" class="align-center" src="../_images/xmc4700_relax_kit_normal_mode.jpg" style="width: 500px;" />
+</a>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="01_hardware.html" class="btn btn-neutral float-left" title="Overview on hardware variants" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../01_features/index.html" class="btn btn-neutral float-right" title="Features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

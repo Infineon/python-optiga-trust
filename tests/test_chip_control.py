@@ -2,30 +2,26 @@
 # SPDX-License-Identifier: MIT
 
 import pytest
-import optigatrust as ot
 import logging
 
 LOGGER = logging.getLogger(__name__)
 
 
-def test_chip_control_set_current_limit():
-    optiga = ot.Chip()
-    optiga.current_limit = 6
-    optiga.current_limit = 15
-    print(optiga.security_event_counter)
-    print(optiga.uid)
-    print(optiga.name)
-    print(optiga.global_lifecycle_state)
-    print(optiga.sleep_activation_delay)
-    print(optiga.security_monitor)
-    print(optiga.security_status)
+def test_chip_control_set_current_limit(chip):
+    chip.current_limit = 6
+    chip.current_limit = 15
+    print(chip.security_event_counter)
+    print(chip.uid)
+    print(chip.name)
+    print(chip.global_lifecycle_state)
+    print(chip.sleep_activation_delay)
+    print(chip.security_monitor)
+    print(chip.security_status)
 
 
-def test_chip_control_set_wrong_current_limit():
-    optiga = ot.Chip()
+def test_chip_control_set_wrong_current_limit(chip):
+    with pytest.raises(ValueError):
+        chip.current_limit = 0
 
     with pytest.raises(ValueError):
-        optiga.current_limit = 0
-
-    with pytest.raises(ValueError):
-        optiga.current_limit = 20
+        chip.current_limit = 20

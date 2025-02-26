@@ -1,0 +1,741 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Object and metadata management &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Cryptographic operations" href="13_crypto.html" />
+    <link rel="prev" title="Chip settings" href="11_chip.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../00_getting_started/index.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/02_prov_mode.html">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Features</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="11_chip.html">Chip settings</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="14_csr.html">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="15_port.html">Export or import chip metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="20_error_codes.html">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../02_building/index.html">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Features</a></li>
+      <li class="breadcrumb-item active">Object and metadata management</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="11_chip.html" class="btn btn-neutral float-left" title="Chip settings" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="13_crypto.html" class="btn btn-neutral float-right" title="Cryptographic operations" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="object-and-metadata-management">
+<h1>Object and metadata management<a class="headerlink" href="#object-and-metadata-management" title="Link to this heading"></a></h1>
+<section id="overview-on-data-objects">
+<h2>Overview on data objects<a class="headerlink" href="#overview-on-data-objects" title="Link to this heading"></a></h2>
+<p>An object within this library is a generic class, which represents basic functionality and features valid for all
+OIDs (Object IDs, except for Session Objects) located on the chip.</p>
+<p>Here are basic features what you can do with a generic Object instance (if access condition allows):</p>
+<ul class="simple">
+<li><p>Read/write data from/to the object</p></li>
+<li><p>Read/write metadata from/to the object</p></li>
+</ul>
+<p>Below you can find object maps for various supported products</p>
+<section id="optiga-trust-m-v1">
+<h3>OPTIGA™ Trust M v1<a class="headerlink" href="#optiga-trust-m-v1" title="Link to this heading"></a></h3>
+<a class="reference internal image-reference" href="../_images/optiga_trust_m1_object_map.png"><img alt="../_images/optiga_trust_m1_object_map.png" class="align-center" src="../_images/optiga_trust_m1_object_map.png" style="width: 500px;" />
+</a>
+</section>
+<section id="optiga-trust-m-v3">
+<h3>OPTIGA™ Trust M v3<a class="headerlink" href="#optiga-trust-m-v3" title="Link to this heading"></a></h3>
+<a class="reference internal image-reference" href="../_images/optiga_trust_m3_object_map.png"><img alt="../_images/optiga_trust_m3_object_map.png" class="align-center" src="../_images/optiga_trust_m3_object_map.png" style="width: 500px;" />
+</a>
+</section>
+</section>
+<section id="objects">
+<h2>Objects<a class="headerlink" href="#objects" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">optigatrust</span> <span class="k">as</span> <span class="nn">optiga</span>
+
+<span class="c1"># Create an instance of object.</span>
+<span class="nb">object</span> <span class="o">=</span> <span class="n">optiga</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
+
+<span class="c1"># Read data</span>
+<span class="nb">object</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;01020304 ... 898a8b8c&#39;</span>
+</pre></div>
+</div>
+<section id="x509-object">
+<h3>X509 object<a class="headerlink" href="#x509-object" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
+
+<span class="n">cert_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">X509</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
+
+<span class="c1"># Output the certificate content</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">==================</span> <span class="n">Certificate</span> <span class="n">Object</span> <span class="p">[</span><span class="mh">0xe0e0</span><span class="p">]</span> <span class="o">==================</span>
+<span class="n">Lifecycle</span> <span class="n">State</span>               <span class="p">:</span><span class="n">creation</span>
+<span class="n">Size</span>                          <span class="p">:</span><span class="mi">514</span>
+<span class="n">Access</span> <span class="n">Condition</span><span class="p">:</span> <span class="n">Read</span>        <span class="p">:</span><span class="n">always</span>
+<span class="n">Access</span> <span class="n">Conditions</span><span class="p">:</span> <span class="n">Change</span>     <span class="p">:</span><span class="n">never</span>
+<span class="n">PEM</span>                           <span class="p">:</span>
+<span class="sa">b</span><span class="s1">&#39;-----BEGIN CERTIFICATE-----</span>
+<span class="n">MIIB9TCCAXygAwIBAgIEcoMKdTAKBggqhkjOPQQDAzByMQswCQYDVQQGEwJERTEh</span>
+<span class="n">MB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRMwEQYDVQQLDApPUFRJ</span>
+<span class="n">R0EoVE0pMSswKQYDVQQDDCJJbmZpbmVvbiBPUFRJR0EoVE0pIFRydXN0IE0gQ0Eg</span>
+<span class="n">MzAwMB4XDTIwMDkxMDExNDAyNFoXDTQwMDkxMDExNDAyNFowGjEYMBYGA1UEAwwP</span>
+<span class="n">SW5maW5lb25Jb1ROb2RlMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEIWaWiiWP</span>
+<span class="n">xWts8JdGXH819hVKg3IHVIvhrC5WWJhR2tyxVP3LuqRXjHJCVwDQHJfQ3z5hm1UA</span>
+<span class="n">PTDk5I</span><span class="o">/</span><span class="n">zlwbEWaNYMFYwDgYDVR0PAQH</span><span class="o">/</span><span class="n">BAQDAgCAMAwGA1UdEwEB</span><span class="o">/</span><span class="n">wQCMAAwFQYD</span>
+<span class="n">VR0gBA4wDDAKBggqghQARAEUATAfBgNVHSMEGDAWgBSzg</span><span class="o">+</span><span class="n">GsVpQGWa</span><span class="o">/</span><span class="n">Yr1cheEV0</span>
+<span class="n">jgxJmTAKBggqhkjOPQQDAwNnADBkAjA9YBGLJmvpUdyQ8WiviQPg9pTyIFzBNpUb</span>
+<span class="n">ZdLarO1Gu44zvMhFoeR</span><span class="o">/</span><span class="n">dtnjahgv59UCMHBNfeU</span><span class="o">+</span><span class="n">ZFfbk7B</span><span class="o">+</span><span class="n">fRHrrotyBSt63GcE</span>
+<span class="n">efqXeARctwDp9bStWx8d9JOw9B0h4mnfTA</span><span class="o">==</span>
+<span class="o">-----</span><span class="n">END</span> <span class="n">CERTIFICATE</span><span class="o">-----</span><span class="s1">&#39;</span>
+<span class="n">Issuer</span><span class="p">:</span> <span class="n">Common</span> <span class="n">Name</span>           <span class="p">:</span><span class="n">Infineon</span> <span class="n">OPTIGA</span><span class="p">(</span><span class="n">TM</span><span class="p">)</span> <span class="n">Trust</span> <span class="n">M</span> <span class="n">CA</span> <span class="mi">300</span>
+<span class="n">Subject</span><span class="p">:</span> <span class="n">Common</span> <span class="n">Name</span>          <span class="p">:</span><span class="n">InfineonIoTNode</span>
+<span class="n">Public</span> <span class="n">Key</span>                    <span class="p">:</span><span class="mi">042166968</span><span class="n">a258fc56b6cf097465c7f35f6154a837</span> <span class="o">...</span> <span class="mi">01</span><span class="n">c97d0df3e619b55003d30e4e48ff39706c459</span>
+<span class="n">Signature</span>                     <span class="p">:</span><span class="mi">306402303</span><span class="n">d60118b266be951dc90f168af8903e0f</span> <span class="o">...</span> <span class="n">cb700e9f5b4ad5b1f1df493b0f41d21e269df4c</span>
+<span class="o">============================================================</span>
+</pre></div>
+</div>
+</section>
+<section id="ecc-key-object">
+<h3>ECC Key object<a class="headerlink" href="#ecc-key-object" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">ECCKey</span><span class="p">(</span><span class="mh">0xe0f1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">key_object</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;lcso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;operational&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp256r1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;authentication&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;signature&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="rsa-key-object">
+<h3>RSA Key object<a class="headerlink" href="#rsa-key-object" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">objects</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">key_object</span> <span class="o">=</span> <span class="n">objects</span><span class="o">.</span><span class="n">RSAKey</span><span class="p">(</span><span class="mh">0xe0fc</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">key_object</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;lcso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;operational&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;rsa2048&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;signature&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;key_agreement&quot;</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="metadata">
+<h2>Metadata<a class="headerlink" href="#metadata" title="Link to this heading"></a></h2>
+<p>Every object (except for Session Objects) has a special service area called - metadata. It is a structured data which
+can significantly influence many aspects of the object itself, for example a lifecycle state.</p>
+<section id="options">
+<h3>Options<a class="headerlink" href="#options" title="Link to this heading"></a></h3>
+<p>Users can work with metadata directly in human-readable form.
+Metadata should be contructed in the following manner:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;&lt;metadata_tag&gt;&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;metadata_value&gt;&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Where metadata can take the following values:</p>
+</section>
+<section id="metadata-tags">
+<h3>Metadata tags<a class="headerlink" href="#metadata-tags" title="Link to this heading"></a></h3>
+<p>All metadata can be changed (except for OPTIGA™ Trust M V3) only if the lifecycle state of the object is either
+‘creation’ or ‘initialisation’</p>
+<table class="docutils align-default" id="id1">
+<caption><span class="caption-text">Metadata Tags Table</span><a class="headerlink" href="#id1" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 9.1%" />
+<col style="width: 27.3%" />
+<col style="width: 63.6%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Tag</p></th>
+<th class="head"><p>Expected values</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘execute’</p></td>
+<td><p>Values are defined in the Access Conditions Table below</p></td>
+<td><p>Define Execute Access Condition for the object. In other words under which conditions the chip can make use of
+the object <strong>internally</strong>; e.g. signature generation using object 0xe0f1.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘change’</p></td>
+<td><p>Values are defined in the Access Conditions Table below</p></td>
+<td><p>Define Change Access Condition for the object. Define when it’s possible to update/overwrite the object.</p></td>
+</tr>
+<tr class="row-even"><td><p>‘read’</p></td>
+<td><p>Values are defined in the Access Conditions Table below</p></td>
+<td><p>Define Read Access Condition for the object. Define when it’s possible to read the object.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘lcso’</p></td>
+<td><p>[‘creation’, ‘initialisation’, ‘operational’, ‘termination’]</p></td>
+<td><p>Define lifecycle state of the object. Attention, in most of cases this action is one-way</p></td>
+</tr>
+<tr class="row-even"><td><p>‘max_size’</p></td>
+<td><p>integer</p></td>
+<td><p>Automatically calculated by the chip, can’t be defined by a user</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘used_size’</p></td>
+<td><p>integer</p></td>
+<td><p>Automatically calculated by the chip, can’t be defined by a user</p></td>
+</tr>
+<tr class="row-even"><td><p>‘algorithm’</p></td>
+<td><p>Automatically set by the chip, can’t be defined by a user</p></td>
+<td><p>This tag is applicable only for Key Objects. The chip selects automatically the value for this tag based on
+the key pair generation parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘key_usage’</p></td>
+<td><p>[ ‘authentication’, ‘encryption’, ‘sign’, ‘key_agreement’]</p></td>
+<td><p>This tag is applicable only for Key Objects. It can be defined in a list to reflect multiple options;
+e.g. {‘key_usage’: [[ ‘authentication’, ‘sign’, ‘key_agreement’]]}</p></td>
+</tr>
+<tr class="row-even"><td><p>‘type’</p></td>
+<td><p>Refer to the types Table below</p></td>
+<td><p>Type of the object. Some functions; e.g. hmac, do work only if a specific type is defined</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘reset_type’</p></td>
+<td><p>either one of [‘creation’, ‘initialisation’, ‘operational’, ‘termination’], or ‘flushing’, or ‘random_data’</p></td>
+<td><p>It defines what happens with the object data in case of updating the metadata</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="access-conditions">
+<h3>Access conditions<a class="headerlink" href="#access-conditions" title="Link to this heading"></a></h3>
+<p>The ‘&lt;metadata_value&gt;’ should be defined either as a list of values; e.g.</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt>a constructed value</dt><dd><ul>
+<li><p>{‘read’: [‘lcso’, ‘&lt;’, ‘operational’]}</p></li>
+<li><p>Read is allowed only if the lifecycle state of the object is less than operational</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>a more complex constructed value</dt><dd><ul>
+<li><p>{‘read’: [‘lcso’, ‘&lt;’, ‘operational’, ‘&amp;&amp;’, ‘conf’, ‘0xe1’, ‘0x40’]}</p></li>
+<li><p>Read is allowed only if the lifecycle state of the object is less than operation and under shielded connection
+(using e140 OID as a binding secret)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<table class="docutils align-default" id="id2">
+<caption><span class="caption-text">Access Conditions Table (SRM M V3 - Table 69)</span><a class="headerlink" href="#id2" title="Link to this table"></a></caption>
+<colgroup>
+<col style="width: 33.3%" />
+<col style="width: 66.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Tag</p></th>
+<th class="head"><p>Meaning</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘always’</p></td>
+<td><p>an action (for instance ‘read’) is always allowed</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘never’</p></td>
+<td><p>an action (for instance ‘read’) is forbidden</p></td>
+</tr>
+<tr class="row-even"><td><p>‘lcsg’</p></td>
+<td><p>Global Lifecycle State (Object ID 0xe0c0) this tag is used as a first argument for a complex
+expressions; e.g. [‘lcsg’, ‘&lt;’, ‘operational’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘lcsa’</p></td>
+<td><p>Application Lifecycle State (Object ID 0xf1c0) this tag is used as a first argument for
+a complex expressions; e.g. [‘lcsa’, ‘&lt;’, ‘operational’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘lcso’</p></td>
+<td><p>Object Lifecycle State (it is part of the metadata, see the section above) this tag is
+used as a first argument for a complex expressions; e.g. [‘lcso’, ‘&lt;’, ‘operational’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘conf’</p></td>
+<td><ul class="simple">
+<li><p>An action is permitted only if the host establishes the shielded connection with the
+chip using the specified
+Binding secret (e.g. 0xE140) and the response is requested with protection (encrypted).</p></li>
+<li><p>Typical values are [‘conf’, ‘0xe1’, ‘0x40’] and [‘conf’, ‘0xf1’, ‘0xd0’],
+where instead of ‘0xf1’, ‘0xd0’ can be used any properly configured
+Application Data Object</p></li>
+<li><p>In the latter case (Secret in Application Data Object) it is recommended to use
+as well the ‘int’ (descrebed below) Access Condition</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>‘int’</p></td>
+<td><ul>
+<li><p>An action is permitted only if the host establishes the shielded connection with
+the chip using the specified
+Binding secret (e.g. 0xE140) and the response is requested with protection (MAC).</p></li>
+<li><p>Typical values are [‘int’, ‘0xe1’, ‘0x40’] and [‘int’, ‘0xe0’, ‘0xef’], where instead
+of ‘0xe0’, ‘0xef’ can be used any properly configured Data Object of
+{‘type’: ‘trust_anchor’}</p></li>
+<li><p>In the latter case (Secret in Application Data Object) it is recommended to use
+as well the ‘int’ (described below) Access Condition</p></li>
+<li><p>Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ta_obj</span> <span class="o">=</span> <span class="n">Object</span><span class="p">(</span><span class="mh">0xe0ef</span><span class="p">)</span>
+<span class="n">ta_obj</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;trust_anchor&#39;</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">:</span> <span class="s1">&#39;always&#39;</span><span class="p">,</span> <span class="s1">&#39;change&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">]}</span>
+<span class="n">ta_obj</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="o">&lt;</span><span class="n">X509</span> <span class="n">Certificate</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="c1"># This action is one-way and can&#39;t be reverted, for demo can be skipped</span>
+<span class="c1"># ta_obj.meta = {&#39;lcso&#39;: &#39;operational&#39;}</span>
+<span class="n">protected_obj</span> <span class="o">=</span> <span class="n">Object</span><span class="p">(</span><span class="mh">0xf1d0</span><span class="p">)</span>
+<span class="n">protected_obj</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;change&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;lcso&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;operational&#39;</span><span class="p">,</span> <span class="s1">&#39;&amp;&amp;&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;0xe0&#39;</span><span class="p">,</span> <span class="s1">&#39;0xef&#39;</span><span class="p">]}</span>
+<span class="c1"># This action is one-way and can&#39;t be reverted, for demo can be skipped</span>
+<span class="c1"># protected_obj.meta = {&#39;lcso&#39;: &#39;operational&#39;}</span>
+<span class="c1"># The above means: in case of writing the f1d0 Application Data Object, the signature associated with the</span>
+<span class="c1"># metadata in the manifest must be verified with the addressed trust anchor e0ef.</span>
+</pre></div>
+</div>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="row-odd"><td><p>‘auto’</p></td>
+<td><ul class="simple">
+<li><p>An authorization reference Object ID. The action (for instance ‘execute’) is allowed
+only if the given object reached the AUTO (Authorised)</p></li>
+<li><p>Typical values are [‘auto’, ‘0xf1’, ‘0xd0’]</p></li>
+</ul>
+</td>
+</tr>
+<tr class="row-even"><td><p>‘luc’</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>‘sec_sta_g’</p></td>
+<td><p>x</p></td>
+</tr>
+<tr class="row-even"><td><p>‘sec_sta_a’</p></td>
+<td><p>x</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘==’</p></td>
+<td><p>“If equal”. Typical values [‘lcso’, <strong>‘==’</strong>, ‘initialization’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘&gt;’</p></td>
+<td><p>“If more”. Typical values [‘lcso’, <strong>‘&gt;’</strong>, ‘initialization’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘&lt;’</p></td>
+<td><p>“If less”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialization’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘&amp;&amp;’</p></td>
+<td><p>“And”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialization’, <strong>‘&amp;&amp;’</strong>, ‘conf’, ‘0xe1’, ‘0x40’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘||’</p></td>
+<td><p>“or”. Typical values [‘lcso’, <strong>‘&lt;’</strong>, ‘initialization’, <strong>‘&amp;&amp;’</strong>, ‘conf’, ‘0xe1’, ‘0x40’]</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="printing-all-metadata-in-human-readable-form">
+<h3>Printing all metadata in human readable form<a class="headerlink" href="#printing-all-metadata-in-human-readable-form" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">x509</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">cert_object</span> <span class="o">=</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">cert_object</span><span class="o">.</span><span class="n">meta</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="updating-metadata-of-the-certificate-object">
+<h3>Updating metadata of the certificate object<a class="headerlink" href="#updating-metadata-of-the-certificate-object" title="Link to this heading"></a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">x509</span>
+
+<span class="n">cert_object</span> <span class="o">=</span> <span class="n">x509</span><span class="o">.</span><span class="n">Certificate</span><span class="p">(</span><span class="mh">0xe0e0</span><span class="p">)</span>
+
+<span class="c1"># Print out certificate sucessfully</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
+
+<span class="c1"># Store old metadata from the chip</span>
+<span class="n">old_meta</span> <span class="o">=</span> <span class="n">cert_object</span><span class="o">.</span><span class="n">meta</span><span class="p">[</span><span class="s1">&#39;read&#39;</span><span class="p">]</span>
+
+<span class="c1"># Prepare new metadata to write on the chip</span>
+<span class="n">new_meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;read&#39;</span><span class="p">:</span> <span class="s1">&#39;never&#39;</span><span class="p">}</span>
+
+<span class="c1"># Update metadata on the chip</span>
+<span class="n">cert_object</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">new_meta</span>
+
+<span class="c1"># Try to read-out the content one more time. Result: Value Error</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
+
+<span class="c1"># Revert the metadata</span>
+<span class="n">cert_object</span><span class="o">.</span><span class="n">meta</span> <span class="o">=</span> <span class="n">old_meta</span>
+
+<span class="c1"># See that printing is again possible</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">cert_object</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Output</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>C:\Users\User\git\python-optiga-trust&gt;python
+Python 3.8.1 (tags/v3.8.1:1b293b6, Dec 18 2019, 22:39:24) [MSC v.1916 32 bit (Intel)] on win32
+Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.
+&gt;&gt;&gt; from optigatrust import x509
+&gt;&gt;&gt; cert_object = x509.Certificate(0xe0e0)
+Loaded: liboptigatrust-libusb-win-i686.dll
+================== OPTIGA™ Trust Chip Info ==================
+Firmware Identifier           [dwFirmwareIdentifier]:0x80101071
+Build Number                  [rgbESWBuild]:0x809
+Current Limitation            [OID: 0xE0C4]:0xf
+Sleep Activation Delay        [OID: 0xE0C3]:0x14
+Global Lifecycle State        [OID: 0xE0C0]:operational
+Security Status               [OID: 0xE0C1]:0x0
+Security Event Counter        [OID: 0xE0C5]:0x0
+============================================================
+&gt;&gt;&gt; print(cert_object)
+================== Certificate Object [0xe0e0] ==================
+Lifecycle State               :creation
+Size                          :485
+Access Condition: Read        :always
+Access Conditions: Change     :never
+PEM                           :
+b&#39;-----BEGIN CERTIFICATE-----
+MIIB2DCCAX6gAwIBAgIEa9mwITAKBggqhkjOPQQDAjByMQswCQYDVQQGEwJERTEh
+MB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRMwEQYDVQQLDApPUFRJ
+R0EoVE0pMSswKQYDVQQDDCJJbmZpbmVvbiBPUFRJR0EoVE0pIFRydXN0IE0gQ0Eg
+MTAxMB4XDTE5MDYxODA2MjgyM1oXDTM5MDYxODA2MjgyM1owHDEaMBgGA1UEAwwR
+SW5maW5lb24gSW9UIE5vZGUwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATxjN/R
+RdonS92dwYnvIIZnD0HrIhYg9lcZsSv3urXRnjL/xVEs/ijCzWKCQruY2CsTv2jg
+iemizjIl4jURWfa9o1gwVjAOBgNVHQ8BAf8EBAMCAIAwDAYDVR0TAQH/BAIwADAV
+BgNVHSAEDjAMMAoGCCqCFABEARQBMB8GA1UdIwQYMBaAFDwwjFzViuijXTKA5FSD
+sv/Nhk0jMAoGCCqGSM49BAMCA0gAMEUCIDdnY4NzhosPawMGoY138J6uHzsLU6nZ
+euBnZOnwnlwzAiEAkXneR8Gzkrk1S6f9zva8J6fe8LYejW15eXOwDyt7Nss=
+-----END CERTIFICATE-----&#39;
+Issuer: Common Name           :Infineon OPTIGA(TM) Trust M CA 101
+Subject: Common Name          :Infineon IoT Node
+Public Key                    :04f18cdfd145da274bdd9dc189ef2086670f41eb221620f65719b12bf7bab5d19e32ffc5512cfe28c2cd628242bb98d82b13bf68e089e9a2ce3225e2351159f6bd
+Signature                     :304502203767638373868b0f6b0306a18d77f09eae1f3b0b53a9d97ae06764e9f09e5c330221009179de47c1b392b9354ba7fdcef6bc27a7def0b61e8d6d797973b00f2b7b36cb
+============================================================
+&gt;&gt;&gt; old_meta = cert_object.meta[&#39;read&#39;]
+&gt;&gt;&gt; new_meta = {&#39;read&#39;: &#39;never&#39;}
+&gt;&gt;&gt; cert_object.meta = new_meta
+&gt;&gt;&gt; print(cert_object)
+Error: 0x8007
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;, line 613, in __str__
+    pem = &#39;{0:&lt;30}:\n{1}\n&#39;.format(&quot;PEM&quot;, str(self.pem).replace(&#39;\\n&#39;, &#39;\n&#39;).replace(&#39;\\t&#39;, &#39;\t&#39;))
+  File &quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;, line 642, in pem
+    pem_cert += _break_apart(base64.b64encode(self.der).decode(), &#39;\n&#39;, 64)
+  File &quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;, line 632, in der
+    self._der = self._read()
+  File &quot;C:\Users\Yushev\git\python-optiga-trust\optigatrust\cert.py&quot;, line 768, in _read
+    raise ValueError(
+ValueError: Certificate Slot 57568 is empty
+&gt;&gt;&gt; cert_object.meta = old_meta
+&gt;&gt;&gt; print(cert_object)
+================== Certificate Object [0xe0e0] ==================
+Lifecycle State               :creation
+Size                          :485
+Access Condition: Read        :always
+Access Conditions: Change     :never
+PEM                           :
+b&#39;-----BEGIN CERTIFICATE-----
+MIIB2DCCAX6gAwIBAgIEa9mwITAKBggqhkjOPQQDAjByMQswCQYDVQQGEwJERTEh
+MB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRMwEQYDVQQLDApPUFRJ
+R0EoVE0pMSswKQYDVQQDDCJJbmZpbmVvbiBPUFRJR0EoVE0pIFRydXN0IE0gQ0Eg
+MTAxMB4XDTE5MDYxODA2MjgyM1oXDTM5MDYxODA2MjgyM1owHDEaMBgGA1UEAwwR
+SW5maW5lb24gSW9UIE5vZGUwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATxjN/R
+RdonS92dwYnvIIZnD0HrIhYg9lcZsSv3urXRnjL/xVEs/ijCzWKCQruY2CsTv2jg
+iemizjIl4jURWfa9o1gwVjAOBgNVHQ8BAf8EBAMCAIAwDAYDVR0TAQH/BAIwADAV
+BgNVHSAEDjAMMAoGCCqCFABEARQBMB8GA1UdIwQYMBaAFDwwjFzViuijXTKA5FSD
+sv/Nhk0jMAoGCCqGSM49BAMCA0gAMEUCIDdnY4NzhosPawMGoY138J6uHzsLU6nZ
+euBnZOnwnlwzAiEAkXneR8Gzkrk1S6f9zva8J6fe8LYejW15eXOwDyt7Nss=
+-----END CERTIFICATE-----&#39;
+Issuer: Common Name           :Infineon OPTIGA(TM) Trust M CA 101
+Subject: Common Name          :Infineon IoT Node
+Public Key                    :04f18cdfd145da274bdd9dc189ef2086670f41eb221620f65719b12bf7bab5d19e32ffc5512cfe28c2cd628242bb98d82b13bf68e089e9a2ce3225e2351159f6bd
+Signature                     :304502203767638373868b0f6b0306a18d77f09eae1f3b0b53a9d97ae06764e9f09e5c330221009179de47c1b392b9354ba7fdcef6bc27a7def0b61e8d6d797973b00f2b7b36cb
+============================================================
+</pre></div>
+</div>
+</section>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.Object">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.</span></span><span class="sig-name descname"><span class="pre">Object</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Object" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent an Object on the OPTIGA Trust Chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>id</strong> (<em>int</em>) – the id of the object; e.g. 0xe0e0</p></li>
+<li><p><strong>updated</strong> (<em>bool</em>) – This boolean variable notifies whether metadata or data has been updated and this can bu used to
+notify other modules to reread data if needed</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Object.meta">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">meta</span></span><a class="headerlink" href="#optigatrust.Object.meta" title="Link to this definition"></a></dt>
+<dd><p>A dictionary of the metadata present right now on the chip for the given object. It is writable,
+so user can update the metadata assigning the value to it. Example return</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">&quot;lcso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;operational&quot;</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp384r1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="s2">&quot;0x21&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="optigatrust.Object.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytearray</span></span></span><a class="headerlink" href="#optigatrust.Object.read" title="Link to this definition"></a></dt>
+<dd><p>This function helps to read the data stored on the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>offset</strong> (<em>int</em>) – An optional parameter defining whether you want to read the data with offset</p></li>
+<li><p><strong>force</strong> – This is a <code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code> parameter which can be used to try to read the data even if id can’t be found</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>byte string</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="optigatrust.Object.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Object.write" title="Link to this definition"></a></dt>
+<dd><p>This function helps to write the data onto the chip</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – byte string to write</p></li>
+<li><p><strong>offset</strong> (<em>int</em>) – An optional parameter defining whether you want to read the data with offset</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:raises</dt><dd><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p id="module-optigatrust.objects">This module implements all Object manipulation related APIs of the optigatrust package</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.AESKey">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">AESKey</span></span><a class="headerlink" href="#optigatrust.objects.AESKey" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent an aes key object on the OPTIGA Trust Chip</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.AcquiredSession">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">AcquiredSession</span></span><a class="headerlink" href="#optigatrust.objects.AcquiredSession" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent a session object on the OPTIGA Trust Chip. This is a pseudo object,
+just to indicate to OPTIGA, that we would like to use the acquired session</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.AppData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">AppData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">object_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.AppData" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent an Application Data object on the OPTIGA Trust Chip.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.ECCKey">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">ECCKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.ECCKey" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent an ecc key object on the OPTIGA Trust Chip</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.RSAKey">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">RSAKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.RSAKey" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent an rsa key object on the OPTIGA Trust Chip</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.Session">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">Session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.Session" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent a session object on the OPTIGA Trust Chip.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.objects.X509">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.objects.</span></span><span class="sig-name descname"><span class="pre">X509</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cert_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.objects.X509" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent a certificate on the OPTIGA Trust Chip</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.der">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">der</span></span><a class="headerlink" href="#optigatrust.objects.X509.der" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get or set the certificate in der form.
+Input should be a valid DER encoded certificate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.pem">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pem</span></span><a class="headerlink" href="#optigatrust.objects.X509.pem" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get or set the certificate in PEM form.
+Input should be a valid PEM formatted certificate.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.pkey">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pkey</span></span><a class="headerlink" href="#optigatrust.objects.X509.pkey" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get the public key from the certificate. In case the certificate can’t be parsed an
+exception will be generated</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.objects.X509.signature">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">signature</span></span><a class="headerlink" href="#optigatrust.objects.X509.signature" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get the signature of the certificate.
+In case the certificate can’t be parsed an exception will be generated</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="11_chip.html" class="btn btn-neutral float-left" title="Chip settings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="13_crypto.html" class="btn btn-neutral float-right" title="Cryptographic operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

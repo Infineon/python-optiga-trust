@@ -68,7 +68,12 @@ class CSRBuilder:
     _extended_key_usage = None
     _other_extensions = None
 
-    _special_extensions = {"basic_constraints", "subject_alt_name", "key_usage", "extended_key_usage"}
+    _special_extensions = {
+        "basic_constraints",
+        "subject_alt_name",
+        "key_usage",
+        "extended_key_usage",
+    }
 
     def __init__(self, subject, subject_public_key):
         """
@@ -404,15 +409,17 @@ class CSRBuilder:
 
     def build(self, signing_key):  # noqa: C901
         """
-        Validates the certificate information, constructs an X.509 certificate and then signs it
-        :param signing_key: An asn1crypto.keys.PrivateKeyInfo or oscrypto.asymmetric.PrivateKey object for the private
-        key to sign the request with. This should be the private key that matches the public key.
+        Validates the certificate information, constructs an X.509 certificate and then signs it :param signing_key: An
+        asn1crypto.keys.PrivateKeyInfo object for the private key to sign the request with. This should be the private
+        key that matches the public key.
 
         :returns:
             An asn1crypto.csr.CertificationRequest object of the request
         """
 
-        if not isinstance(signing_key, objects.ECCKey) and not isinstance(signing_key, objects.RSAKey):
+        if not isinstance(signing_key, objects.ECCKey) and not isinstance(
+            signing_key, objects.RSAKey
+        ):
             raise TypeError(
                 _pretty_message(
                     """
@@ -433,7 +440,11 @@ class CSRBuilder:
         signature_algorithm_id = "%s_%s" % (self._hash_algo, signature_algo)
 
         def _make_extension(_name, _value):
-            return {"extn_id": _name, "critical": self._determine_critical(_name), "extn_value": _value}
+            return {
+                "extn_id": _name,
+                "critical": self._determine_critical(_name),
+                "extn_value": _value,
+            }
 
         extensions = []
         for name in sorted(self._special_extensions):
@@ -449,7 +460,12 @@ class CSRBuilder:
             attributes.append({"type": "extension_request", "values": [extensions]})
         logger.info(attributes)
         certification_request_info = csr.CertificationRequestInfo(
-            {"version": "v1", "subject": self._subject, "subject_pk_info": self._subject_public_key, "attributes": attributes}
+            {
+                "version": "v1",
+                "subject": self._subject,
+                "subject_pk_info": self._subject_public_key,
+                "attributes": attributes,
+            }
         )
 
         if isinstance(signing_key, objects.ECCKey):

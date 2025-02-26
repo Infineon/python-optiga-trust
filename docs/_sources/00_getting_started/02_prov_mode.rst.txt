@@ -1,0 +1,64 @@
+Enabling the provisioning mode for UART-to-I²C bridge
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+OPTIGA™ Trust M with PSOC™ 6 evaluation kits
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To use the OPTIGA™ Trust Host Library for Python in combination with any OPTIGA™ Trust M device and a supported PSOC™ 6 evaluation kit, follow 
+the instructions at `ModusToolbox™ example application for OPTIGA™ Trust M data management`_ to activate the provisioning mode on PSOC™ 6.
+
+As an example, see the following combination of `PSOC™ 62S2 Wi-Fi BT Pioneer Kit`_, `OPTIGA™ Trust Adapter`_ and an  OPTIGA™ Trust M sample.
+
+.. image:: ../_images/psoc62_matter_kit.png
+   :alt: PSOC™ 62S2 Wi-Fi BT Pioneer Kit with OPTIGA™ Trust M Shield.
+   :align: center
+   :width: 500px
+
+1. Create a new ModusToolbox™ project via the "New Application" button.
+2. Select :code:`CY8CKIT-062S2-43012` as BSP and press "Next".
+
+.. image:: ../_images/psoc_prov_mode_bsp.png
+   :align: center
+   :width: 650px
+
+3. Select the :code:`OPTIGA™ Trust M Data and Certificates Management` example and click on "Create"
+
+.. image:: ../_images/psoc_prov_mode_project.png
+   :align: center
+   :width: 650px
+
+4. Flash and launch the program.
+
+OPTIGA™ Trust M with XMC4700 Relax Kit
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Prerequisite: Make sure you have SEGGER J-FLash Lite installed:
+
+- `Download J-Link Software and Documentation pack`_
+
+1. Make sure you have connected your Evaluation Kit as depicted below (USB Port **X1002**)
+
+.. image:: ../_images/xmc4700_relax_kit_programming_mode.jpg
+   :align: center
+   :width: 500px
+
+2. Start SEGGER J-FLash Lite.
+3. Click on Device to select a target device: Select Infineon as "Manufacturer" and XMC4700-2048 as "Device", and then click "OK".
+
+.. image:: ../_images/j-flash_lite_device_selection.png
+   :align: center
+   :width: 500px
+
+4. Select `xmc4700 hex file`_ (right click, Save) to be flashed under "Data File" and click on "Program Device". It then shows the programming progress window.
+
+.. image:: ../_images/j-flash_lite_flash.png
+   :align: center
+   :width: 500px
+
+5. Once done make sure to change the connection of the USB cable to a different USB port located on the other side of the Evaluation Kit (USB Port **X100**)
+
+.. image:: ../_images/xmc4700_relax_kit_normal_mode.jpg
+   :align: center
+   :width: 500px
+
+.. include:: ../references.rst

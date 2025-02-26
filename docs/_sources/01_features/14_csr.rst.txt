@@ -1,0 +1,51 @@
+Certificate Signing Request (CSR)
+=================================
+
+Example
+-------
+
+::
+
+    from optigatrust import objects, crypto
+    from optigatrust.csr import CSRBuilder
+
+    csr_key_obj = objects.ECCKey(0xe0f3)
+
+    builder = CSRBuilder(
+		{
+			'country_name': 'DE',
+			'state_or_province_name': 'Bayern',
+			'organization_name': 'Infineon Technologies AG',
+			'common_name': 'OPTIGA(TM) Trust IoT',
+		},
+		pkey
+	)
+
+    builder.build(csr_key_obj)
+
+    # or RSA
+
+    csr_key_obj = objects.RSAKey(0xe0fc)
+    print(csr_key_obj)
+    pkey, _ = crypto.generate_pair(key_object=csr_key_obj, key_size=ki)
+
+    builder = CSRBuilder(
+		{
+			'country_name': 'DE',
+			'state_or_province_name': 'Bayern',
+			'organization_name': 'Infineon Technologies AG',
+			'common_name': 'OPTIGA(TM) Trust IoT',
+		},
+		pkey
+	)
+
+    builder.build(csr_key_obj)
+
+API
+---
+
+.. automodule:: optigatrust.csr
+   :members: pem_armor_csr
+
+.. autoclass:: optigatrust.csr.CSRBuilder
+   :members:

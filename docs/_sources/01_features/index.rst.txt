@@ -1,0 +1,15 @@
+********************************
+Features
+********************************
+
+This chapter gives an overview on the optigatrust features.
+
+.. toctree::
+    :maxdepth: 1
+
+    11_chip.rst
+    12_metadata.rst
+    13_crypto.rst
+    14_csr.rst
+    15_port.rst
+    20_error_codes.md

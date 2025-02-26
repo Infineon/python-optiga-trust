@@ -49,7 +49,10 @@ def test_hmac(hash_alg, hazmat_curve, curve):
     key = objects.ECCKey(0xE0F1)
     _, _ = optiga_ec.generate_pair(key, curve=curve)
     private_key = ec.generate_private_key(hazmat_curve, default_backend())
-    peer_public_key = private_key.public_key().public_bytes(encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo)
+    peer_public_key = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.DER, format=serialization.PublicFormat.SubjectPublicKeyInfo
+    )
     session_object = optiga_ec.ecdh(key, peer_public_key)
     data = "Hello world!"
     mac = optiga_ec.hmac(session_object, str.encode(data), hash_algorithm=hash_alg)
+    assert mac is not None

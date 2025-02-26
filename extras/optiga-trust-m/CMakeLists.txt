@@ -43,6 +43,10 @@ if(i2c)
     include(${TRUSTM_PATH}/linux_i2c.cmake)
 endif(i2c)
 
+if(i2c-gpiod)
+    include(${TRUSTM_PATH}/linux_i2c_gpiod.cmake)
+endif(i2c-gpiod)
+
 if(libusb)
     include(${TRUSTM_PATH}/linux_libusb.cmake)
 endif(libusb)

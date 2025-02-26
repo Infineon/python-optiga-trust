@@ -1,0 +1,239 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chip settings &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Object and metadata management" href="12_metadata.html" />
+    <link rel="prev" title="Features" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../00_getting_started/index.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/02_prov_mode.html">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Features</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Chip settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12_metadata.html">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="14_csr.html">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="15_port.html">Export or import chip metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="20_error_codes.html">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../02_building/index.html">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Features</a></li>
+      <li class="breadcrumb-item active">Chip settings</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="index.html" class="btn btn-neutral float-left" title="Features" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="12_metadata.html" class="btn btn-neutral float-right" title="Object and metadata management" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="chip-settings">
+<h1>Chip settings<a class="headerlink" href="#chip-settings" title="Link to this heading"></a></h1>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<p>The following properties of the chip can be read and set using the <code class="code docutils literal notranslate"><span class="pre">optigatrust</span></code> API.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">optigatrust</span> <span class="k">as</span> <span class="nn">optiga</span>
+
+<span class="n">chip</span> <span class="o">=</span> <span class="n">optiga</span><span class="o">.</span><span class="n">Chip</span><span class="p">()</span>
+
+<span class="n">chip</span><span class="o">.</span><span class="n">current_limit</span> <span class="o">=</span> <span class="mi">15</span> <span class="c1"># allowed are from 6 to 15</span>
+<span class="n">chip</span><span class="o">.</span><span class="n">sleep_activation_delay</span> <span class="o">=</span> <span class="mi">255</span> <span class="c1"># allowed are from 0 to 255</span>
+<span class="c1"># This might affect your chip, and even lock it, so please make sure you know what you do</span>
+<span class="c1"># chip.global_lifecycle_state = &#39;operational&#39;</span>
+<span class="c1"># This is only applicable for OPTIGA™ Trust M v3</span>
+<span class="c1"># Disable the security monitor</span>
+<span class="n">chip</span><span class="o">.</span><span class="n">config_security_monitor</span><span class="p">(</span><span class="n">t_max</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;New state for parameters&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Current limit : </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">current_limit</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Sleep Activation Delay : </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">sleep_activation_delay</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Coprocessor Unique ID : </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">uid</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Global Lifecycle State (LcsG) : </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">global_lifecycle_state</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Security Status : </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">security_status</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Security Event Counter Value : </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chip</span><span class="o">.</span><span class="n">security_event_counter</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="api">
+<h2>API<a class="headerlink" href="#api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="optigatrust.Chip">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">optigatrust.</span></span><span class="sig-name descname"><span class="pre">Chip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interface</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Chip" title="Link to this definition"></a></dt>
+<dd><p>A class used to represent the whole OPTIGA Trust Chip</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="optigatrust.Chip.config_security_monitor">
+<span class="sig-name descname"><span class="pre">config_security_monitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t_max</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sec_credit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delayed_sec_sync</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.Chip.config_security_monitor" title="Link to this definition"></a></dt>
+<dd><p>This property allows to configure the security monitor configuration for your chip.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only OPTIGA™ Trust M3 relevant</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Changing the following settings should be carefully evaluated as this might lead to security risks</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>t_max</strong> – Chip allows to perform one protected operation per t_max.
+If more performed, internal SECcredit and afterwards SECcounter are increased until saturation. In the end
+the chip starts inducing delays of t_max between crypto operations
+t_max = 0 disables Security Monitor</p></li>
+<li><p><strong>max_sec_credit</strong> – The maximum SECcredit that can be achieved</p></li>
+<li><p><strong>delayed_sec_sync</strong> – If there are multiple security events with in t_max due to use case demand,
+the number of NVM write operations can be avoided by configuring this count appropriately</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.current_limit">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">current_limit</span></span><a class="headerlink" href="#optigatrust.Chip.current_limit" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get or set the current limitation of the chip. Allowed range is from 6 to 15 (mA)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.global_lifecycle_state">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">global_lifecycle_state</span></span><a class="headerlink" href="#optigatrust.Chip.global_lifecycle_state" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get or set the global lifecycle state for your chip.
+Should be one of <code class="xref py py-data docutils literal notranslate"><span class="pre">optigatrust.lifecycle_states</span></code></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.security_event_counter">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">security_event_counter</span></span><a class="headerlink" href="#optigatrust.Chip.security_event_counter" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get the security event counter for your chip.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.security_monitor">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">security_monitor</span></span><a class="headerlink" href="#optigatrust.Chip.security_monitor" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get the security monitor configuration for your chip.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only OPTIGA™ Trust M3 relevant</p>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.security_status">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">security_status</span></span><a class="headerlink" href="#optigatrust.Chip.security_status" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get the security status for your chip.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.sleep_activation_delay">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sleep_activation_delay</span></span><a class="headerlink" href="#optigatrust.Chip.sleep_activation_delay" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get or set the sleep activation delay for your chip. Should be from 1 to 255.
+(time the chip should wait after all operations are finished before going to sleep)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="optigatrust.Chip.uid">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">uid</span></span><a class="headerlink" href="#optigatrust.Chip.uid" title="Link to this definition"></a></dt>
+<dd><p>This property allows to get a Coprocessor Unique ID. It will be returned as a namedtuple class. Example</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">UID</span><span class="p">(</span><span class="n">cim_id</span><span class="o">=</span><span class="s1">&#39;cd&#39;</span><span class="p">,</span> <span class="n">platform_id</span><span class="o">=</span><span class="s1">&#39;16&#39;</span><span class="p">,</span> <span class="n">model_id</span><span class="o">=</span><span class="s1">&#39;33&#39;</span><span class="p">,</span> <span class="n">rommask_id</span><span class="o">=</span><span class="s1">&#39;9301&#39;</span><span class="p">,</span> <span class="n">chip_type</span><span class="o">=</span><span class="s1">&#39;001c00050000&#39;</span><span class="p">,</span>
+    <span class="n">batch_num</span><span class="o">=</span><span class="s1">&#39;0a09a413000a&#39;</span><span class="p">,</span> <span class="n">x_coord</span><span class="o">=</span><span class="s1">&#39;007d&#39;</span><span class="p">,</span> <span class="n">y_coord</span><span class="o">=</span><span class="s1">&#39;003b&#39;</span><span class="p">,</span> <span class="n">fw_id</span><span class="o">=</span><span class="s1">&#39;80101071&#39;</span><span class="p">,</span> <span class="n">fw_build</span><span class="o">=</span><span class="s1">&#39;2440&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="12_metadata.html" class="btn btn-neutral float-right" title="Object and metadata management" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>

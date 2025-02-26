@@ -8,7 +8,6 @@ import optigatrust.crypto as optiga_ec
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.serialization import load_der_public_key
 
 
 def test_keypair_default():

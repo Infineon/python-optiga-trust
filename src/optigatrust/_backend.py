@@ -16,14 +16,22 @@ from serial.tools import list_ports
 from optigatrust.enums import x, m1, m3, m2id2, charge
 
 from optigatrust import util
-import logging
 
 logger = util.Logger(name=__name__)
 
 _OPTIGA_CDLL = None
 
 
-__all__ = ["get_handler", "lookup_optiga", "read_data", "read_meta", "write_data", "write_meta", "protected_update", "_set_com_port_config"]
+__all__ = [
+    "get_handler",
+    "lookup_optiga",
+    "read_data",
+    "read_meta",
+    "write_data",
+    "write_meta",
+    "protected_update",
+    "_set_com_port_config",
+]
 
 
 def _get_arch_os():
@@ -60,24 +68,33 @@ def _get_lib_name(interface="libusb"):
     else:
         raise OSError("You OS is not supported.Exit.")
 
-    return "liboptigatrust-{interface}-{os}-{arch}.{ext}".format(interface=interface, os=_os, arch=arch, ext=extension)
+    return "liboptigatrust-{interface}-{os}-{arch}.{ext}".format(
+        interface=interface, os=_os, arch=arch, ext=extension
+    )
 
 
 def _scan_com_ports():
+    comportFound = False
     com_ports = list(list_ports.comports())
     for com_port in com_ports:
-        logger.debug("Found a com port: {0}: {1}".format(com_port.device, com_port.description))
+        logger.debug("Found a COM port: {0}: {1}".format(com_port.device, com_port.description))
         if (
             com_port.description.startswith("USB Serial Device")
             or com_port.description.startswith("KitProg3")
             or com_port.description.startswith("Communications Port")
         ):
             _set_com_port_config(com_port.device)
+            comportFound = True
+
+    return comportFound
 
 
-def _load_lib(interface):
+def _load_lib(interface, probing):
     if interface == "uart":
-        _scan_com_ports()
+        if not _scan_com_ports():
+            if not probing:
+                logger.error("No COM port found for UART connection!")
+            return
 
     libname = _get_lib_name(interface)
 
@@ -93,13 +110,22 @@ def _load_lib(interface):
         api = cdll.LoadLibrary(lib_path)
     except OSError as fail_to_load:
         os.chdir(old_path)
-        logger.warn(fail_to_load)
-        raise OSError("{}: Failed to find library {} in {}".format(interface, libname, curr_path)) from fail_to_load
+        logger.warning(fail_to_load)
+        raise OSError(
+            "{}: Failed to find library {} in {}".format(interface, libname, curr_path)
+        ) from fail_to_load
+
+    print("Trying to open {} interface: ".format(interface), end="")
+
     api.exp_optiga_init.restype = c_int
     ret = api.exp_optiga_init()
+
     if ret != 0:
         os.chdir(old_path)
+        print("FAIL")
         raise OSError("{0}: Failed to connect".format(interface))
+
+    print("SUCCESS")
 
     os.chdir(old_path)
     return api
@@ -111,14 +137,24 @@ def _set_com_port_config(com_port):
 
     :param com_port: A string with 'COM39' like content
     """
-    ini_path = os.path.normpath(os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "optiga_comms.ini")))
-    if not match(r"COM[0-9][0-9]", com_port) and not match(r"COM[0-9]", com_port) and not match(r"/dev/ttyACM[0-9]*", com_port):
-        raise ValueError("opts is specified, but value parameter is given: expected COMXX, your provided {0}. " "Use set_com_port('COM39')".format(com_port))
+    ini_path = os.path.normpath(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), "lib", "optiga_comms.ini"))
+    )
+    if (
+        not match(r"COM[0-9][0-9]", com_port)
+        and not match(r"COM[0-9]", com_port)
+        and not match(r"/dev/ttyACM[0-9]*", com_port)
+    ):
+        raise ValueError(
+            "opts is specified, but value parameter is given: expected COMXX, your provided {0}. Use set_com_port('COM39')".format(
+                com_port
+            )
+        )
     with open(ini_path, "w+", encoding="utf-8") as file:
         file.write(com_port)
 
 
-def get_handler():
+def get_handler(interface):
     # pylint: disable=global-statement
     # This is fair to use a global, as there should be only one instance of the communication stack initialized
     """
@@ -127,25 +163,43 @@ def get_handler():
     """
     global _OPTIGA_CDLL
 
+    # Convert interface name to lowercase if needed
+    if interface is not None:
+        interface = interface.lower()
+
     if _OPTIGA_CDLL is None:
         _, _os = _get_arch_os()
 
         if _os == "win":
             supported_interfaces = ("libusb", "uart")
         elif _os == "linux":
-            supported_interfaces = ("libusb", "uart", "i2c")
+            supported_interfaces = ("libusb", "uart", "i2c-gpiod", "i2c")
 
         initialised = False
         errors = list()
-        # Here we try to probe which interface is actually in use, might be either libusb, i2c or uart
-        # We suppress stderr output of the libusb interface in case it's not connected to not confuse
-        # a user
-        for interface in supported_interfaces:
+
+        if interface is None:
+            print(
+                "No interface selected. Trying to probe the supported interfaces: {}".format(
+                    supported_interfaces
+                )
+            )
+            # Here we try to probe which interface is actually in use, might be either libusb, i2c or uart
+            # We suppress stderr output of the libusb interface in case it's not connected to not confuse
+            # a user
+            for _interface in supported_interfaces:
+                try:
+                    _OPTIGA_CDLL = _load_lib(_interface, probing=True)
+                    initialised = True
+                    print()
+                    break
+                except OSError as error:
+                    errors.append(error)
+        else:
             try:
-                _OPTIGA_CDLL = _load_lib(interface)
-                logger.info("Loaded: {0}".format(_get_lib_name(interface)))
+                _OPTIGA_CDLL = _load_lib(interface, probing=False)
                 initialised = True
-                break
+                print()
             except OSError as error:
                 errors.append(error)
 
@@ -177,7 +231,11 @@ def protected_update(api, manifest, fragments):
     ret = api.exp_optiga_util_protected_update_start(c_ubyte(0x01), _manifest, len(_manifest))
 
     if ret != 0:
-        logger.info("Manifest [{0}]: ".format(len(_manifest)).join("{:02x} ".format(x) for x in list(_manifest)))
+        logger.info(
+            "Manifest [{0}]: ".format(len(_manifest)).join(
+                "{:02x} ".format(x) for x in list(_manifest)
+            )
+        )
         logger.info(len(_manifest))
         raise IOError("Function can't be executed. Error {0}".format(hex(ret)))
 
@@ -190,7 +248,11 @@ def protected_update(api, manifest, fragments):
         ret = api.exp_optiga_util_protected_update_continue(_fragment, len(_fragment))
 
         if ret != 0:
-            logger.info("Fragment {0} [{1}]: ".format(count, len(_fragment)).join("{:02x} ".format(x) for x in list(_fragment)))
+            logger.info(
+                "Fragment {0} [{1}]: ".format(count, len(_fragment)).join(
+                    "{:02x} ".format(x) for x in list(_fragment)
+                )
+            )
             raise IOError("Function can't be executed. Error {0}".format(hex(ret)))
 
     final_fragment = (c_ubyte * len(fragments[-1]))(*fragments[-1])
@@ -201,7 +263,11 @@ def protected_update(api, manifest, fragments):
     ret = api.exp_optiga_util_protected_update_final(final_fragment, len(final_fragment))
 
     if ret != 0:
-        logger.info("Final Fragment [{0}]: ".format(len(final_fragment)).join("{:02x} ".format(x) for x in list(final_fragment)))
+        logger.info(
+            "Final Fragment [{0}]: ".format(len(final_fragment)).join(
+                "{:02x} ".format(x) for x in list(final_fragment)
+            )
+        )
         raise IOError("Function can't be executed. Error {0}".format(hex(ret)))
 
     return ret
@@ -241,7 +307,7 @@ def lookup_optiga(api):
 
         return m1, "OPTIGA™ Trust M V1 (SLS32AIA010MH/S)"
     # Trust M2 ID2 or M3
-    if _fw_build in {0x2440}:
+    if _fw_build in {0x2440, 0x2564}:
         ret = api.exp_optiga_util_read_metadata(c_ushort(0xE0F1), data, byref(c_dlen))
         if ret != 0:
             # it means that we work with OPTIGA Trust M2 ID2
@@ -331,12 +397,20 @@ def write_data(api, object_id, offset, data):
     :raises
         - IOError - in case data read is not possible an IOError exception is generated
     """
-    api.exp_optiga_util_write_data.argtypes = c_ushort, c_ubyte, c_ushort, POINTER(c_ubyte), c_ushort
+    api.exp_optiga_util_write_data.argtypes = (
+        c_ushort,
+        c_ubyte,
+        c_ushort,
+        POINTER(c_ubyte),
+        c_ushort,
+    )
     api.exp_optiga_util_write_data.restype = c_int
 
     ctypes_data = (c_ubyte * len(data))(*data)
 
-    ret = api.exp_optiga_util_write_data(c_ushort(object_id), 0x40, offset, ctypes_data, len(ctypes_data))
+    ret = api.exp_optiga_util_write_data(
+        c_ushort(object_id), 0x40, offset, ctypes_data, len(ctypes_data)
+    )
 
     if ret != 0:
         raise IOError("Function can't be executed. Error {0}".format(hex(ret)))

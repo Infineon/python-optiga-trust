@@ -16,7 +16,7 @@ import hashlib
 
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes, serialization
 
 import optigatrust as optiga
 from optigatrust import objects, util, _algorithms
@@ -57,7 +57,11 @@ _curve_hash_map = {
     "brainpoolp512r1": [hashlib.sha512, 64, "sha512"],
 }
 
-_hash_map = {"sha256": [hashlib.sha256, 32], "sha384": [hashlib.sha384, 48], "sha512": [hashlib.sha512, 64]}
+_hash_map = {
+    "sha256": [hashlib.sha256, 32, hashes.SHA256()],
+    "sha384": [hashlib.sha384, 48, hashes.SHA384()],
+    "sha512": [hashlib.sha512, 64, hashes.SHA512()],
+}
 
 
 def _str2curve(curve_str, return_value=False):
@@ -67,7 +71,9 @@ def _str2curve(curve_str, return_value=False):
         if return_value:
             return curves_map[curve_str].value
         return curves_map[curve_str]
-    raise ValueError("Your curve ({0}) not supported use one of these: {1}".format(curve_str, curves_map.keys()))
+    raise ValueError(
+        "Your curve ({0}) not supported use one of these: {1}".format(curve_str, curves_map.keys())
+    )
 
 
 def _curve2str(curve):
@@ -77,7 +83,9 @@ def _curve2str(curve):
         if curve == curves_map[entry]:
             return entry
 
-    raise ValueError("Your curve ({0}) not supported use one of these: {1}".format(curve, curves_map.keys()))
+    raise ValueError(
+        "Your curve ({0}) not supported use one of these: {1}".format(curve, curves_map.keys())
+    )
 
 
 def _native_to_pkcs(pkey, key=None, algorithm=None):
@@ -103,28 +111,66 @@ def _native_to_pkcs(pkey, key=None, algorithm=None):
         A tuple of keys (public_key, private_key)
     """
     _algorithms_map = {
-        "secp256r1": ("ec", b"0Y0\x13\x06\x07*\x86H\xce=\x02\x01\x06\x08*\x86H\xce=\x03\x01\x07", ec.SECP256R1()),
-        "secp384r1": ("ec", b'0v0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00"', ec.SECP384R1()),
-        "secp521r1": ("ec", b"0\x81\x9b0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00#", ec.SECP521R1()),
-        "brainpoolp256r1": ("ec", b"0Z0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\x07", ec.BrainpoolP256R1()),
-        "brainpoolp384r1": ("ec", b"0z0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\x0b", ec.BrainpoolP384R1()),
-        "brainpoolp512r1": ("ec", b"0\x81\x9b0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\r", ec.BrainpoolP512R1()),
+        "secp256r1": (
+            "ec",
+            b"0Y0\x13\x06\x07*\x86H\xce=\x02\x01\x06\x08*\x86H\xce=\x03\x01\x07",
+            ec.SECP256R1(),
+        ),
+        "secp384r1": (
+            "ec",
+            b'0v0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00"',
+            ec.SECP384R1(),
+        ),
+        "secp521r1": (
+            "ec",
+            b"0\x81\x9b0\x10\x06\x07*\x86H\xce=\x02\x01\x06\x05+\x81\x04\x00#",
+            ec.SECP521R1(),
+        ),
+        "brainpoolp256r1": (
+            "ec",
+            b"0Z0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\x07",
+            ec.BrainpoolP256R1(),
+        ),
+        "brainpoolp384r1": (
+            "ec",
+            b"0z0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\x0b",
+            ec.BrainpoolP384R1(),
+        ),
+        "brainpoolp512r1": (
+            "ec",
+            b"0\x81\x9b0\x14\x06\x07*\x86H\xce=\x02\x01\x06\t+$\x03\x03\x02\x08\x01\x01\r",
+            ec.BrainpoolP512R1(),
+        ),
     }
     if algorithm not in _algorithms_map:
-        raise ValueError("{0} isn't supported. Use one of {1}".format(algorithm, _algorithms_map.keys()))
+        raise ValueError(
+            "{0} isn't supported. Use one of {1}".format(algorithm, _algorithms_map.keys())
+        )
     if not isinstance(pkey, (bytes, bytearray)):
-        raise TypeError("pkey is of unsupported types (pkey type = {0}), " "should be either bytes or bytearray".format(type(pkey)))
+        raise TypeError(
+            "pkey is of unsupported types (pkey type = {0}), should be either bytes or bytearray".format(
+                type(pkey)
+            )
+        )
     if key is not None and not isinstance(key, (bytes, bytearray)):
-        raise TypeError("key is of unsupported types (key type = {0}), " "should be either bytes or bytearray".format(type(key)))
+        raise TypeError(
+            "key is of unsupported types (key type = {0}), should be either bytes or bytearray".format(
+                type(key)
+            )
+        )
     _type = _algorithms_map[algorithm][0]
     if _type == "ec":
         prefix = _algorithms_map[algorithm][1]
         pyca_curve = _algorithms_map[algorithm][2]
         public_key = prefix + pkey
         if key is not None:
-            private_key = ec.derive_private_key(int.from_bytes(key[2:], "big"), pyca_curve, default_backend())
+            private_key = ec.derive_private_key(
+                int.from_bytes(key[2:], "big"), pyca_curve, default_backend()
+            )
             private_key = private_key.private_bytes(
-                encoding=serialization.Encoding.DER, format=serialization.PrivateFormat.PKCS8, encryption_algorithm=serialization.NoEncryption()
+                encoding=serialization.Encoding.DER,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.NoEncryption(),
             )
         else:
             private_key = None
@@ -154,7 +200,9 @@ def _ecc_signature_asn1_to_native(signature):
             signature = bytes(signature.encode())
             warnings.warn("Signture will be converted to bytes type.")
         else:
-            raise TypeError("Signture should be either bytes or str type, you gave {0}".format(type(signature)))
+            raise TypeError(
+                "Signture should be either bytes or str type, you gave {0}".format(type(signature))
+            )
 
     # Check if the ECC signature starts with the 0x30 tag
     if signature[0] != 0x30:
@@ -188,11 +236,24 @@ def _public_key_pkcs_to_native(pkey, algorithm=None):
     :returns:
         Public key as two DER Octet Strings
     """
-    _algorithms_map = {"secp256r1": 23, "secp384r1": 20, "secp521r1": 21, "brainpoolp256r1": 24, "brainpoolp384r1": 24, "brainpoolp512r1": 25}
+    _algorithms_map = {
+        "secp256r1": 23,
+        "secp384r1": 20,
+        "secp521r1": 21,
+        "brainpoolp256r1": 24,
+        "brainpoolp384r1": 24,
+        "brainpoolp512r1": 25,
+    }
     if algorithm not in _algorithms_map:
-        raise ValueError("{0} isn't supported. Use one of {1}".format(algorithm, _algorithms_map.keys()))
+        raise ValueError(
+            "{0} isn't supported. Use one of {1}".format(algorithm, _algorithms_map.keys())
+        )
     if not isinstance(pkey, (bytes, bytearray)):
-        raise TypeError("pkey is of unsupported types (pkey type = {0}), " "should be either bytes or bytearray".format(type(pkey)))
+        raise TypeError(
+            "pkey is of unsupported types (pkey type = {0}), should be either bytes or bytearray".format(
+                type(pkey)
+            )
+        )
     prefix_length = _algorithms_map[algorithm]
 
     return pkey[prefix_length:]
@@ -263,7 +324,11 @@ def random(number, trng=True):
 # pylint: disable=too-many-locals
 def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     opt = optiga.Chip()
-    _allowed_key_usage = {"key_agreement": opt.key_usage.KEY_AGR, "authentication": opt.key_usage.AUTH, "signature": opt.key_usage.SIGN}
+    _allowed_key_usage = {
+        "key_agreement": opt.key_usage.KEY_AGR,
+        "authentication": opt.key_usage.AUTH,
+        "signature": opt.key_usage.SIGN,
+    }
     _key_sizes = {
         "secp256r1": (68, 34),
         "secp384r1": (100, 50),
@@ -279,12 +344,20 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     else:
         for entry in key_usage:
             if entry not in _allowed_key_usage:
-                raise ValueError("Wrong Key Usage value {0}, supported are {1}".format(entry, _allowed_key_usage.keys()))
+                raise ValueError(
+                    "Wrong Key Usage value {0}, supported are {1}".format(
+                        entry, _allowed_key_usage.keys()
+                    )
+                )
             _key_usage.append(_allowed_key_usage[entry])
 
     _curve = _str2curve(curve, return_value=True)
     if _curve not in opt.curves_values:
-        raise TypeError("object_id not found. \n\r Supported = {0},\n\r  " "Provided = {1}".format(map(_curve2str, list(opt.curves)), curve))
+        raise TypeError(
+            "object_id not found. \n\r Supported = {0},\n\r  Provided = {1}".format(
+                map(_curve2str, list(opt.curves)), curve
+            )
+        )
 
     c_keyusage = c_uint8(sum(map(lambda ku: ku.value, _key_usage)))
     pkey = (c_uint8 * _key_sizes[curve][0])()
@@ -296,7 +369,9 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     else:
         key = byref(c_uint16(key_object.id))
 
-    ret = opt.api.exp_optiga_crypt_ecc_generate_keypair(_curve, c_keyusage, int(export), key, pkey, byref(c_plen))
+    ret = opt.api.exp_optiga_crypt_ecc_generate_keypair(
+        _curve, c_keyusage, int(export), key, pkey, byref(c_plen)
+    )
 
     if export:
         priv_key = (c_uint8 * _key_sizes[curve][1])()
@@ -310,7 +385,9 @@ def _generate_ecc_pair(key_object, curve, key_usage=None, export=False):
     if ret == 0:
         key_object.curve = curve
         if export:
-            public_key, private_key = _native_to_pkcs(key=bytes(priv_key), pkey=bytes(pub_key), algorithm=curve)
+            public_key, private_key = _native_to_pkcs(
+                key=bytes(priv_key), pkey=bytes(pub_key), algorithm=curve
+            )
             return public_key, private_key
 
         public_key, _ = _native_to_pkcs(key=None, pkey=bytes(pub_key), algorithm=curve)
@@ -335,16 +412,31 @@ def _generate_rsa_pair(key_object, key_size=1024, key_usage=None, export=False):
     else:
         for entry in key_usage:
             if entry not in _allowed_key_usages:
-                raise ValueError("Wrong Key Usage value {0}, supported are {1}".format(entry, _allowed_key_usages.keys()))
+                raise ValueError(
+                    "Wrong Key Usage value {0}, supported are {1}".format(
+                        entry, _allowed_key_usages.keys()
+                    )
+                )
             _key_usage.append(_allowed_key_usages[entry])
 
     api = handle.api
 
     allowed_key_sizes = (1024, 2048)
     if key_size not in allowed_key_sizes:
-        raise ValueError("This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]".format(key_size, type(key_size)))
+        raise ValueError(
+            "This key size is not supported, you typed {0} (type {1}) supported are [1024, 2048]".format(
+                key_size, type(key_size)
+            )
+        )
 
-    api.exp_optiga_crypt_rsa_generate_keypair.argtypes = c_int32, c_uint8, c_bool, c_void_p, POINTER(c_uint8), POINTER(c_uint16)
+    api.exp_optiga_crypt_rsa_generate_keypair.argtypes = (
+        c_int32,
+        c_uint8,
+        c_bool,
+        c_void_p,
+        POINTER(c_uint8),
+        POINTER(c_uint16),
+    )
     api.exp_optiga_crypt_rsa_generate_keypair.restype = c_int32
 
     if key_size == 1024:
@@ -364,7 +456,9 @@ def _generate_rsa_pair(key_object, key_size=1024, key_usage=None, export=False):
         key = byref(c_uint16(key_object.id))
     c_plen = c_uint16(len(pkey))
 
-    ret = api.exp_optiga_crypt_ecc_generate_keypair(c_keytype, c_keyusage, int(export), key, pkey, byref(c_plen))
+    ret = api.exp_optiga_crypt_ecc_generate_keypair(
+        c_keytype, c_keyusage, int(export), key, pkey, byref(c_plen)
+    )
 
     if export:
         priv_key = (c_uint8 * (100 + 4))()
@@ -423,10 +517,14 @@ def generate_pair(key_object, curve=None, key_usage=None, key_size=1024, export=
 
     """
     if isinstance(key_object, objects.ECCKey):
-        return _generate_ecc_pair(key_object=key_object, curve=curve, key_usage=key_usage, export=export)
+        return _generate_ecc_pair(
+            key_object=key_object, curve=curve, key_usage=key_usage, export=export
+        )
 
     if isinstance(key_object, objects.RSAKey):
-        return _generate_rsa_pair(key_object=key_object, key_size=key_size, key_usage=key_usage, export=export)
+        return _generate_rsa_pair(
+            key_object=key_object, key_size=key_size, key_usage=key_usage, export=export
+        )
 
     raise ValueError("key_object type isn't supported")
 
@@ -437,7 +535,9 @@ def calculate_hash(hash_algorithm, data):
             _d = bytes(data.encode())
             warnings.warn("data will be converted to bytes type before hashing")
         else:
-            raise TypeError("Data to sign should be either bytes or str type, you gave {0}".format(type(data)))
+            raise TypeError(
+                "Data to sign should be either bytes or str type, you gave {0}".format(type(data))
+            )
     else:
         _d = data
 
@@ -450,7 +550,11 @@ def calculate_hash(hash_algorithm, data):
 
 def ecdsa_sign(key_object, data):
     if not isinstance(key_object, objects.ECCKey):
-        raise TypeError("key_object is not supported. You provided {0}, expected {1}".format(type(key_object), objects.ECCKey))
+        raise TypeError(
+            "key_object is not supported. You provided {0}, expected {1}".format(
+                type(key_object), objects.ECCKey
+            )
+        )
 
     hash_algorithm = _curve_hash_map[key_object.curve][2]
 
@@ -477,7 +581,11 @@ def ecdsa_sign_with_hash(key_object, data, hash_algorithm):
         EcdsaSignature object or None
     """
     if not isinstance(key_object, objects.ECCKey):
-        raise TypeError("key_object is not supported. You provided {0}, expected {1}".format(type(key_object), objects.ECCKey))
+        raise TypeError(
+            "key_object is not supported. You provided {0}, expected {1}".format(
+                type(key_object), objects.ECCKey
+            )
+        )
     api = optiga.Chip().api
 
     if not isinstance(data, bytes) and not isinstance(data, bytearray):
@@ -485,7 +593,9 @@ def ecdsa_sign_with_hash(key_object, data, hash_algorithm):
             data = bytes(data.encode())
             warnings.warn("data will be converted to bytes type before signing")
         else:
-            raise TypeError("Data to sign should be either bytes or str type, you gave {0}".format(type(data)))
+            raise TypeError(
+                "Data to sign should be either bytes or str type, you gave {0}".format(type(data))
+            )
     else:
         data = data
 
@@ -504,9 +614,17 @@ def ecdsa_sign_with_hash(key_object, data, hash_algorithm):
     logger.info("Key ID: 0x{:X}".format(key_object.id))
     logger.info("Digest (0x{:X}):\n{}".format(c_digest_len.value, util.binary_to_hex(c_digest)))
 
-    api.exp_optiga_crypt_ecdsa_sign.argtypes = POINTER(c_uint8), c_uint8, c_uint16, POINTER(c_uint8), POINTER(c_uint16)
+    api.exp_optiga_crypt_ecdsa_sign.argtypes = (
+        POINTER(c_uint8),
+        c_uint8,
+        c_uint16,
+        POINTER(c_uint8),
+        POINTER(c_uint16),
+    )
     api.exp_optiga_crypt_ecdsa_sign.restype = c_uint16
-    ret = api.exp_optiga_crypt_ecdsa_sign(c_digest, c_digest_len, key_object.id, c_signature, byref(c_signature_len))
+    ret = api.exp_optiga_crypt_ecdsa_sign(
+        c_digest, c_digest_len, key_object.id, c_signature, byref(c_signature_len)
+    )
 
     if ret == 0:
         if c_signature_len.value > 0x7F:
@@ -666,18 +784,31 @@ def _ecdsa_verify(c_digest, c_signature, c_pk_type, c_pub_key):
     c_digest_len = c_uint8(len(c_digest))
 
     logger.info("Digest (0x{:X}):\n{}".format(c_digest_len.value, util.binary_to_hex(c_digest)))
-    logger.info("Signature (0x{:X}):\n{}".format(c_sginature_len.value, util.binary_to_hex(c_signature)))
+    logger.info(
+        "Signature (0x{:X}):\n{}".format(c_sginature_len.value, util.binary_to_hex(c_signature))
+    )
 
     if c_pk_type.value == 0x00:
         logger.info("Public key OID: (0x{:X})".format(c_pub_key.value))
     if c_pk_type.value == 0x01:
-        pk_string = util.binary_to_hex(bytearray(cast(c_pub_key.public_key, POINTER(c_uint8 * c_pub_key.length)).contents))
+        pk_string = util.binary_to_hex(
+            bytearray(cast(c_pub_key.public_key, POINTER(c_uint8 * c_pub_key.length)).contents)
+        )
         logger.info("Public key (0x{:X}):\n{}".format(c_pub_key.length, pk_string))
 
     api = optiga.Chip().api
-    api.exp_optiga_crypt_ecdsa_verify.argtypes = POINTER(c_uint8), c_uint8, POINTER(c_uint8), c_uint16, c_uint8, c_void_p
+    api.exp_optiga_crypt_ecdsa_verify.argtypes = (
+        POINTER(c_uint8),
+        c_uint8,
+        POINTER(c_uint8),
+        c_uint16,
+        c_uint8,
+        c_void_p,
+    )
     api.exp_optiga_crypt_ecdsa_verify.restype = c_uint16
-    ret = api.exp_optiga_crypt_ecdsa_verify(c_digest, c_digest_len, c_signature, c_sginature_len, c_pk_type, byref(c_pub_key))
+    ret = api.exp_optiga_crypt_ecdsa_verify(
+        c_digest, c_digest_len, c_signature, c_sginature_len, c_pk_type, byref(c_pub_key)
+    )
 
     if ret == 0:
         logger.info("Signature validation successful!")
@@ -697,29 +828,10 @@ def ecdh(key_object, external_pkey, export=False):
         :class:`~optigatrust.objects.ECCKey`
 
     :param external_pkey:
-        a bytearray with a public key You can submit public keys with parameters as per openssl output in DER format
-        ::
-
-            from asn1crypto import pem
-            # Option 1
-            pem_string = '-----BEGIN PUBLIC KEY-----\\n' + \\
-                         'MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhqPByq/2I5Xv1jqSZbBzS8fptkdP\\n' + \\
-                         'fArs2+l6SZ8IfOIukkf/wHiww0FV+jxehrVyzW+cy9+KftBobalw3iXN2A==\\n' + \\
-                         '-----END PUBLIC KEY-----'
-            if pem.detect(pem_string):
-                type_name, headers, der_bytes = pem.unarmor(pem_string)
-
-            # Option 2
-            hex_string ='3059301306072a8648ce3d020106082a' + \\
-                        '8648ce3d0301070342000486a3c1caaf' + \\
-                        'f62395efd63a9265b0734bc7e9b6474f' + \\
-                        '7c0aecdbe97a499f087ce22e9247ffc0' + \\
-                        '78b0c34155fa3c5e86b572cd6f9ccbdf' + \\
-                        '8a7ed0686da970de25cdd8'
-            der_bytes = bytes().from_hex(hex_string)
+        A public key in DER encoding as :class:`bytes` object.
 
     :param export:
-        defines whether the resulting secret should be exported or not
+        Specifies whether the resulting secret should be exported or not
 
     :raises:
         - TypeError - when any of the parameters are of the wrong type
@@ -730,9 +842,17 @@ def ecdh(key_object, external_pkey, export=False):
         otherwise returns :class:`~optigatrust.objects.AcquiredSession()`
     """
     if not isinstance(key_object, objects.ECCKey):
-        raise TypeError("key_object is not supported. You provided {0}, expected {1}".format(type(key_object), objects.ECCKey))
+        raise TypeError(
+            "key_object is not supported. You provided {0}, expected {1}".format(
+                type(key_object), objects.ECCKey
+            )
+        )
     if not isinstance(external_pkey, bytes) and not isinstance(external_pkey, bytearray):
-        raise TypeError("Public Key should be either bytes or " "bytearray type, you gave {0}".format(type(external_pkey)))
+        raise TypeError(
+            "Public Key should be either bytes or bytearray type, you gave {0}".format(
+                type(external_pkey)
+            )
+        )
     api = optiga.Chip().api
     # OPTIGA doesn't understand the asn.1 encoded parameters field
     external_pkey = _public_key_pkcs_to_native(pkey=external_pkey, algorithm=key_object.curve)
@@ -742,7 +862,12 @@ def ecdh(key_object, external_pkey, export=False):
     except KeyError as no_meta_found:
         raise ValueError("Given object does't have a key populated.") from no_meta_found
 
-    api.exp_optiga_crypt_ecdh.argtypes = c_uint16, POINTER(PublicKeyFromHost), c_uint8, POINTER(c_uint8)
+    api.exp_optiga_crypt_ecdh.argtypes = (
+        c_uint16,
+        POINTER(PublicKeyFromHost),
+        c_uint8,
+        POINTER(c_uint8),
+    )
     api.exp_optiga_crypt_ecdsa_sign.restype = c_int32
 
     # pylint: disable=attribute-defined-outside-init
@@ -792,14 +917,20 @@ def pkcs1v15_sign(key_object, data, hash_algorithm="sha256"):
     api = optiga.Chip().api
 
     if not isinstance(key_object, objects.RSAKey):
-        raise TypeError("key_object is not supported. You provided {0}, expected {1}".format(type(key_object), objects.RSAKey))
+        raise TypeError(
+            "key_object is not supported. You provided {0}, expected {1}".format(
+                type(key_object), objects.RSAKey
+            )
+        )
 
     if not isinstance(data, bytes) and not isinstance(data, bytearray):
         if isinstance(data, str):
             _d = bytes(data.encode())
             warnings.warn("data will be converted to bytes type before signing")
         else:
-            raise TypeError("Data to sign should be either bytes or str type, you gave {0}".format(type(data)))
+            raise TypeError(
+                "Data to sign should be either bytes or str type, you gave {0}".format(type(data))
+            )
     else:
         _d = data
 
@@ -816,10 +947,16 @@ def pkcs1v15_sign(key_object, data, hash_algorithm="sha256"):
         # Signature schemes RSA SSA PKCS1-v1.5 with SHA384 digest
         sign_scheme = 0x02
     else:
-        raise ValueError("This key isze is not supported, you typed {0} supported are ['sha256', 'sha384']".format(hash_algorithm))
+        raise ValueError(
+            "This key isze is not supported, you typed {0} supported are ['sha256', 'sha384']".format(
+                hash_algorithm
+            )
+        )
     c_slen = c_uint32(len(sign))
 
-    ret = api.exp_optiga_crypt_rsa_sign(sign_scheme, digest, len(digest), key_object.id, sign, byref(c_slen), 0)
+    ret = api.exp_optiga_crypt_rsa_sign(
+        sign_scheme, digest, len(digest), key_object.id, sign, byref(c_slen), 0
+    )
 
     if ret == 0:
         signature = (c_uint8 * c_slen.value)()
@@ -857,19 +994,31 @@ def pkcs1v15_encrypt(data, pkey, exp_size="1024"):
     api = optiga.Chip().api
 
     if not isinstance(pkey, (int, bytes, bytearray)):
-        raise TypeError("pkey is not supported. You provided {0}, expected {1}, {2}, or {3}".format(type(pkey), int, bytes, bytearray))
+        raise TypeError(
+            "pkey is not supported. You provided {0}, expected {1}, {2}, or {3}".format(
+                type(pkey), int, bytes, bytearray
+            )
+        )
 
     if not isinstance(data, (bytes, bytearray)):
         if isinstance(data, str):
             _d = bytes(data.encode())
             warnings.warn("data will be converted to bytes type before signing")
         else:
-            raise TypeError("Data to encrypt should be either bytes, bytearray or str type, " "you provided {0}".format(type(data)))
+            raise TypeError(
+                "Data to encrypt should be either bytes, bytearray or str type, you provided {0}".format(
+                    type(data)
+                )
+            )
     else:
         _d = data
 
     if exp_size not in {"1024", "2048"}:
-        raise ValueError("This exponent size is not supported, you typed {0} supported are ['1024', '2048']".format(exp_size))
+        raise ValueError(
+            "This exponent size is not supported, you typed {0} supported are ['1024', '2048']".format(
+                exp_size
+            )
+        )
 
     api.optiga_crypt_rsa_encrypt_message.restype = c_int32
 
@@ -883,7 +1032,7 @@ def pkcs1v15_encrypt(data, pkey, exp_size="1024"):
     else:
         if pkey[0] != 0x03:
             raise ValueError(
-                "See https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Public-Key.\n" "Your key has unsupported format: \n{0}".format(
+                "See https://github.com/Infineon/optiga-trust-m/wiki/Data-format-examples#RSA-Public-Key.\nYour key has unsupported format: \n{0}".format(
                     "".join("{:02x} ".format(x) for x in pkey)
                 )
             )
@@ -904,7 +1053,15 @@ def pkcs1v15_encrypt(data, pkey, exp_size="1024"):
     c_ctlen = c_uint32(500)
 
     ret = api.exp_optiga_crypt_rsa_encrypt_message(
-        encrypt_scheme, data_to_encrypt, len(data_to_encrypt), None, c_uint16(0), _type, byref(_pkey), ctext, byref(c_ctlen)
+        encrypt_scheme,
+        data_to_encrypt,
+        len(data_to_encrypt),
+        None,
+        c_uint16(0),
+        _type,
+        byref(_pkey),
+        ctext,
+        byref(c_ctlen),
     )
 
     if ret == 0:
@@ -939,12 +1096,18 @@ def pkcs1v15_decrypt(ciphertext, key_id):
     api = optiga.Chip().api
 
     if not isinstance(ciphertext, (bytes, bytearray)):
-        raise TypeError("Data to decrypt should be either bytes or bytearray type, " "you provided {0}".format(type(ciphertext)))
+        raise TypeError(
+            "Data to decrypt should be either bytes or bytearray type, you provided {0}".format(
+                type(ciphertext)
+            )
+        )
     else:
         ct = ciphertext
 
     if not isinstance(key_id, int):
-        raise TypeError("key is not supported. You provided {0}, expected {1}".format(type(key_id), int))
+        raise TypeError(
+            "key is not supported. You provided {0}, expected {1}".format(type(key_id), int)
+        )
 
     encrypt_scheme = 0x11
 
@@ -954,7 +1117,14 @@ def pkcs1v15_decrypt(ciphertext, key_id):
     c_ptlen = c_uint32(500)
 
     ret = api.exp_optiga_crypt_rsa_decrypt_and_export(
-        encrypt_scheme, data_to_decrypt, len(data_to_decrypt), None, c_uint16(0), key_id, plaintext, byref(c_ptlen)
+        encrypt_scheme,
+        data_to_decrypt,
+        len(data_to_decrypt),
+        None,
+        c_uint16(0),
+        key_id,
+        plaintext,
+        byref(c_ptlen),
     )
 
     if ret == 0:
@@ -993,23 +1163,37 @@ def hmac(key_object, data, hash_algorithm="sha256"):
     """
     api = optiga.Chip().api
     if not isinstance(key_object, (objects.AppData, objects.Session, objects.AcquiredSession)):
-        raise TypeError("key_object should be either {0}, {1}, or {2} types".format(objects.AppData, objects.Session, objects.AcquiredSession))
+        raise TypeError(
+            "key_object should be either {0}, {1}, or {2} types".format(
+                objects.AppData, objects.Session, objects.AcquiredSession
+            )
+        )
     if isinstance(key_object, objects.AppData):
         try:
             if key_object.meta["type"] != "pre_sh_secret":
-                raise ValueError("Selected object doesn't have a proper setup." "Should have PRESHSEC type, you have {0}".format(key_object.meta["type"]))
+                raise ValueError(
+                    "Selected object doesn't have a proper setup.Should have PRESHSEC type, you have {0}".format(
+                        key_object.meta["type"]
+                    )
+                )
         except KeyError as no_such_meta:
-            raise ValueError("Selected object doesn't have a proper setup." "Should have PRESHSEC type") from no_such_meta
+            raise ValueError(
+                "Selected object doesn't have a proper setup.Should have PRESHSEC type"
+            ) from no_such_meta
     _hash_map = {"sha256": (0x20, 32), "sha384": (0x21, 48), "sha512": (0x22, 64)}
     if hash_algorithm not in _hash_map:
-        raise ValueError("Hash algorithm should be one of the following {}".format(_hash_map.keys()))
+        raise ValueError(
+            "Hash algorithm should be one of the following {}".format(_hash_map.keys())
+        )
     if not isinstance(data, (bytearray, bytes)):
         raise TypeError("Data should be byte string, {0} provided.".format(type(data)))
     _data = (c_uint8 * len(data))(*data)
     mac = (c_uint8 * _hash_map[hash_algorithm][1])()
     mac_len = c_uint32(_hash_map[hash_algorithm][1])
 
-    ret = api.exp_optiga_crypt_hmac(_hash_map[hash_algorithm][0], key_object.id, _data, len(_data), mac, byref(mac_len))
+    ret = api.exp_optiga_crypt_hmac(
+        _hash_map[hash_algorithm][0], key_object.id, _data, len(_data), mac, byref(mac_len)
+    )
 
     if ret == 0:
         return bytes(mac)
@@ -1057,16 +1241,28 @@ def tls_prf(obj, key_length, seed, label=None, hash_algorithm="sha256", export=F
     """
     api = optiga.Chip().api
     if not isinstance(obj, (objects.AppData, objects.AcquiredSession)):
-        raise TypeError("key_object should be either {0}, or {1} types".format(objects.AppData, objects.AcquiredSession))
+        raise TypeError(
+            "key_object should be either {0}, or {1} types".format(
+                objects.AppData, objects.AcquiredSession
+            )
+        )
     if isinstance(obj, objects.AppData):
         try:
             if obj.meta["type"] != "pre_sh_secret":
-                raise ValueError("Selected object doesn't have a proper setup." "Should have PRESHSEC type, you have {0}".format(obj.meta["type"]))
+                raise ValueError(
+                    "Selected object doesn't have a proper setup.Should have PRESHSEC type, you have {0}".format(
+                        obj.meta["type"]
+                    )
+                )
         except KeyError as no_meta_found:
-            raise ValueError("Selected object doesn't have a proper setup." "Should have PRESHSEC type") from no_meta_found
+            raise ValueError(
+                "Selected object doesn't have a proper setup.Should have PRESHSEC type"
+            ) from no_meta_found
     _hash_map = {"sha256": 0x01, "sha384": 0x02, "sha512": 0x03}
     if hash_algorithm not in _hash_map:
-        raise ValueError("Hash algorithm should be one of the following {}".format(_hash_map.keys()))
+        raise ValueError(
+            "Hash algorithm should be one of the following {}".format(_hash_map.keys())
+        )
 
     if label is None:
         label_len = c_uint16(0)
@@ -1083,7 +1279,17 @@ def tls_prf(obj, key_length, seed, label=None, hash_algorithm="sha256", export=F
     else:
         derived_key = None
 
-    ret = api.exp_optiga_crypt_tls_prf(_hash_map[hash_algorithm], obj.id, label, label_len, seed, seed_len, key_length, int(export), derived_key)
+    ret = api.exp_optiga_crypt_tls_prf(
+        _hash_map[hash_algorithm],
+        obj.id,
+        label,
+        label_len,
+        seed,
+        seed_len,
+        key_length,
+        int(export),
+        derived_key,
+    )
 
     if ret == 0:
         if export:
@@ -1134,16 +1340,28 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm="sha256", 
     """
     api = optiga.Chip().api
     if not isinstance(key_object, (objects.AppData, objects.AcquiredSession)):
-        raise TypeError("key_object should be either {0},  or {1} types".format(objects.AppData, objects.AcquiredSession))
+        raise TypeError(
+            "key_object should be either {0},  or {1} types".format(
+                objects.AppData, objects.AcquiredSession
+            )
+        )
     if isinstance(key_object, objects.AppData):
         try:
             if key_object.meta["type"] != "pre_sh_secret":
-                raise ValueError("Selected object doesn't have a proper setup." "Should have PRESHSEC type, you have {0}".format(key_object.meta["type"]))
+                raise ValueError(
+                    "Selected object doesn't have a proper setup.Should have PRESHSEC type, you have {0}".format(
+                        key_object.meta["type"]
+                    )
+                )
         except KeyError as no_meta_found:
-            raise ValueError("Selected object doesn't have a proper setup." "Should have PRESHSEC type") from no_meta_found
+            raise ValueError(
+                "Selected object doesn't have a proper setup.Should have PRESHSEC type"
+            ) from no_meta_found
     _hash_map = {"sha256": 0x08, "sha384": 0x09, "sha512": 0x0A}
     if hash_algorithm not in _hash_map:
-        raise ValueError("Hash algorithm should be one of the following {}".format(_hash_map.keys()))
+        raise ValueError(
+            "Hash algorithm should be one of the following {}".format(_hash_map.keys())
+        )
 
     if salt is None:
         salt_len = c_uint16(0)
@@ -1160,7 +1378,15 @@ def hkdf(key_object, key_length, salt=None, info=None, hash_algorithm="sha256", 
         derived_key = None
 
     ret = api.exp_optiga_crypt_hkdf(
-        _hash_map[hash_algorithm], key_object.id, salt, byref(salt_len), info, byref(info_len), key_length, int(export), derived_key
+        _hash_map[hash_algorithm],
+        key_object.id,
+        salt,
+        byref(salt_len),
+        info,
+        byref(info_len),
+        key_length,
+        int(export),
+        derived_key,
     )
 
     if ret == 0:
@@ -1210,7 +1436,9 @@ def pbkdf2_hmac(key_object, hash_name, salt, iterations, dklen=None):
     """
     _hash_map = {"sha256": 32, "sha384": 48, "sha512": 64}
     if hash_name not in _hash_map:
-        raise ValueError("Hash algorithm should be one of the following {}".format(_hash_map.keys()))
+        raise ValueError(
+            "Hash algorithm should be one of the following {}".format(_hash_map.keys())
+        )
 
     if not isinstance(hash_name, str):
         raise TypeError(hash_name)

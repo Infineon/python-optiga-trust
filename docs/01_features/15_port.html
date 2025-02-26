@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Export or import chip metadata &mdash; OPTIGA™ Trust M Host Library for Python 1.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/ifx.css?v=98c1075d" />
+
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=e0a75244"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Error codes" href="20_error_codes.html" />
+    <link rel="prev" title="Certificate Signing Request (CSR)" href="14_csr.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: white" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            OPTIGA™ Trust M Host Library for Python
+              <img src="../_static/infineon_logo_color.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../00_getting_started/index.html">Hardware</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/01_hardware.html">Overview on hardware variants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../00_getting_started/02_prov_mode.html">Enabling the provisioning mode for UART-to-I²C bridge</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Features</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="11_chip.html">Chip settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="12_metadata.html">Object and metadata management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="13_crypto.html">Cryptographic operations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="14_csr.html">Certificate Signing Request (CSR)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Export or import chip metadata</a></li>
+<li class="toctree-l2"><a class="reference internal" href="20_error_codes.html">Error codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../02_building/index.html">Building &amp; Porting</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: white" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">OPTIGA™ Trust M Host Library for Python</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Features</a></li>
+      <li class="breadcrumb-item active">Export or import chip metadata</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul><div class="rst-breadcrumbs-buttons" role="navigation" aria-label="Sequential page navigation">
+        <a href="14_csr.html" class="btn btn-neutral float-left" title="Certificate Signing Request (CSR)" accesskey="p"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="20_error_codes.html" class="btn btn-neutral float-right" title="Error codes" accesskey="n">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+  </div>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="export-or-import-chip-metadata">
+<h1>Export or import chip metadata<a class="headerlink" href="#export-or-import-chip-metadata" title="Link to this heading"></a></h1>
+<section id="example">
+<h2>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">optigatrust</span> <span class="kn">import</span> <span class="n">port</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">dump</span> <span class="o">=</span> <span class="n">port</span><span class="o">.</span><span class="n">to_json</span><span class="p">()</span>
+<span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dump</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="module-optigatrust.port">
+<span id="api"></span><h2>API<a class="headerlink" href="#module-optigatrust.port" title="Link to this heading"></a></h2>
+<p>This module implements data/metadata import and export functions</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="optigatrust.port.from_json">
+<span class="sig-prename descclassname"><span class="pre">optigatrust.port.</span></span><span class="sig-name descname"><span class="pre">from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.from_json" title="Link to this definition"></a></dt>
+<dd><p>This function will take as an input your data and populate the chip with it, whatever is possible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> – JSON string with the dump of the data. Should be a valid dict structure</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;e0f1&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s1">&#39;200fc00101d001ffd301ffe00103e10121&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp256r1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;e0c2&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;2009c4011bd001ffd10100&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span>
+        <span class="p">}</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="s2">&quot;cd16338201001c000500000a091b5c0007006200ad801010710809&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="optigatrust.port.from_json_path">
+<span class="sig-prename descclassname"><span class="pre">optigatrust.port.</span></span><span class="sig-name descname"><span class="pre">from_json_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.from_json_path" title="Link to this definition"></a></dt>
+<dd><p>This function will take as an input your data and populate the chip with it, whatever is possible</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – path to the json file. The content should be formed like the following</p>
+</dd>
+</dl>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;e0f1&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s1">&#39;200fc00101d001ffd301ffe00103e10121&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp256r1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;e0c2&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;2009c4011bd001ffd10100&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span>
+        <span class="p">}</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="s2">&quot;cd16338201001c000500000a091b5c0007006200ad801010710809&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="optigatrust.port.to_json">
+<span class="sig-prename descclassname"><span class="pre">optigatrust.port.</span></span><span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.to_json" title="Link to this definition"></a></dt>
+<dd><p>This function will secentially read all metadata from all available OIDs and return a dictionary with all entrie</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><p>a dictionary will all available metadata per object; e.g.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;e0f1&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s1">&#39;200fc00101d001ffd301ffe00103e10121&#39;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;lcso&quot;</span><span class="p">:</span> <span class="s2">&quot;creation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;execute&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="s2">&quot;secp256r1&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;key_usage&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;key_agreement&#39;</span><span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;e0c2&quot;</span><span class="p">:</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;metadata&quot;</span><span class="p">:</span><span class="s2">&quot;2009c4011bd001ffd10100&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pretty_metadata&quot;</span><span class="p">:</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;max_size&quot;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+            <span class="s2">&quot;change&quot;</span><span class="p">:</span> <span class="s2">&quot;never&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;read&quot;</span><span class="p">:</span> <span class="s2">&quot;always&quot;</span>
+        <span class="p">}</span>
+        <span class="s2">&quot;data&quot;</span><span class="p">:</span><span class="s2">&quot;cd16338201001c000500000a091b5c0007006200ad801010710809&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="optigatrust.port.to_otc">
+<span class="sig-prename descclassname"><span class="pre">optigatrust.port.</span></span><span class="sig-name descname"><span class="pre">to_otc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#optigatrust.port.to_otc" title="Link to this definition"></a></dt>
+<dd><p>This function exports the whole available dump of the chip in the format compatible with
+the OPTIGA Trust Configurator. Two things will be exported. Data in .dat file format from available objects and
+an xml file with metadata stored. The function uses optigatrust/enums/conf_template.xml and add sequentially all objects
+found on the chip. There are exceptions, objects [“f1c1”, “e0c2”, “e0c0”, “e0c1”, “e0c5”, “e0c6”] are excluded and
+Objects which don’t have ‘used_size’ metatag defined are excluded</p>
+<dl class="field-list simple">
+<dt class="field-odd">Param<span class="colon">:</span></dt>
+<dd class="field-odd"><p>path Path to the folder where to store the resulting data.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p>ValueError - when any of the parameters contain an invalid value</p></li>
+<li><p>TypeError - when any of the parameters are of the wrong type</p></li>
+<li><p>OSError - when an error is returned by the chip initialisation library</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an xml string according to the template optigatrust/enums/conf_template.xml</p>
+</dd>
+</dl>
+<div class="highlight-xml notranslate"><div class="highlight"><pre><span></span><span class="nt">&lt;objects&gt;</span>
+<span class="cm">&lt;!--OPTIGA Objects Metadata and Data--&gt;</span>
+<span class="w">    </span><span class="nt">&lt;oid</span><span class="w"> </span><span class="na">id=</span><span class="s">&quot;E0F0&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;metadata</span><span class="w"> </span><span class="na">value=</span><span class="s">&quot;Updated_Tags&quot;</span><span class="nt">&gt;</span>C00101D001FFD30100E00103E10101<span class="nt">&lt;/metadata&gt;</span>
+<span class="w">        </span><span class="nt">&lt;data</span>
+<span class="w">            </span><span class="na">data_from=</span><span class="s">&quot;Infineon&quot;</span>
+<span class="w">            </span><span class="na">value=</span><span class="s">&quot;Default&quot;</span>
+<span class="w">            </span><span class="na">type=</span><span class="s">&quot;Plain&quot;</span>
+<span class="w">            </span><span class="na">chip_individual=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
+<span class="w">        </span><span class="nt">&lt;/data&gt;</span>
+<span class="w">    </span><span class="nt">&lt;/oid&gt;</span>
+<span class="w">    </span>...
+<span class="nt">&lt;/objects&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="14_csr.html" class="btn btn-neutral float-left" title="Certificate Signing Request (CSR)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="20_error_codes.html" class="btn btn-neutral float-right" title="Error codes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021-2025, Infineon Technologies AG.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(false);
+      });
+  </script> 
+
+</body>
+</html>
