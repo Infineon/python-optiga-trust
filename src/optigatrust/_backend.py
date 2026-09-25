@@ -81,6 +81,7 @@ def _scan_com_ports():
         if (
             com_port.description.startswith("USB Serial Device")
             or com_port.description.startswith("KitProg3")
+            or com_port.description.startswith("MiniProg4")
             or com_port.description.startswith("Communications Port")
             or com_port.description.startswith("IFX CDC")
         ):
